@@ -1,0 +1,59 @@
+name: Issue Template
+description: Template para cadastro de issues
+title: "[Issue]: "
+labels: ["enhancement", "triage"]
+projects: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Por favor, preencha as informações abaixo para cadastrar a issue.
+        
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição
+      description: Explique o problema ou a funcionalidade a ser implementada. Inclua o objetivo da issue e como ela impacta o projeto.
+      placeholder: Descreva o contexto da issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: escopo
+    attributes:
+      label: Escopo
+      description: Delimite o escopo da issue, especificando o que será abordado e o que está fora do escopo.
+      placeholder: Defina o escopo da issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de Aceitação
+      description: Liste os critérios que devem ser atendidos para considerar a issue concluída.
+      placeholder: Defina os critérios de aceitação.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pontos-de-teste
+    attributes:
+      label: Pontos de Teste
+      description: Descreva os cenários de teste e os passos de validação.
+      placeholder: Defina os pontos de teste.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: dependencias
+    attributes:
+      label: Dependências
+      description: Existe alguma dependência de outras issues?
+      options:
+        - label: Depende de outra issue
+          required: false
+        - label: Impacta outras issues
+          required: false
