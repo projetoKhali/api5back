@@ -1,6 +1,6 @@
 #!/bin/sh
 
-commit_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,50}$"
+commit_regex="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{10,200}$"
 error_msg="
 Commit message does not follow semantic guidelines!
 
