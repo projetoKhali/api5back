@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2024-09-17 02:21:51.856
+-- Last modification date: 2024-09-18 16:12:11.942
 
 -- tables
 -- Table: candidate
@@ -8,7 +8,6 @@ CREATE TABLE candidate (
     cd_name varchar  NOT NULL,
     cd_email varchar  NOT NULL,
     cd_phone varchar  NOT NULL,
-    cd_subscribe_date timestamp  NOT NULL,
     cd_status int  NOT NULL DEFAULT 1,
     cd_score int  NOT NULL,
     cd_last_update timestamp  NOT NULL,
@@ -20,11 +19,19 @@ CREATE TABLE candidate_evaluation (
     ce_id int  NOT NULL,
     cd_id int  NOT NULL,
     pc_id int  NOT NULL,
-    ce_evaluation_criteria int  NOT NULL,
+    ce_evaluation_criteria varchar  NOT NULL,
     ce_score int  NOT NULL,
     ce_evaluation_date timestamp  NOT NULL,
     usr_id int  NOT NULL,
     CONSTRAINT candidate_evaluation_pk PRIMARY KEY (ce_id)
+);
+
+-- Table: department
+CREATE TABLE department (
+    dp_id int  NOT NULL,
+    dp_name varchar  NOT NULL,
+    dp_description varchar  NOT NULL,
+    CONSTRAINT department_pk PRIMARY KEY (dp_id)
 );
 
 -- Table: feedback
@@ -70,10 +77,12 @@ CREATE TABLE process (
     pc_id int  NOT NULL,
     pc_title varchar  NOT NULL,
     pc_initial_date timestamp  NOT NULL,
+    pc_expected_finish_date timestamp  NOT NULL,
     pc_finish_date timestamp  NOT NULL,
     pc_status int  NOT NULL DEFAULT 1,
     usr_id int  NOT NULL,
     pc_description varchar  NULL,
+    dp_id int  NOT NULL,
     CONSTRAINT process_pk PRIMARY KEY (pc_id)
 );
 
@@ -83,7 +92,7 @@ CREATE TABLE process_history (
     ph_type_action varchar  NOT NULL,
     pc_id int  NOT NULL,
     usr_id int  NOT NULL,
-    ph_insertdate timestamp  NOT NULL DEFAULT now(),
+    ph_insert_date timestamp  NOT NULL DEFAULT now(),
     CONSTRAINT process_history_pk PRIMARY KEY (ph_id)
 );
 
@@ -91,7 +100,7 @@ CREATE TABLE process_history (
 CREATE TABLE requirement (
     req_id int  NOT NULL,
     req_name varchar  NOT NULL,
-    req_proficiency_level varchar  NOT NULL,
+    req_proficiency_level varchar  NULL,
     CONSTRAINT requirement_pk PRIMARY KEY (req_id)
 );
 
@@ -103,6 +112,7 @@ CREATE TABLE "user" (
     usr_password varchar  NOT NULL,
     usr_ocupation varchar  NOT NULL,
     usr_qtd_feedback int  NOT NULL,
+    dp_id int  NULL,
     CONSTRAINT user_pk PRIMARY KEY (usr_id)
 );
 
@@ -112,7 +122,6 @@ CREATE TABLE vacancy (
     pc_id int  NOT NULL,
     vc_title varchar  NOT NULL,
     vc_num_positions int  NOT NULL,
-    req_id int  NOT NULL,
     vc_status int  NOT NULL DEFAULT 1,
     vc_location varchar  NOT NULL,
     usr_id int  NOT NULL,
@@ -127,6 +136,14 @@ CREATE TABLE vacancy_candidate (
     vc_id int  NOT NULL,
     vc_cd_insert_date timestamp  NOT NULL DEFAULT now(),
     CONSTRAINT vacancy_candidate_pk PRIMARY KEY (cd_id,vc_id)
+);
+
+-- Table: vacancy_requirement
+CREATE TABLE vacancy_requirement (
+    vc_rec_vc_id int  NOT NULL,
+    vc_req_req_id int  NOT NULL,
+    vc_req_insertdate timestamp  NOT NULL DEFAULT now(),
+    CONSTRAINT vacancy_requirement_pk PRIMARY KEY (vc_rec_vc_id,vc_req_req_id)
 );
 
 -- foreign keys
@@ -226,6 +243,14 @@ ALTER TABLE feedback ADD CONSTRAINT feedback_vacancy
     INITIALLY IMMEDIATE
 ;
 
+-- Reference: process_department (table: process)
+ALTER TABLE process ADD CONSTRAINT process_department
+    FOREIGN KEY (dp_id)
+    REFERENCES department (dp_id)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
 -- Reference: process_history_process (table: process_history)
 ALTER TABLE process_history ADD CONSTRAINT process_history_process
     FOREIGN KEY (pc_id)
@@ -250,6 +275,14 @@ ALTER TABLE process ADD CONSTRAINT process_user
     INITIALLY IMMEDIATE
 ;
 
+-- Reference: user_department (table: user)
+ALTER TABLE "user" ADD CONSTRAINT user_department
+    FOREIGN KEY (dp_id)
+    REFERENCES department (dp_id)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
 -- Reference: vacancy_candidate_candidate (table: vacancy_candidate)
 ALTER TABLE vacancy_candidate ADD CONSTRAINT vacancy_candidate_candidate
     FOREIGN KEY (cd_id)
@@ -266,13 +299,20 @@ ALTER TABLE vacancy_candidate ADD CONSTRAINT vacancy_candidate_vacancy
     INITIALLY IMMEDIATE
 ;
 
--- Reference: vacancy_requirement (table: vacancy)
-ALTER TABLE vacancy ADD CONSTRAINT vacancy_requirement
-    FOREIGN KEY (req_id)
+-- Reference: vacancy_requirement_requirement (table: vacancy_requirement)
+ALTER TABLE vacancy_requirement ADD CONSTRAINT vacancy_requirement_requirement
+    FOREIGN KEY (vc_req_req_id)
     REFERENCES requirement (req_id)  
     NOT DEFERRABLE 
     INITIALLY IMMEDIATE
 ;
 
--- End of file.
+-- Reference: vacancy_requirement_vacancy (table: vacancy_requirement)
+ALTER TABLE vacancy_requirement ADD CONSTRAINT vacancy_requirement_vacancy
+    FOREIGN KEY (vc_rec_vc_id)
+    REFERENCES vacancy (vc_id)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
 
+-- End of file.
