@@ -5,6 +5,7 @@
 bin/
 docs/
 
-# Generated files except `schema`
+# Generated files except `schema` and `generate.go`
 ent/*
 !ent/schema/
+!ent/generate.go
