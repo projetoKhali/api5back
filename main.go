@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api5back/src/database"
 	"net/http"
 
 	docs "api5back/docs"
@@ -26,6 +27,10 @@ func Helloworld(g *gin.Context) {
 }
 
 func main() {
+	if err := database.DatabaseSetup(); err != nil {
+		panic(err)
+	}
+
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
@@ -37,5 +42,4 @@ func main() {
 	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	r.Run(":8080")
-
 }

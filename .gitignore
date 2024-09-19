@@ -1,2 +1,10 @@
+# Credentials
+.env
+
+# Temporary and generated files
 bin/
 docs/
+
+# Generated files except `schema`
+ent/*
+!ent/schema/
