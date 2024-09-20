@@ -28,13 +28,13 @@ func Helloworld(g *gin.Context) {
 }
 
 func main() {
-	dbClient, err := database.DatabaseSetup("DB")
+	dbClient, err := database.Setup("DB")
 	if err != nil {
 		panic(fmt.Errorf("failed to setup normalized database: %v", err))
 	}
 	defer dbClient.Close()
 
-	dwClient, err := database.DatabaseSetup("DW")
+	dwClient, err := database.Setup("DW")
 	if err != nil {
 		panic(fmt.Errorf("failed to setup data warehouse: %v", err))
 	}

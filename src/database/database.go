@@ -10,7 +10,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func DatabaseSetup(prefix string) (*ent.Client, error) {
+func Setup(prefix string) (*ent.Client, error) {
 	databaseCredentials, err := NewDatabaseCredentials(prefix)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create databaseCredentials: %v", err)
