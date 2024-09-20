@@ -1,7 +1,13 @@
 all: serve
 
+%:
+	@:
+
 serve:
 	air
+
+schema:
+	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 
 ent-gen:
 	go run scripts/generate/main.go
