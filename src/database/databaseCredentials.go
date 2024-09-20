@@ -16,13 +16,13 @@ type DatabaseCredentials struct {
 	Name *string
 }
 
-func NewDatabaseCredentials() (*DatabaseCredentials, error) {
+func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 	fields := []string{
-		"DB_USER",
-		"DB_PASS",
-		"DB_HOST",
-		"DB_PORT",
-		"DB_NAME",
+		fmt.Sprintf("%s_USER", prefix),
+		fmt.Sprintf("%s_PASS", prefix),
+		fmt.Sprintf("%s_HOST", prefix),
+		fmt.Sprintf("%s_PORT", prefix),
+		fmt.Sprintf("%s_NAME", prefix),
 	}
 
 	err := godotenv.Load(".env")
