@@ -12,7 +12,8 @@ tmp_dir = "./bin"
     "tmp",
     "vendor",
     "testdata",
-    "ent"
+    "ent",
+    "scripts"
   ]
   exclude_file = []
   exclude_regex = ["_test.go"]

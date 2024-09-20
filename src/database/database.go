@@ -2,7 +2,6 @@ package database
 
 import (
 	"api5back/ent"
-	"context"
 	"database/sql"
 	"fmt"
 
@@ -23,10 +22,6 @@ func DatabaseSetup(prefix string) (*ent.Client, error) {
 		return nil, fmt.Errorf("failed to create postgres client: %v", err)
 	}
 
-	if err := Migrate(client); err != nil {
-		return nil, fmt.Errorf("failed to migrate database: %v", err)
-	}
-
 	return client, nil
 }
 
@@ -38,15 +33,4 @@ func CreatePostgresClient(databaseUrl string) (*ent.Client, error) {
 
 	drv := entsql.OpenDB(dialect.Postgres, db)
 	return ent.NewClient(ent.Driver(drv)), nil
-}
-
-// Run the automatic migration tool to create all schema resources.
-func Migrate(client *ent.Client) error {
-	ctx := context.Background()
-
-	if err := client.Schema.Create(ctx); err != nil {
-		return fmt.Errorf("failed creating schema resources: %v", err)
-	}
-
-	return nil
 }
