@@ -17,7 +17,7 @@ func Migrate(client *ent.Client) error {
 	ctx := context.Background()
 
 	if err := client.Schema.Create(ctx); err != nil {
-		return fmt.Errorf("failed creating schema resources: %v", err)
+		return fmt.Errorf("scripts/migrate • failed creating schema resources: %v", err)
 	}
 
 	return nil
@@ -28,15 +28,15 @@ func MigrateAll() error {
 	for _, prefix := range databasePrefixes {
 		client, err := database.Setup(prefix)
 		if err != nil {
-			return fmt.Errorf("failed to setup database: %v", err)
+			return fmt.Errorf("scripts/migrate • failed to setup database: %v", err)
 		}
 		defer client.Close()
 
 		if err := Migrate(client); err != nil {
-			return fmt.Errorf("failed to migrate database: %v", err)
+			return fmt.Errorf("scripts/migrate • failed to migrate database: %v", err)
 		}
 
-		fmt.Printf("migrated database with prefix: %s\n", prefix)
+		fmt.Printf("scripts/migrate • migrated database with prefix: %s\n", prefix)
 	}
 
 	return nil
@@ -44,7 +44,11 @@ func MigrateAll() error {
 
 // manual entry point for migration on command
 func main() {
+	fmt.Println("scripts/migrate • Migrating all databases...")
+
 	if err := MigrateAll(); err != nil {
-		panic(fmt.Errorf("failed to migrate databases: %v", err))
+		panic(fmt.Errorf("scripts/migrate • failed to migrate databases: %v", err))
 	}
+
+	fmt.Println("scripts/migrate • Successfully migrated databases.")
 }
