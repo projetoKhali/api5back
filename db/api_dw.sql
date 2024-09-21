@@ -56,7 +56,7 @@ CREATE TABLE fact_hiring_process (
     dim_process_dim_pc_id int  NOT NULL,
     dim_vacancy_vc_id int  NOT NULL,
     dim_user_dim_usr_id int  NOT NULL,
-    dim_date_dim_date_id int  NOT NULL,
+    dim_datetime_dim_datetime_id int  NOT NULL,
     met_total_candidates_applied int  NOT NULL,
     met_total_candidates_interviewed int  NOT NULL,
     met_total_candidates_hired int  NOT NULL,
@@ -69,35 +69,35 @@ CREATE TABLE fact_hiring_process (
 );
 
 -- foreign keys
--- Reference: fact_hiring_process_dim_date (table: fact_hiring_process)
-ALTER TABLE fact_hiring_process ADD CONSTRAINT fact_hiring_process_dim_date
-    FOREIGN KEY (dim_date_dim_date_id)
-    REFERENCES dim_datetime (dim_datetime_id)  
-    NOT DEFERRABLE 
+-- Reference: fact_hiring_process_dim_datetime (table: fact_hiring_process)
+ALTER TABLE fact_hiring_process ADD CONSTRAINT fact_hiring_process_dim_datetime
+    FOREIGN KEY (dim_datetime_dim_datetime_id)
+    REFERENCES dim_datetime (dim_datetime_id)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
 -- Reference: fact_hiring_process_dim_process (table: fact_hiring_process)
 ALTER TABLE fact_hiring_process ADD CONSTRAINT fact_hiring_process_dim_process
     FOREIGN KEY (dim_process_dim_pc_id)
-    REFERENCES dim_process (dim_pc_id)  
-    NOT DEFERRABLE 
+    REFERENCES dim_process (dim_pc_id)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
 -- Reference: fact_hiring_process_dim_user (table: fact_hiring_process)
 ALTER TABLE fact_hiring_process ADD CONSTRAINT fact_hiring_process_dim_user
     FOREIGN KEY (dim_user_dim_usr_id)
-    REFERENCES dim_user (dim_usr_id)  
-    NOT DEFERRABLE 
+    REFERENCES dim_user (dim_usr_id)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
 -- Reference: fact_hiring_process_dim_vacancy (table: fact_hiring_process)
 ALTER TABLE fact_hiring_process ADD CONSTRAINT fact_hiring_process_dim_vacancy
     FOREIGN KEY (dim_vacancy_vc_id)
-    REFERENCES dim_vacancy (vc_id)  
-    NOT DEFERRABLE 
+    REFERENCES dim_vacancy (vc_id)
+    NOT DEFERRABLE
     INITIALLY IMMEDIATE
 ;
 
