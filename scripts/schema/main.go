@@ -60,7 +60,7 @@ func CreateSchema(ctx *schemast.Context, name string) error {
 	return nil
 }
 
-func main() {
+func Schema() {
 	if len(os.Args) < 2 {
 		panic("scripts/schema • missing schema name argument")
 	}
@@ -91,4 +91,8 @@ func main() {
 	}
 
 	fmt.Println("scripts/schema • Successfully created schema.")
+}
+
+func main() {
+	Schema()
 }

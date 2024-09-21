@@ -25,8 +25,7 @@ func GenerateEntFiles() error {
 	return nil
 }
 
-// manual entry point for codegen on command
-func main() {
+func Generate() {
 	fmt.Println("scripts/generate • Generating ent files...")
 
 	if err := GenerateEntFiles(); err != nil {
@@ -34,4 +33,9 @@ func main() {
 	}
 
 	fmt.Println("scripts/generate • Successfully genereted ent files.")
+}
+
+// manual entry point for codegen on command
+func main() {
+	Generate()
 }

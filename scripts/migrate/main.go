@@ -2,6 +2,7 @@ package main
 
 import (
 	"api5back/ent"
+	"api5back/ent/migrate"
 	"api5back/src/database"
 	"context"
 	"fmt"
@@ -13,10 +14,14 @@ var databasePrefixes = []string{
 }
 
 // Run the automatic migration tool to create all schema resources of the database.
-func Migrate(client *ent.Client) error {
+func RunMigration(client *ent.Client) error {
 	ctx := context.Background()
 
-	if err := client.Schema.Create(ctx); err != nil {
+	if err := client.Schema.Create(
+		ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	); err != nil {
 		return fmt.Errorf("scripts/migrate • failed creating schema resources: %v", err)
 	}
 
@@ -32,7 +37,7 @@ func MigrateAll() error {
 		}
 		defer client.Close()
 
-		if err := Migrate(client); err != nil {
+		if err := RunMigration(client); err != nil {
 			return fmt.Errorf("scripts/migrate • failed to migrate database: %v", err)
 		}
 
@@ -42,8 +47,7 @@ func MigrateAll() error {
 	return nil
 }
 
-// manual entry point for migration on command
-func main() {
+func Migrate() {
 	fmt.Println("scripts/migrate • Migrating all databases...")
 
 	if err := MigrateAll(); err != nil {
@@ -51,4 +55,9 @@ func main() {
 	}
 
 	fmt.Println("scripts/migrate • Successfully migrated databases.")
+}
+
+// manual entry point for migration on command
+func main() {
+	Migrate()
 }
