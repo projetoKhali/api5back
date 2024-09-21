@@ -2,6 +2,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -30,5 +32,13 @@ func (Vacancy) Fields() []ent.Field {
 func (Vacancy) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type),
+	}
+}
+
+func (Vacancy) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{
+			Table: "vacancy",
+		},
 	}
 }
