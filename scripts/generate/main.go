@@ -10,7 +10,7 @@ import (
 // defines the settings for the ent codegen
 func entConfig() *gen.Config {
 	return &gen.Config{
-		Schema:  "database/schema",
+		Schema:  "src/schema",
 		Target:  "ent",
 		Package: "api5back/ent",
 	}
