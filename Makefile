@@ -9,10 +9,10 @@ serve:
 schema:
 	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 
-ent-gen:
+gen:
 	go run scripts/generate/main.go
 
-ent-migrate:
+migrate:
 	go run scripts/migrate/main.go
 
 db-up:
