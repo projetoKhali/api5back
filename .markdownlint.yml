@@ -7,6 +7,9 @@ MD009:
 MD022:
   lines_below: 0
 
+MD024:
+    siblings_only: true
+
 MD025:
   level: 2
 

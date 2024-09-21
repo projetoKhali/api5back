@@ -1,6 +1,8 @@
 package main
 
 import (
+	"api5back/src/database"
+	"fmt"
 	"net/http"
 
 	docs "api5back/docs"
@@ -26,6 +28,18 @@ func Helloworld(g *gin.Context) {
 }
 
 func main() {
+	dbClient, err := database.Setup("DB")
+	if err != nil {
+		panic(fmt.Errorf("failed to setup normalized database: %v", err))
+	}
+	defer dbClient.Close()
+
+	dwClient, err := database.Setup("DW")
+	if err != nil {
+		panic(fmt.Errorf("failed to setup data warehouse: %v", err))
+	}
+	defer dwClient.Close()
+
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := r.Group("/api/v1")
@@ -37,5 +51,4 @@ func main() {
 	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	r.Run(":8080")
-
 }
