@@ -10,6 +10,10 @@ sch: schema
 schema:
 	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 
+ti: test-integration
+test-integration:
+	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+
 gen: generate
 generate:
 	go run scripts/generate/main.go
