@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   # Instância 1 - Banco das entidades
   postgres_entity:
