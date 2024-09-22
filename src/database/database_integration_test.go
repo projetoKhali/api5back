@@ -5,19 +5,13 @@ package database
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-	"os"
 	"testing"
 
 	"api5back/ent"
 	"api5back/ent/migrate"
 
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,28 +29,13 @@ func TestDatabaseOperations(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Load the environment variables
-		err = godotenv.Load("../../.env")
+		databaseCredentials, err := newTestingDatabaseCredentials()
 		require.NoError(t, err)
 
-		// Create the database client
-		databaseUrl := fmt.Sprintf(
-			"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-			os.Getenv("DW_USER"),
-			os.Getenv("DW_PASS"),
-			os.Getenv("DW_HOST"),
-			os.Getenv("DW_PORT"),
-			os.Getenv("DW_NAME"),
-		)
+		databaseUrl := databaseCredentials.getConnectionString()
 
-		db, err := sql.Open("pgx", databaseUrl)
+		client, err = createPostgresClient(databaseUrl)
 		require.NoError(t, err)
-
-		client = ent.NewClient(
-			ent.Driver(
-				entsql.OpenDB(dialect.Postgres, db),
-			),
-		)
 	})
 
 	defer client.Close()
