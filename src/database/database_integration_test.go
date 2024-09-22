@@ -59,6 +59,8 @@ func TestDatabaseOperations(t *testing.T) {
 		)
 	})
 
+	defer client.Close()
+
 	t.Run("Migrate database", func(t *testing.T) {
 		err = client.Schema.Create(
 			ctx,
