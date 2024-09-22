@@ -71,6 +71,11 @@ func startTestingDatabaseContainer(
 	)
 }
 
+type TestCase struct {
+	Name string
+	Run  func(t *testing.T)
+}
+
 func TestDatabaseOperations(t *testing.T) {
 	ctx := context.Background()
 	var client *ent.Client
@@ -132,34 +137,50 @@ func TestDatabaseOperations(t *testing.T) {
 	t.Run("Test dim_user table operations", func(t *testing.T) {
 		var testDimUser *ent.DimUser
 
-		t.Run("Insert a dim_user into the table", func(t *testing.T) {
-			testDimUser, err = client.DimUser.
-				Create().
-				SetName("John Doe").
-				SetOcupation("Software Engineer").
-				Save(ctx)
-			require.NoError(t, err)
-			require.Equal(t, "John Doe", testDimUser.Name)
-			require.Equal(t, "Software Engineer", testDimUser.Ocupation)
-		})
-
-		t.Run("Retrieve the inserted dim_user", func(t *testing.T) {
-			retrievedDimUser, err := client.DimUser.Get(ctx, testDimUser.ID)
-			require.NoError(t, err)
-			require.Equal(t, testDimUser.ID, retrievedDimUser.ID)
-			require.Equal(t, testDimUser.Name, retrievedDimUser.Name)
-			require.Equal(t, testDimUser.Ocupation, retrievedDimUser.Ocupation)
-		})
-
-		t.Run("Delete the dim_user", func(t *testing.T) {
-			err = client.DimUser.DeleteOne(testDimUser).Exec(ctx)
-			require.NoError(t, err)
-		})
-
-		t.Run("Try to retrieve the dim_user again, expecting a not found error", func(t *testing.T) {
-			_, err = client.DimUser.Get(ctx, testDimUser.ID)
-			require.Error(t, err)
-		})
+		for _, TestCase := range []TestCase{
+			{
+				Name: "Insert a dim_user into the table",
+				Run: func(t *testing.T) {
+					testDimUser, err = client.DimUser.
+						Create().
+						SetName("John Doe").
+						SetOcupation("Software Engineer").
+						Save(ctx)
+					if err != nil {
+						t.Fatalf("failed to insert the dim_user: %v", err)
+					}
+					require.Equal(t, "John Doe", testDimUser.Name)
+					require.Equal(t, "Software Engineer", testDimUser.Ocupation)
+				},
+			}, {
+				Name: "Retrieve the inserted dim_user",
+				Run: func(t *testing.T) {
+					retrievedDimUser, err := client.DimUser.Get(ctx, testDimUser.ID)
+					if err != nil {
+						t.Fatalf("failed to retrieve the dim_user: %v", err)
+					}
+					require.Equal(t, testDimUser.ID, retrievedDimUser.ID)
+					require.Equal(t, testDimUser.Name, retrievedDimUser.Name)
+					require.Equal(t, testDimUser.Ocupation, retrievedDimUser.Ocupation)
+				},
+			}, {
+				Name: "Delete the dim_user",
+				Run: func(t *testing.T) {
+					err = client.DimUser.DeleteOne(testDimUser).Exec(ctx)
+					require.NoError(t, err)
+				},
+			}, {
+				Name: "Try to retrieve the dim_user again, expecting a not found error",
+				Run: func(t *testing.T) {
+					_, err = client.DimUser.Get(ctx, testDimUser.ID)
+					require.Error(t, err)
+				},
+			},
+		} {
+			if testResult := t.Run(TestCase.Name, TestCase.Run); !testResult {
+				t.Fatalf("Test case failed")
+			}
+		}
 	})
 }
 
