@@ -6,13 +6,17 @@ all: serve
 serve:
 	air
 
-sch: schema
-schema:
-	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
-
 ti: test-integration
 test-integration:
 	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+
+swag: swagger
+swagger:
+	swag init
+
+sch: schema
+schema:
+	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 
 gen: generate
 generate:
