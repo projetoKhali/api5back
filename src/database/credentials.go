@@ -16,7 +16,7 @@ type DatabaseCredentials struct {
 	Name *string
 }
 
-func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
+func internalNewDatabaseCredentials(prefix string, envFilePath string) (*DatabaseCredentials, error) {
 	fields := []string{
 		fmt.Sprintf("%s_USER", prefix),
 		fmt.Sprintf("%s_PASS", prefix),
@@ -25,15 +25,23 @@ func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 		fmt.Sprintf("%s_NAME", prefix),
 	}
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load(envFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("error loading `.env` file: %w", err)
+		return nil, fmt.Errorf(
+			"error loading `%s` file: %w",
+			envFilePath,
+			err,
+		)
 	}
 
 	for i, field := range fields {
 		value, ok := os.LookupEnv(field)
 		if !ok {
-			return nil, fmt.Errorf("missing environment variable `%s` in `.env` file", field)
+			return nil, fmt.Errorf(
+				"missing environment variable `%s` in `%s` file",
+				field,
+				envFilePath,
+			)
 		}
 
 		fields[i] = value
@@ -41,7 +49,12 @@ func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 
 	port, err := strconv.Atoi(fields[3])
 	if err != nil {
-		return nil, fmt.Errorf("invalid port number: `%s` in `.env` file: %w", fields[3], err)
+		return nil, fmt.Errorf(
+			"invalid port number: `%s` in `%s`: %w",
+			fields[3],
+			envFilePath,
+			err,
+		)
 	}
 
 	return &DatabaseCredentials{
@@ -51,6 +64,20 @@ func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 		Port: &port,
 		Name: &fields[4],
 	}, nil
+}
+
+func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
+	return internalNewDatabaseCredentials(
+		prefix,
+		".env",
+	)
+}
+
+func newTestingDatabaseCredentials() (*DatabaseCredentials, error) {
+	return internalNewDatabaseCredentials(
+		"TI",
+		"../../.env.integration",
+	)
 }
 
 func (dc *DatabaseCredentials) getConnectionString() string {
