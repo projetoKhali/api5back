@@ -4,13 +4,14 @@
 package database
 
 import (
-	"api5back/ent"
-	"api5back/ent/migrate"
 	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"testing"
+
+	"api5back/ent"
+	"api5back/ent/migrate"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -20,69 +21,83 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) {
-	// Generate the ent files
-	err := entc.Generate("../schema", &gen.Config{
-		Schema:  "../schema",
-		Target:  "../../ent",
-		Package: "api5back/ent",
-	})
-	require.NoError(t, err)
-
-	// Load the environment variables
-	err = godotenv.Load("../../.env")
-	require.NoError(t, err)
-
-	// Create the database client
-	databaseUrl := fmt.Sprintf(
-		"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-		os.Getenv("DW_USER"),
-		os.Getenv("DW_PASS"),
-		os.Getenv("DW_HOST"),
-		os.Getenv("DW_PORT"),
-		os.Getenv("DW_NAME"),
-	)
-
-	db, err := sql.Open("pgx", databaseUrl)
-	require.NoError(t, err)
-
-	client := ent.NewClient(
-		ent.Driver(
-			entsql.OpenDB(dialect.Postgres, db),
-		),
-	)
-
-	// Migrate the database
+func TestDatabaseOperations(t *testing.T) {
 	ctx := context.Background()
-	err = client.Schema.Create(
-		ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-	)
-	require.NoError(t, err)
+	var client *ent.Client
+	var err error
 
-	// Insert a user into the table
-	user, err := client.DimUser.
-		Create().
-		SetName("John Doe").
-		SetOcupation("Software Engineer").
-		Save(ctx)
-	require.NoError(t, err)
-	require.Equal(t, "John Doe", user.Name)
-	require.Equal(t, "Software Engineer", user.Ocupation)
+	t.Run("Setup database connection", func(t *testing.T) {
+		// Generate the ent files
+		err = entc.Generate("../schema", &gen.Config{
+			Schema:  "../schema",
+			Target:  "../../ent",
+			Package: "api5back/ent",
+		})
+		require.NoError(t, err)
 
-	// Retrieve the inserted user
-	retrievedUser, err := client.DimUser.Get(ctx, user.ID)
-	require.NoError(t, err)
-	require.Equal(t, user.ID, retrievedUser.ID)
-	require.Equal(t, user.Name, retrievedUser.Name)
-	require.Equal(t, user.Ocupation, retrievedUser.Ocupation)
+		// Load the environment variables
+		err = godotenv.Load("../../.env")
+		require.NoError(t, err)
 
-	// Delete the user
-	err = client.DimUser.DeleteOne(user).Exec(ctx)
-	require.NoError(t, err)
+		// Create the database client
+		databaseUrl := fmt.Sprintf(
+			"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+			os.Getenv("DW_USER"),
+			os.Getenv("DW_PASS"),
+			os.Getenv("DW_HOST"),
+			os.Getenv("DW_PORT"),
+			os.Getenv("DW_NAME"),
+		)
 
-	// Try to retrieve the user again, expecting a not found error
-	_, err = client.DimUser.Get(ctx, user.ID)
-	require.Error(t, err)
+		db, err := sql.Open("pgx", databaseUrl)
+		require.NoError(t, err)
+
+		client = ent.NewClient(
+			ent.Driver(
+				entsql.OpenDB(dialect.Postgres, db),
+			),
+		)
+	})
+
+	t.Run("Migrate database", func(t *testing.T) {
+		err = client.Schema.Create(
+			ctx,
+			migrate.WithDropIndex(true),
+			migrate.WithDropColumn(true),
+		)
+		require.NoError(t, err)
+	})
+
+	t.Run("Test dim_user table operations", func(t *testing.T) {
+		var testDimUser *ent.DimUser
+
+		t.Run("Insert a dim_user into the table", func(t *testing.T) {
+			testDimUser, err = client.DimUser.
+				Create().
+				SetName("John Doe").
+				SetOcupation("Software Engineer").
+				Save(ctx)
+			require.NoError(t, err)
+			require.Equal(t, "John Doe", testDimUser.Name)
+			require.Equal(t, "Software Engineer", testDimUser.Ocupation)
+		})
+
+		t.Run("Retrieve the inserted dim_user", func(t *testing.T) {
+			retrievedDimUser, err := client.DimUser.Get(ctx, testDimUser.ID)
+			require.NoError(t, err)
+			require.Equal(t, testDimUser.ID, retrievedDimUser.ID)
+			require.Equal(t, testDimUser.Name, retrievedDimUser.Name)
+			require.Equal(t, testDimUser.Ocupation, retrievedDimUser.Ocupation)
+		})
+
+		t.Run("Delete the dim_user", func(t *testing.T) {
+			err = client.DimUser.DeleteOne(testDimUser).Exec(ctx)
+			require.NoError(t, err)
+		})
+
+		t.Run("Try to retrieve the dim_user again, expecting a not found error", func(t *testing.T) {
+			_, err = client.DimUser.Get(ctx, testDimUser.ID)
+			require.Error(t, err)
+		})
+	})
 }
