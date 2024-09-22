@@ -11,11 +11,11 @@ import (
 )
 
 func Setup(prefix string) (*ent.Client, error) {
-	databaseCredentials, err := NewDatabaseCredentials(prefix)
+	databaseCredentials, err := newDatabaseCredentials(prefix)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create databaseCredentials: %v", err)
 	}
-	databaseUrl := databaseCredentials.GetConnectionString()
+	databaseUrl := databaseCredentials.getConnectionString()
 
 	client, err := CreatePostgresClient(databaseUrl)
 	if err != nil {

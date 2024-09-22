@@ -16,7 +16,7 @@ type DatabaseCredentials struct {
 	Name *string
 }
 
-func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
+func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 	fields := []string{
 		fmt.Sprintf("%s_USER", prefix),
 		fmt.Sprintf("%s_PASS", prefix),
@@ -53,7 +53,7 @@ func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 	}, nil
 }
 
-func (dc *DatabaseCredentials) GetConnectionString() string {
+func (dc *DatabaseCredentials) getConnectionString() string {
 	connectionString := fmt.Sprintf(
 		"user=%s password=%s host=%s",
 		dc.User,
