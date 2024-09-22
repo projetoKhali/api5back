@@ -1,9 +1,10 @@
 package database
 
 import (
-	"api5back/ent"
 	"database/sql"
 	"fmt"
+
+	"api5back/ent"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -17,7 +18,7 @@ func Setup(prefix string) (*ent.Client, error) {
 	}
 	databaseUrl := databaseCredentials.getConnectionString()
 
-	client, err := CreatePostgresClient(databaseUrl)
+	client, err := createPostgresClient(databaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create postgres client: %v", err)
 	}
@@ -25,7 +26,7 @@ func Setup(prefix string) (*ent.Client, error) {
 	return client, nil
 }
 
-func CreatePostgresClient(databaseUrl string) (*ent.Client, error) {
+func createPostgresClient(databaseUrl string) (*ent.Client, error) {
 	db, err := sql.Open("pgx", databaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
