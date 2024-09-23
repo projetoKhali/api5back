@@ -145,6 +145,31 @@ func (intEnv *IntegrationEnvironment) WithClient() *IntegrationEnvironment {
 	return intEnv
 }
 
+func (intEnv *IntegrationEnvironment) WithWipe() *IntegrationEnvironment {
+	if intEnv.Error != nil || intEnv.Client == nil {
+		return intEnv
+	}
+
+	ctx := context.Background()
+	client := intEnv.Client
+	if client == nil {
+		fmt.Println("integration_environment::WithWipe -- Client not found in environment, creating a new client")
+		intEnv = intEnv.WithClient()
+		client = intEnv.Client
+	}
+
+	wipeQuery := "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+	if _, err := client.ExecContext(ctx, wipeQuery); err != nil {
+		intEnv.Error = fmt.Errorf("failed to wipe the database: %v", err)
+		return intEnv
+	}
+
+	fmt.Println("Successfully wiped the Integration database")
+
+	return intEnv
+}
+
 func (intEnv *IntegrationEnvironment) WithMigration() *IntegrationEnvironment {
 	if intEnv.Error != nil || intEnv.Client == nil || intEnv.migrated == true {
 		return intEnv
