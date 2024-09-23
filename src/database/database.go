@@ -12,7 +12,7 @@ import (
 )
 
 func Setup(prefix string) (*ent.Client, error) {
-	databaseCredentials, err := newDatabaseCredentials(prefix)
+	databaseCredentials, err := newCredentials(prefix)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create databaseCredentials: %v", err)
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type DatabaseCredentials struct {
+type Credentials struct {
 	User string
 	Pass string
 	Host string
@@ -16,7 +16,7 @@ type DatabaseCredentials struct {
 	Name *string
 }
 
-func internalNewDatabaseCredentials(prefix string, envFilePath string) (*DatabaseCredentials, error) {
+func internalNewCredentials(prefix string, envFilePath string) (*Credentials, error) {
 	fields := []string{
 		fmt.Sprintf("%s_USER", prefix),
 		fmt.Sprintf("%s_PASS", prefix),
@@ -57,7 +57,7 @@ func internalNewDatabaseCredentials(prefix string, envFilePath string) (*Databas
 		)
 	}
 
-	return &DatabaseCredentials{
+	return &Credentials{
 		User: fields[0],
 		Pass: fields[1],
 		Host: fields[2],
@@ -66,21 +66,21 @@ func internalNewDatabaseCredentials(prefix string, envFilePath string) (*Databas
 	}, nil
 }
 
-func newDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
-	return internalNewDatabaseCredentials(
+func newCredentials(prefix string) (*Credentials, error) {
+	return internalNewCredentials(
 		prefix,
 		".env",
 	)
 }
 
-func newTestingDatabaseCredentials() (*DatabaseCredentials, error) {
-	return internalNewDatabaseCredentials(
+func newTestingCredentials() (*Credentials, error) {
+	return internalNewCredentials(
 		"TI",
 		"../../.env.integration",
 	)
 }
 
-func (dc *DatabaseCredentials) getConnectionString() string {
+func (dc *Credentials) getConnectionString() string {
 	connectionString := fmt.Sprintf(
 		"user=%s password=%s host=%s",
 		dc.User,

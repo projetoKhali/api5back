@@ -27,7 +27,7 @@ import (
 
 func startTestingDatabaseContainer(
 	ctx context.Context,
-	credentials *DatabaseCredentials,
+	credentials *Credentials,
 ) (testcontainers.Container, error) {
 	var databaseName string
 	if credentials.Name != nil {
@@ -90,17 +90,17 @@ func TestDatabaseOperations(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		databaseCredentials, err := newTestingDatabaseCredentials()
+		credentials, err := newTestingCredentials()
 		require.NoError(t, err)
 
 		if _, err = startTestingDatabaseContainer(
 			ctx,
-			databaseCredentials,
+			credentials,
 		); err != nil {
 			t.Fatalf("failed to start the testing database container: %v", err)
 		}
 
-		databaseUrl := databaseCredentials.getConnectionString()
+		databaseUrl := credentials.getConnectionString()
 
 		client, err = createPostgresClient(databaseUrl)
 		require.NoError(t, err)
