@@ -1,3 +1,13 @@
+.PHONY: all \
+	serve \
+	ti test-integration \
+	swag swagger \
+	sch schema \
+	gen generate \
+	mig migrate \
+	db-up database-up \
+	db-down database-down
+
 all: serve
 
 %:
