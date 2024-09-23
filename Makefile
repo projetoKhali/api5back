@@ -5,6 +5,7 @@
 	sch schema \
 	gen generate \
 	mig migrate \
+	seeds \
 	db-up database-up \
 	db-down database-down
 
@@ -36,6 +37,9 @@ generate:
 mig: migrate
 migrate:
 	go run scripts/migrate/main.go
+
+seeds:
+	go run scripts/seeds/dw.go
 
 db-up: database-up
 database-up:
