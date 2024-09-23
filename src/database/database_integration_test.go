@@ -25,7 +25,6 @@ func TestDatabaseOperations(t *testing.T) {
 		require.NotNil(t, intEnv)
 		require.NoError(t, intEnv.Error)
 		require.NotNil(t, intEnv.Client)
-		println("a")
 	}); !testResult {
 		t.Fatalf("Setup test failed")
 	}
