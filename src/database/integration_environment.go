@@ -112,7 +112,7 @@ func DefaultIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment 
 }
 
 func (intEnv *IntegrationEnvironment) WithSleep() *IntegrationEnvironment {
-	if intEnv.Error != nil || intEnv.Container == nil || intEnv.Client != nil {
+	if intEnv.Error != nil || intEnv.Container == nil {
 		return intEnv
 	}
 
