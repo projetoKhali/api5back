@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	"api5back/ent"
 	"api5back/ent/migrate"
@@ -30,10 +29,6 @@ func TestDatabaseOperations(t *testing.T) {
 	}); !testResult {
 		t.Fatalf("Setup test failed")
 	}
-
-	time.Sleep(time.Duration(
-		getContainerConnectionDelayMs(),
-	) * time.Millisecond)
 
 	if testResult := t.Run("Migrate database", func(t *testing.T) {
 		if err = intEnv.Client.Schema.Create(
