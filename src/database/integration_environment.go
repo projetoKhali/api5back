@@ -198,6 +198,23 @@ func (intEnv *IntegrationEnvironment) WithMigration() *IntegrationEnvironment {
 	return intEnv
 }
 
+type SeedsFunc func(client *ent.Client) error
+
+func (intEnv *IntegrationEnvironment) WithSeeds(seedsFunc SeedsFunc) *IntegrationEnvironment {
+	if intEnv.Error != nil || intEnv.Client == nil {
+		return intEnv
+	}
+
+	if err := seedsFunc(intEnv.Client); err != nil {
+		intEnv.Error = fmt.Errorf("failed to seed the database: %v", err)
+		return intEnv
+	}
+
+	fmt.Println("Successfully seeded the Integration database")
+
+	return intEnv
+}
+
 func (intEnv *IntegrationEnvironment) Close() {
 	if intEnv == nil {
 		fmt.Println("integration_environment::Close -- Integration environment not found")
