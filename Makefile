@@ -8,7 +8,8 @@ serve:
 
 ti: test-integration
 test-integration:
-	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+	$(MAKE) gen
+	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
 
 swag: swagger
 swagger:

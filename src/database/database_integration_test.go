@@ -82,14 +82,6 @@ func TestDatabaseOperations(t *testing.T) {
 	var err error
 
 	if testResult := t.Run("Setup database connection", func(t *testing.T) {
-		// Generate the ent files
-		err = entc.Generate("../schema", &gen.Config{
-			Schema:  "../schema",
-			Target:  "../../ent",
-			Package: "api5back/ent",
-		})
-		require.NoError(t, err)
-
 		credentials, err := newTestingCredentials()
 		require.NoError(t, err)
 
