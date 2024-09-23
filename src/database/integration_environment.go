@@ -116,10 +116,10 @@ func (intEnv *IntegrationEnvironment) WithSleep() *IntegrationEnvironment {
 		return intEnv
 	}
 
-	fmt.Println("integration_environment::WithSleep -- Sleeping for a bit to allow the container to connect")
-	time.Sleep(time.Duration(
-		getContainerConnectionDelayMs(),
-	) * time.Millisecond)
+	sleepTimeMs := getContainerConnectionDelayMs()
+
+	fmt.Printf("integration_environment::WithSleep -- Sleeping for %dms to allow the container to connect\n", sleepTimeMs)
+	time.Sleep(time.Duration(sleepTimeMs) * time.Millisecond)
 	fmt.Println("integration_environment::WithSleep -- Done sleeping")
 
 	return intEnv
