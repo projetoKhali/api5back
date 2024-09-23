@@ -108,7 +108,10 @@ func DefaultIntegrationEnvironment(ctx context.Context) *IntegrationEnvironment 
 	}
 
 	return newIntegrationEnvironment(ctx, credentials).
-		WithClient()
+		WithClient().
+		WithSleep().
+		WithWipe().
+		WithMigration()
 }
 
 func (intEnv *IntegrationEnvironment) WithSleep() *IntegrationEnvironment {
