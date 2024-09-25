@@ -46,7 +46,7 @@ CREATE TABLE dim_vacancy (
     vc_location varchar  NOT NULL,
     usr_id int  NOT NULL,
     vc_opening_date timestamp  NOT NULL,
-    vc_closing_date int  NOT NULL,
+    vc_closing_date timestamp  NOT NULL,
     CONSTRAINT dim_vacancy_pk PRIMARY KEY (vc_id)
 );
 

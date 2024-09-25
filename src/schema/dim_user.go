@@ -16,7 +16,7 @@ func (DimUser) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
 		field.String("name"),
-		field.String("ocupation"),
+		field.String("occupation"),
 	}
 }
 
