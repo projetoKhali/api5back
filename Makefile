@@ -37,3 +37,7 @@ database-up:
 db-down: database-down
 database-down:
 	docker-compose down
+
+h: hooks
+hooks:
+	husky install
