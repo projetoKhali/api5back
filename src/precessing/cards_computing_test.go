@@ -4,122 +4,72 @@ import (
 	"api5back/ent"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
-// Função auxiliar para criar um DimProcess mock
-func mockDimProcess(status int, initialDate, finishDate time.Time) *ent.DimProcess {
-	return &ent.DimProcess{
-		Status:      status,
-		InitialDate: initialDate,
-		FinishDate:  finishDate,
-	}
-}
-
-// Função auxiliar para criar um FactHiringProcess mock
-func mockFactHiringProcess(duration int) *ent.FactHiringProcess {
-	return &ent.FactHiringProcess{
-		MetSumDurationHiringProces: duration,
-	}
-}
-
-// Testa a função ComputingCardInfo
 func TestComputingCardInfo(t *testing.T) {
-	processes := []*ent.DimProcess{
-		mockDimProcess(1, time.Now().Add(-5*time.Hour), time.Now().Add(1*time.Hour)),   // Open, approaching deadline
-		mockDimProcess(2, time.Now().Add(-10*time.Hour), time.Now().Add(-1*time.Hour)), // Expired
-		mockDimProcess(3, time.Now().Add(-8*time.Hour), time.Now().Add(-2*time.Hour)),  // Closed
+	// Criação de dados fictícios de DimProcess
+	process1 := &ent.DimProcess{
+		Status:      1,
+		InitialDate: time.Now().Add(-10 * 24 * time.Hour), // Início há 10 dias
+		FinishDate:  time.Now().Add(2 * 24 * time.Hour),   // Termina em 2 dias
+	}
+	process2 := &ent.DimProcess{
+		Status:      2,
+		InitialDate: time.Now().Add(-15 * 24 * time.Hour), // Início há 15 dias
+		FinishDate:  time.Now().Add(-5 * 24 * time.Hour),  // Terminou há 5 dias
+	}
+	process3 := &ent.DimProcess{
+		Status:      3,
+		InitialDate: time.Now().Add(-30 * 24 * time.Hour), // Início há 30 dias
+		FinishDate:  time.Now().Add(-20 * 24 * time.Hour), // Terminou há 20 dias
 	}
 
-	hirings := []*ent.FactHiringProcess{
-		mockFactHiringProcess(10),
-		mockFactHiringProcess(20),
+	// Criação de dados fictícios de FactHiringProcess
+	hiringData := []*ent.FactHiringProcess{
+		{
+			Edges: ent.FactHiringProcessEdges{
+				DimProcess: process1,
+			},
+			MetSumDurationHiringProces: 10,
+		},
+		{
+			Edges: ent.FactHiringProcessEdges{
+				DimProcess: process2,
+			},
+			MetSumDurationHiringProces: 15,
+		},
+		{
+			Edges: ent.FactHiringProcessEdges{
+				DimProcess: process3,
+			},
+			MetSumDurationHiringProces: 20,
+		},
 	}
 
-	cardInfo, err := ComputingCardInfo(processes, hirings)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	// Chama a função ComputingCardInfo com os dados de teste
+	cardInfos, err := ComputingCardInfo(hiringData)
 
-	// Verifica se o cardInfo retornado está correto
-	if cardInfo.openProcess != 1 {
-		t.Errorf("Expected 1 open process, got %d", cardInfo.openProcess)
-	}
+	// Verifica se não houve erro
+	assert.NoError(t, err)
 
-	if cardInfo.expirededProcess != 1 {
-		t.Errorf("Expected 1 expired process, got %d", cardInfo.expirededProcess)
-	}
-
-	if cardInfo.closeProcess != 1 {
-		t.Errorf("Expected 1 closed process, got %d", cardInfo.closeProcess)
-	}
-
-	if cardInfo.approachingDeadlineProcess != 1 {
-		t.Errorf("Expected 1 approaching deadline process, got %d", cardInfo.approachingDeadlineProcess)
-	}
-
-	if cardInfo.averageHiringTime != 15 { // (10 + 20) / 2 = 15
-		t.Errorf("Expected average hiring time 15, got %d", cardInfo.averageHiringTime)
-	}
+	// Verifica os valores retornados
+	assert.Equal(t, 1, cardInfos.openProcess)
+	assert.Equal(t, 1, cardInfos.expirededProcess)
+	assert.Equal(t, 1, cardInfos.closeProcess)
+	assert.Equal(t, 1, cardInfos.approachingDeadlineProcess)
+	assert.Equal(t, 15, cardInfos.averageHiringTime)
 }
 
-// Testa a função getProcessCardInfo
-func TestGetProcessCardInfo(t *testing.T) {
-	processes := []*ent.DimProcess{
-		mockDimProcess(1, time.Now().Add(-5*time.Hour), time.Now().Add(1*time.Hour)),   // Open, approaching deadline
-		mockDimProcess(2, time.Now().Add(-10*time.Hour), time.Now().Add(-1*time.Hour)), // Expired
-		mockDimProcess(3, time.Now().Add(-8*time.Hour), time.Now().Add(-2*time.Hour)),  // Closed
-	}
+func TestComputingCardInfo_EmptyData(t *testing.T) {
+	// Chama a função com uma lista vazia
+	cardInfos, err := ComputingCardInfo([]*ent.FactHiringProcess{})
 
-	var cardInfos CardInfos
-	err := getProcessCardInfo(processes, &cardInfos)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
+	// Verifica se o erro foi retornado corretamente
+	assert.Error(t, err)
+	assert.Equal(t, "the list is empty", err.Error())
 
-	// Verifica se o cardInfos retornado está correto
-	if cardInfos.openProcess != 1 {
-		t.Errorf("Expected 1 open process, got %d", cardInfos.openProcess)
-	}
-
-	if cardInfos.expirededProcess != 1 {
-		t.Errorf("Expected 1 expired process, got %d", cardInfos.expirededProcess)
-	}
-
-	if cardInfos.closeProcess != 1 {
-		t.Errorf("Expected 1 closed process, got %d", cardInfos.closeProcess)
-	}
-
-	if cardInfos.approachingDeadlineProcess != 1 {
-		t.Errorf("Expected 1 approaching deadline process, got %d", cardInfos.approachingDeadlineProcess)
-	}
-}
-
-// Testa a função getAverageHiringTime
-func TestGetAverageHiringTime(t *testing.T) {
-	hirings := []*ent.FactHiringProcess{
-		mockFactHiringProcess(10),
-		mockFactHiringProcess(20),
-	}
-
-	var cardInfos CardInfos
-	err := getAverageHiringTime(hirings, &cardInfos)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-
-	// Verifica se o tempo médio de contratação está correto
-	if cardInfos.averageHiringTime != 15 { // (10 + 20) / 2 = 15
-		t.Errorf("Expected average hiring time 15, got %d", cardInfos.averageHiringTime)
-	}
-}
-
-// Testa erro de hiring data vazio
-func TestGetAverageHiringTimeEmptyData(t *testing.T) {
-	var hirings []*ent.FactHiringProcess
-
-	var cardInfos CardInfos
-	err := getAverageHiringTime(hirings, &cardInfos)
-	if err == nil {
-		t.Error("Expected error for empty hiring data, got none")
-	}
+	// Verifica se os valores do cardInfos são os valores padrão (zero)
+	assert.Equal(t, CardInfos{}, cardInfos)
 }
