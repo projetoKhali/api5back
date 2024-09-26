@@ -13,6 +13,9 @@ func entConfig() *gen.Config {
 		Schema:  "src/schema",
 		Target:  "ent",
 		Package: "api5back/ent",
+		Features: []gen.Feature{
+			gen.FeatureExecQuery,
+		},
 	}
 }
 

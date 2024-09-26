@@ -13,10 +13,14 @@ tmp_dir = "./bin"
     "vendor",
     "testdata",
     "ent",
-    "scripts"
+    "scripts",
+    "docs"
   ]
   exclude_file = []
-  exclude_regex = ["_test.go"]
+  exclude_regex = [
+    "_test.go",
+    "_integration_test.go",
+  ]
   exclude_unchanged = false
   follow_symlink = false
   full_bin = ""

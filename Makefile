@@ -1,3 +1,14 @@
+.PHONY: all \
+	serve \
+	ti test-integration \
+	swag swagger \
+	sch schema \
+	gen generate \
+	mig migrate \
+	seeds \
+	db-up database-up \
+	db-down database-down
+
 all: serve
 
 %:
@@ -12,7 +23,8 @@ test:
 
 ti: test-integration
 test-integration:
-	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+	$(MAKE) gen
+	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
 
 swag: swagger
 swagger:
@@ -29,6 +41,9 @@ generate:
 mig: migrate
 migrate:
 	go run scripts/migrate/main.go
+
+seeds:
+	go run scripts/seeds/dw.go
 
 db-up: database-up
 database-up:
