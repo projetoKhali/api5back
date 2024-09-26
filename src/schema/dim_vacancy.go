@@ -22,7 +22,7 @@ func (DimVacancy) Fields() []ent.Field {
 		field.String("location"),
 		field.Int("dimUsrId"),
 		field.Time("openingDate"),
-		field.Int("closingDate"),
+		field.Time("closingDate"),
 	}
 }
 
