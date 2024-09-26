@@ -6,6 +6,10 @@ all: serve
 serve:
 	air
 
+t: test
+test:
+	go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go')
+
 ti: test-integration
 test-integration:
 	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
@@ -33,3 +37,7 @@ database-up:
 db-down: database-down
 database-down:
 	docker-compose down
+
+h: hooks
+hooks:
+	husky install
