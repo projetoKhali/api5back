@@ -103,7 +103,6 @@ func DataWarehouse(client *ent.Client) error {
 	}
 
 	for _, process := range processes {
-		fmt.Printf("Título: %+v", process.Title)
 		_, err := client.DimProcess.Create().
 			SetTitle(process.Title).
 			SetInitialDate(process.InitialDate).
