@@ -33,6 +33,7 @@ swagger:
 sch: schema
 schema:
 	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
 
 gen: generate
 generate:
