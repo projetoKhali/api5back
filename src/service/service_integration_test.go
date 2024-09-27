@@ -33,6 +33,7 @@ func TestDatabaseOperations(t *testing.T) {
 
 	t.Run("Test hiring_process_candidate table operations", func(t *testing.T) {
 		var testFactHiringProcessId int
+		var hiringProcessCandidateId int
 
 		for _, TestCase := range []database.TestCase{
 			{
@@ -58,7 +59,7 @@ func TestDatabaseOperations(t *testing.T) {
 						t.Fatalf("failed to parse applyDatePgType for candidate: %v", err)
 					}
 
-					_, err = intEnv.Client.HiringProcessCandidate.
+					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
 						Create().
 						SetFactHiringProcessID(testFactHiringProcessId).
 						SetName("John Doe").
@@ -71,6 +72,8 @@ func TestDatabaseOperations(t *testing.T) {
 					if err != nil {
 						t.Fatalf("failed to insert the hiring_process_candidate: %v", err)
 					}
+
+					hiringProcessCandidateId = hiringProcessCandidate.ID
 				},
 			},
 			{
@@ -81,7 +84,6 @@ func TestDatabaseOperations(t *testing.T) {
 						FactHiringProcess.
 						Query().
 						WithDimVacancy().
-						WithHiringProcessCandidates().
 						Where(facthiringprocess.ID(testFactHiringProcessId)).
 						First(ctx)
 					require.NoError(t, err)
@@ -92,6 +94,22 @@ func TestDatabaseOperations(t *testing.T) {
 					require.NoError(t, err)
 					require.NotNil(t, candidates)
 					require.NotEmpty(t, candidates)
+				},
+			},
+			{
+				Name: "Select a candidate by ID",
+				Run: func(t *testing.T) {
+					hiringProcessCandidate, err := intEnv.
+						Client.
+						HiringProcessCandidate.
+						Get(ctx, hiringProcessCandidateId)
+					require.NoError(t, err)
+					require.NotNil(t, hiringProcessCandidate)
+					require.Equal(
+						t,
+						property.HiringProcessCandidateStatusInAnalysis,
+						hiringProcessCandidate.Status,
+					)
 				},
 			},
 		} {
