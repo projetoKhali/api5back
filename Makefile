@@ -14,6 +14,7 @@ all: serve
 %:
 	@:
 
+s: serve
 serve:
 	air
 
