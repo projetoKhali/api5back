@@ -5,9 +5,9 @@ services:
     image: postgres:latest
     container_name: khali-api5-DB-postgres
     environment:
-      POSTGRES_USER: user_entity
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass_entity
-      POSTGRES_DB: db_entity
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"  # Porta exposta para a instância de persistência
     volumes:
@@ -20,9 +20,9 @@ services:
     image: postgres:latest
     container_name: khali-api5-DW-postgres
     environment:
-      POSTGRES_USER: user_warehouse
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: pass_warehouse
-      POSTGRES_DB: db_warehouse
+      POSTGRES_DB: postgres
     ports:
       - "5433:5432"  # Porta exposta para o Data Warehouse
     volumes:
