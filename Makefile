@@ -14,6 +14,7 @@ all: serve
 %:
 	@:
 
+s: serve
 serve:
 	air
 
@@ -33,6 +34,7 @@ swagger:
 sch: schema
 schema:
 	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
 
 gen: generate
 generate:
@@ -43,7 +45,8 @@ migrate:
 	go run scripts/migrate/main.go
 
 seeds:
-	go run scripts/seeds/dw.go
+	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
 
 db-up: database-up
 database-up:

@@ -15,13 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDatabaseOperations(t *testing.T) {
+func TestBaseDatabaseOperations(t *testing.T) {
 	ctx := context.Background()
 	var intEnv *IntegrationEnvironment = nil
 	var err error
 
 	if testResult := t.Run("Setup database connection", func(t *testing.T) {
 		intEnv = DefaultIntegrationEnvironment(ctx)
+
 		require.NotNil(t, intEnv)
 		require.NoError(t, intEnv.Error)
 		require.NotNil(t, intEnv.Client)
