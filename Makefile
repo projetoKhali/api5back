@@ -1,3 +1,14 @@
+.PHONY: all \
+	serve \
+	ti test-integration \
+	swag swagger \
+	sch schema \
+	gen generate \
+	mig migrate \
+	seeds \
+	db-up database-up \
+	db-down database-down
+
 all: serve
 
 %:
@@ -6,13 +17,22 @@ all: serve
 serve:
 	air
 
-sch: schema
-schema:
-	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
+t: test
+test:
+	go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go')
 
 ti: test-integration
 test-integration:
-	go test -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+	$(MAKE) gen
+	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+
+swag: swagger
+swagger:
+	swag init
+
+sch: schema
+schema:
+	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 
 gen: generate
 generate:
@@ -22,6 +42,9 @@ mig: migrate
 migrate:
 	go run scripts/migrate/main.go
 
+seeds:
+	go run scripts/seeds/dw.go
+
 db-up: database-up
 database-up:
 	docker-compose up -d
@@ -29,3 +52,7 @@ database-up:
 db-down: database-down
 database-down:
 	docker-compose down
+
+h: hooks
+hooks:
+	husky install

@@ -4,85 +4,93 @@
 package database
 
 import (
-	"api5back/ent"
-	"api5back/ent/migrate"
 	"context"
-	"database/sql"
 	"fmt"
-	"os"
+	"strings"
 	"testing"
 
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc"
-	"entgo.io/ent/entc/gen"
-	"github.com/joho/godotenv"
+	"api5back/ent"
+	"api5back/ent/migrate"
+
 	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) {
-	// Generate the ent files
-	err := entc.Generate("../schema", &gen.Config{
-		Schema:  "../schema",
-		Target:  "../../ent",
-		Package: "api5back/ent",
-	})
-	require.NoError(t, err)
-
-	// Load the environment variables
-	err = godotenv.Load("../../.env")
-	require.NoError(t, err)
-
-	// Create the database client
-	databaseUrl := fmt.Sprintf(
-		"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-		os.Getenv("DW_USER"),
-		os.Getenv("DW_PASS"),
-		os.Getenv("DW_HOST"),
-		os.Getenv("DW_PORT"),
-		os.Getenv("DW_NAME"),
-	)
-
-	db, err := sql.Open("pgx", databaseUrl)
-	require.NoError(t, err)
-
-	client := ent.NewClient(
-		ent.Driver(
-			entsql.OpenDB(dialect.Postgres, db),
-		),
-	)
-
-	// Migrate the database
+func TestDatabaseOperations(t *testing.T) {
 	ctx := context.Background()
-	err = client.Schema.Create(
-		ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-	)
-	require.NoError(t, err)
+	var intEnv *IntegrationEnvironment = nil
+	var err error
 
-	// Insert a user into the table
-	user, err := client.DimUser.
-		Create().
-		SetName("John Doe").
-		SetOcupation("Software Engineer").
-		Save(ctx)
-	require.NoError(t, err)
-	require.Equal(t, "John Doe", user.Name)
-	require.Equal(t, "Software Engineer", user.Ocupation)
+	if testResult := t.Run("Setup database connection", func(t *testing.T) {
+		intEnv = DefaultIntegrationEnvironment(ctx)
+		require.NotNil(t, intEnv)
+		require.NoError(t, intEnv.Error)
+		require.NotNil(t, intEnv.Client)
+	}); !testResult {
+		t.Fatalf("Setup test failed")
+	}
 
-	// Retrieve the inserted user
-	retrievedUser, err := client.DimUser.Get(ctx, user.ID)
-	require.NoError(t, err)
-	require.Equal(t, user.ID, retrievedUser.ID)
-	require.Equal(t, user.Name, retrievedUser.Name)
-	require.Equal(t, user.Ocupation, retrievedUser.Ocupation)
+	if testResult := t.Run("Migrate database", func(t *testing.T) {
+		if err = intEnv.Client.Schema.Create(
+			ctx,
+			migrate.WithDropIndex(true),
+			migrate.WithDropColumn(true),
+		); err != nil {
+			var sb strings.Builder
+			sb.WriteString(fmt.Sprintf("failed to migrate the database: %v", err))
+			sb.WriteString("\n\nThis error may be caused by the test not waiting long enough for the database to be ready.")
+			sb.WriteString("\nTry increasing the sleep time in the `.env.integration` test.")
+			t.Fatalf(sb.String())
+		}
+	}); !testResult {
+		t.Fatalf("Migration test failed")
+	}
 
-	// Delete the user
-	err = client.DimUser.DeleteOne(user).Exec(ctx)
-	require.NoError(t, err)
+	t.Run("Test dim_user table operations", func(t *testing.T) {
+		var testDimUser *ent.DimUser
 
-	// Try to retrieve the user again, expecting a not found error
-	_, err = client.DimUser.Get(ctx, user.ID)
-	require.Error(t, err)
+		for _, TestCase := range []TestCase{
+			{
+				Name: "Insert a dim_user into the table",
+				Run: func(t *testing.T) {
+					testDimUser, err = intEnv.Client.DimUser.
+						Create().
+						SetName("John Doe").
+						SetOccupation("Software Engineer").
+						Save(ctx)
+					if err != nil {
+						t.Fatalf("failed to insert the dim_user: %v", err)
+					}
+					require.Equal(t, "John Doe", testDimUser.Name)
+					require.Equal(t, "Software Engineer", testDimUser.Occupation)
+				},
+			}, {
+				Name: "Retrieve the inserted dim_user",
+				Run: func(t *testing.T) {
+					retrievedDimUser, err := intEnv.Client.DimUser.Get(ctx, testDimUser.ID)
+					if err != nil {
+						t.Fatalf("failed to retrieve the dim_user: %v", err)
+					}
+					require.Equal(t, testDimUser.ID, retrievedDimUser.ID)
+					require.Equal(t, testDimUser.Name, retrievedDimUser.Name)
+					require.Equal(t, testDimUser.Occupation, retrievedDimUser.Occupation)
+				},
+			}, {
+				Name: "Delete the dim_user",
+				Run: func(t *testing.T) {
+					err = intEnv.Client.DimUser.DeleteOne(testDimUser).Exec(ctx)
+					require.NoError(t, err)
+				},
+			}, {
+				Name: "Try to retrieve the dim_user again, expecting a not found error",
+				Run: func(t *testing.T) {
+					_, err = intEnv.Client.DimUser.Get(ctx, testDimUser.ID)
+					require.Error(t, err)
+				},
+			},
+		} {
+			if testResult := t.Run(TestCase.Name, TestCase.Run); !testResult {
+				t.Fatalf("Test case failed")
+			}
+		}
+	})
 }

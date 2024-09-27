@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type DatabaseCredentials struct {
+type Credentials struct {
 	User string
 	Pass string
 	Host string
@@ -16,7 +16,7 @@ type DatabaseCredentials struct {
 	Name *string
 }
 
-func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
+func internalNewCredentials(prefix string, envFilePath string) (*Credentials, error) {
 	fields := []string{
 		fmt.Sprintf("%s_USER", prefix),
 		fmt.Sprintf("%s_PASS", prefix),
@@ -25,15 +25,23 @@ func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 		fmt.Sprintf("%s_NAME", prefix),
 	}
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load(envFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("error loading `.env` file: %w", err)
+		return nil, fmt.Errorf(
+			"error loading `%s` file: %w",
+			envFilePath,
+			err,
+		)
 	}
 
 	for i, field := range fields {
 		value, ok := os.LookupEnv(field)
 		if !ok {
-			return nil, fmt.Errorf("missing environment variable `%s` in `.env` file", field)
+			return nil, fmt.Errorf(
+				"missing environment variable `%s` in `%s` file",
+				field,
+				envFilePath,
+			)
 		}
 
 		fields[i] = value
@@ -41,10 +49,15 @@ func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 
 	port, err := strconv.Atoi(fields[3])
 	if err != nil {
-		return nil, fmt.Errorf("invalid port number: `%s` in `.env` file: %w", fields[3], err)
+		return nil, fmt.Errorf(
+			"invalid port number: `%s` in `%s`: %w",
+			fields[3],
+			envFilePath,
+			err,
+		)
 	}
 
-	return &DatabaseCredentials{
+	return &Credentials{
 		User: fields[0],
 		Pass: fields[1],
 		Host: fields[2],
@@ -53,7 +66,21 @@ func NewDatabaseCredentials(prefix string) (*DatabaseCredentials, error) {
 	}, nil
 }
 
-func (dc *DatabaseCredentials) GetConnectionString() string {
+func newCredentials(prefix string) (*Credentials, error) {
+	return internalNewCredentials(
+		prefix,
+		".env",
+	)
+}
+
+func newTestingCredentials() (*Credentials, error) {
+	return internalNewCredentials(
+		"TI",
+		"../../.env.integration",
+	)
+}
+
+func (dc *Credentials) getConnectionString() string {
 	connectionString := fmt.Sprintf(
 		"user=%s password=%s host=%s",
 		dc.User,
