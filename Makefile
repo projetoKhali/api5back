@@ -44,7 +44,8 @@ migrate:
 	go run scripts/migrate/main.go
 
 seeds:
-	go run scripts/seeds/dw.go
+	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
 
 db-up: database-up
 database-up:
