@@ -55,13 +55,13 @@ func TestDatabaseOperations(t *testing.T) {
 					testDimUser, err = intEnv.Client.DimUser.
 						Create().
 						SetName("John Doe").
-						SetOcupation("Software Engineer").
+						SetOccupation("Software Engineer").
 						Save(ctx)
 					if err != nil {
 						t.Fatalf("failed to insert the dim_user: %v", err)
 					}
 					require.Equal(t, "John Doe", testDimUser.Name)
-					require.Equal(t, "Software Engineer", testDimUser.Ocupation)
+					require.Equal(t, "Software Engineer", testDimUser.Occupation)
 				},
 			}, {
 				Name: "Retrieve the inserted dim_user",
@@ -72,7 +72,7 @@ func TestDatabaseOperations(t *testing.T) {
 					}
 					require.Equal(t, testDimUser.ID, retrievedDimUser.ID)
 					require.Equal(t, testDimUser.Name, retrievedDimUser.Name)
-					require.Equal(t, testDimUser.Ocupation, retrievedDimUser.Ocupation)
+					require.Equal(t, testDimUser.Occupation, retrievedDimUser.Occupation)
 				},
 			}, {
 				Name: "Delete the dim_user",

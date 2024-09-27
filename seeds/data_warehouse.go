@@ -1,17 +1,17 @@
-package main
+package seeds
 
 import (
-	"api5back/ent"
-	"api5back/src/database"
 	"context"
 	"fmt"
 	"time"
+
+	"api5back/ent"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // Função para popular os dados no banco
-func SeedData(client *ent.Client) error {
+func DataWarehouse(client *ent.Client) error {
 	ctx := context.Background()
 
 	users := []ent.DimUser{
@@ -144,34 +144,5 @@ func SeedData(client *ent.Client) error {
 		}
 	}
 
-	fmt.Println("Database seeded successfully!")
 	return nil
-}
-
-func SeedAll() error {
-	dwPrefix := "DW"
-	client, err := database.Setup(dwPrefix)
-	if err != nil {
-		return fmt.Errorf("failed to setup database: %v", err)
-	}
-	defer client.Close()
-
-	if err := SeedData(client); err != nil {
-		return fmt.Errorf("failed to seed database: %v", err)
-	}
-
-	fmt.Printf("Seeded database with prefix: %s\n", dwPrefix)
-
-	return nil
-}
-
-// Ponto de entrada manual para rodar a seed
-func main() {
-	fmt.Println("Seeding all databases...")
-
-	if err := SeedAll(); err != nil {
-		panic(fmt.Errorf("failed to seed databases: %v", err))
-	}
-
-	fmt.Println("Successfully seeded databases.")
 }
