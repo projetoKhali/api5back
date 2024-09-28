@@ -118,4 +118,18 @@ func TestDatabaseOperations(t *testing.T) {
 			}
 		}
 	})
+
+	metricsService := NewMetricsService(intEnv.Client)
+	t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
+		metricsData, err := metricsService.GetMetrics(ctx)
+
+		require.NoError(t, err)
+
+		require.NotNil(t, metricsData)
+
+		require.NotEmpty(t, metricsData.CardInfos)
+		require.NotNil(t, metricsData.VacancySummary)
+		require.NotNil(t, metricsData.AvgHiringTime)
+
+	})
 }
