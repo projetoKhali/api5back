@@ -1,9 +1,10 @@
 package processing
 
 import (
-	"api5back/ent"
 	"testing"
 	"time"
+
+	"api5back/ent"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -55,11 +56,11 @@ func TestComputingCardInfo(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verifica os valores retornados
-	assert.Equal(t, 1, cardInfos.openProcess)
-	assert.Equal(t, 1, cardInfos.expirededProcess)
-	assert.Equal(t, 1, cardInfos.closeProcess)
-	assert.Equal(t, 1, cardInfos.approachingDeadlineProcess)
-	assert.Equal(t, 15, cardInfos.averageHiringTime)
+	assert.Equal(t, 1, cardInfos.OpenProcesses)
+	assert.Equal(t, 1, cardInfos.ExpiredProcesses)
+	assert.Equal(t, 1, cardInfos.CloseProcesses)
+	assert.Equal(t, 1, cardInfos.ApproachingDeadlineProcesses)
+	assert.Equal(t, 15, cardInfos.AverageHiringTime)
 }
 
 func TestComputingCardInfo_EmptyData(t *testing.T) {
