@@ -37,21 +37,27 @@ func (s HiringProcessCandidateStatus) Value() (driver.Value, error) {
 }
 
 func (s *HiringProcessCandidateStatus) Scan(value interface{}) error {
+	var valueStr string
 	switch v := value.(type) {
 	case nil:
 		return nil
-	case string:
-	case []byte:
-		for i, str := range HiringProcessCandidateStatus(0).Values() {
-			if str == string(v) {
-				*s = HiringProcessCandidateStatus(i)
-				break
-			}
-		}
+	case int:
+		*s = HiringProcessCandidateStatus(v)
 		return nil
+	case string:
+		valueStr = v
+	case []byte:
+		valueStr = string(v)
 	default:
 		return fmt.Errorf("invalid hiring_process_candidate status: %v", value)
 	}
 
-	return nil
+	for i, statusStr := range HiringProcessCandidateStatus(0).Values() {
+		if statusStr == string(valueStr) {
+			*s = HiringProcessCandidateStatus(i)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid hiring_process_candidate status: %q", value)
 }
