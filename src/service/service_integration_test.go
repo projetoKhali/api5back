@@ -84,6 +84,7 @@ func TestDatabaseOperations(t *testing.T) {
 						FactHiringProcess.
 						Query().
 						WithDimVacancy().
+						WithHiringProcessCandidates().
 						Where(facthiringprocess.ID(testFactHiringProcessId)).
 						First(ctx)
 					require.NoError(t, err)
