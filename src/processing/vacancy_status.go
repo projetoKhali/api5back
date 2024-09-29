@@ -7,9 +7,9 @@ import (
 )
 
 type VacancyStatusSummary struct {
-	Open    int `json:"open"`
-	Hired   int `json:"hired"`
-	Expired int `json:"expired"`
+	Open      int `json:"open"`
+	Analyzing int `json:"analyzing"`
+	Closed    int `json:"closed"`
 }
 
 func GenerateVacancyStatusSummary(
@@ -30,9 +30,9 @@ func GenerateVacancyStatusSummary(
 		case 0:
 			summary.Open++
 		case 1:
-			summary.Hired++
+			summary.Analyzing++
 		case 2:
-			summary.Expired++
+			summary.Closed++
 		default:
 			return summary, fmt.Errorf(
 				"invalid vacancy status: %d",
