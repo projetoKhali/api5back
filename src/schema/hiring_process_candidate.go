@@ -19,14 +19,11 @@ type HiringProcessCandidate struct {
 func (HiringProcessCandidate) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
-		field.String("email").
-			Unique(),
-		field.String("phone").
-			Unique(),
+		field.String("email"),
+		field.String("phone"),
 		field.Float("score"),
 		field.Int("factHiringProcessId").
-			Immutable().
-			Unique(),
+			Immutable(),
 		field.Other("applyDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
 		}),
