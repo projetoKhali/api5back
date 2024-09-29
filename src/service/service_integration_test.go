@@ -120,8 +120,8 @@ func TestDatabaseOperations(t *testing.T) {
 		}
 	})
 
-	metricsService := NewMetricsService(intEnv.Client)
-	t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
+	if testResult := t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
+		metricsService := NewMetricsService(intEnv.Client)
 		metricsData, err := metricsService.GetMetrics(ctx)
 
 		require.NoError(t, err)
@@ -131,6 +131,7 @@ func TestDatabaseOperations(t *testing.T) {
 		require.NotEmpty(t, metricsData.CardInfos)
 		require.NotNil(t, metricsData.VacancySummary)
 		require.NotNil(t, metricsData.AverageHiringTime)
-
-	})
+	}); !testResult {
+		t.Fatalf("GetMetrics test failed")
+	}
 }
