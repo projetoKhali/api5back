@@ -1,9 +1,10 @@
 package processing
 
 import (
+	"fmt"
+
 	"api5back/ent"
 	"api5back/src/property"
-	"fmt"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -39,12 +40,14 @@ func GenerateAverageHiringTime(
 				err,
 			)
 		}
+
 		for _, candidate := range candidates {
 			if candidate.Status == property.HiringProcessCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
-				monthsValues[candidate.UpdatedAt.Time.Month()-1].TotalDurationInDays += intervalDays
-				monthsValues[candidate.UpdatedAt.Time.Month()-1].HiredCandidates += 1
+				monthIndex := candidate.UpdatedAt.Time.Month() - 1
+				monthsValues[monthIndex].TotalDurationInDays += intervalDays
+				monthsValues[monthIndex].HiredCandidates++
 			}
 		}
 	}
