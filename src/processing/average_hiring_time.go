@@ -63,6 +63,11 @@ func GenerateAverageHiringTime(
 			duration := monthsValues[i].TotalDurationInDays
 			candidates := monthsValues[i].HiredCandidates
 
+			if duration == 0 || candidates == 0 {
+				resultValue.FieldByName(fieldName).SetFloat(0)
+				continue
+			}
+
 			avg := float32(duration / candidates)
 			resultValue.FieldByName(fieldName).SetFloat(float64(avg))
 		}
