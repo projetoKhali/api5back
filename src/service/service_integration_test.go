@@ -130,7 +130,7 @@ func TestDatabaseOperations(t *testing.T) {
 
 		require.NotEmpty(t, metricsData.CardInfos)
 		require.NotNil(t, metricsData.VacancySummary)
-		require.NotNil(t, metricsData.AvgHiringTime)
+		require.NotNil(t, metricsData.AverageHiringTime)
 
 	})
 }

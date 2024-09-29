@@ -1,19 +1,20 @@
 package service
 
 import (
-	"api5back/ent"
-	"api5back/src/processing"
 	"context"
 	"fmt"
+
+	"api5back/ent"
+	"api5back/src/processing"
 )
 
 type MetricsService struct {
 	dbClient *ent.Client
 }
 type MetricsData struct {
-	VacancySummary processing.VacancyStatusSummary `json:"summary"`
-	CardInfos      processing.CardInfos            `json:"cardInfos"`
-	AvgHiringTime  processing.AvgHiringTime        `json:"avgHiringTime"`
+	VacancySummary    processing.VacancyStatusSummary      `json:"summary"`
+	CardInfos         processing.CardInfos                 `json:"cardInfos"`
+	AverageHiringTime processing.AverageHiringTimePerMonth `json:"avgHiringTime"`
 }
 
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
@@ -55,14 +56,14 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 	}
 	metricsData.VacancySummary = vacancyInfo
 
-	avgHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
+	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
 	if err != nil {
 		return metricsData, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
 			err,
 		)
 	}
-	metricsData.AvgHiringTime = avgHiringTime
+	metricsData.AverageHiringTime = averageHiringTime
 
 	return metricsData, nil
 }
