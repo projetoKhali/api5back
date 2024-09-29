@@ -12,9 +12,9 @@ type MetricsService struct {
 	dbClient *ent.Client
 }
 type MetricsData struct {
-	VacancySummary    processing.VacancyStatusSummary      `json:"summary"`
-	CardInfos         processing.CardInfos                 `json:"cardInfos"`
-	AverageHiringTime processing.AverageHiringTimePerMonth `json:"avgHiringTime"`
+	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
+	CardInfos         processing.CardInfos                 `json:"cards"`
+	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
 }
 
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
