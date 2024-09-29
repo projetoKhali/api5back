@@ -38,32 +38,41 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 		)
 	}
 
+	var errors []error
+
 	cardInfo, err := processing.ComputingCardInfo(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not calculate `CardInfo` data: %w",
 			err,
-		)
+		))
 	}
 	metricsData.CardInfos = cardInfo
 
 	vacancyInfo, err := processing.GenerateVacancyStatusSummary(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not generate `VacancyStatus` summary: %w",
 			err,
-		)
+		))
 	}
 	metricsData.VacancySummary = vacancyInfo
 
 	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
 			err,
-		)
+		))
 	}
 	metricsData.AverageHiringTime = averageHiringTime
+
+	if len(errors) > 0 {
+		return metricsData, fmt.Errorf(
+			"failed to get metrics: %v",
+			errors,
+		)
+	}
 
 	return metricsData, nil
 }
