@@ -1,9 +1,11 @@
 package processing
 
 import (
+	"fmt"
+	"reflect"
+
 	"api5back/ent"
 	"api5back/src/property"
-	"fmt"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -39,28 +41,37 @@ func GenerateAverageHiringTime(
 				err,
 			)
 		}
+
 		for _, candidate := range candidates {
 			if candidate.Status == property.HiringProcessCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
-				monthsValues[candidate.UpdatedAt.Time.Month()-1].TotalDurationInDays += intervalDays
-				monthsValues[candidate.UpdatedAt.Time.Month()-1].HiredCandidates += 1
+				monthIndex := candidate.UpdatedAt.Time.Month() - 1
+				monthsValues[monthIndex].TotalDurationInDays += intervalDays
+				monthsValues[monthIndex].HiredCandidates++
 			}
 		}
 	}
 
-	return AverageHiringTimePerMonth{
-		January:   float32(monthsValues[0].TotalDurationInDays / monthsValues[0].HiredCandidates),
-		February:  float32(monthsValues[1].TotalDurationInDays / monthsValues[1].HiredCandidates),
-		March:     float32(monthsValues[2].TotalDurationInDays / monthsValues[2].HiredCandidates),
-		April:     float32(monthsValues[3].TotalDurationInDays / monthsValues[3].HiredCandidates),
-		May:       float32(monthsValues[4].TotalDurationInDays / monthsValues[4].HiredCandidates),
-		June:      float32(monthsValues[5].TotalDurationInDays / monthsValues[5].HiredCandidates),
-		July:      float32(monthsValues[6].TotalDurationInDays / monthsValues[6].HiredCandidates),
-		August:    float32(monthsValues[7].TotalDurationInDays / monthsValues[7].HiredCandidates),
-		September: float32(monthsValues[8].TotalDurationInDays / monthsValues[8].HiredCandidates),
-		October:   float32(monthsValues[9].TotalDurationInDays / monthsValues[9].HiredCandidates),
-		November:  float32(monthsValues[10].TotalDurationInDays / monthsValues[10].HiredCandidates),
-		December:  float32(monthsValues[11].TotalDurationInDays / monthsValues[11].HiredCandidates),
-	}, nil
+	result := AverageHiringTimePerMonth{}
+	resultValue := reflect.ValueOf(&result).Elem()
+
+	for i := 0; i < len(monthsValues); i++ {
+		if monthsValues[i].HiredCandidates > 0 {
+			fieldName := resultValue.Type().Field(i).Name
+
+			duration := monthsValues[i].TotalDurationInDays
+			candidates := monthsValues[i].HiredCandidates
+
+			if duration == 0 || candidates == 0 {
+				resultValue.FieldByName(fieldName).SetFloat(0)
+				continue
+			}
+
+			avg := float32(duration / candidates)
+			resultValue.FieldByName(fieldName).SetFloat(float64(avg))
+		}
+	}
+
+	return result, nil
 }

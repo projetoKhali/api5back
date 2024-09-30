@@ -4,15 +4,13 @@
 package service
 
 import (
-	"context"
-	"testing"
-
 	"api5back/ent/facthiringprocess"
 	"api5back/seeds"
 	"api5back/src/database"
 	"api5back/src/property"
+	"context"
+	"testing"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,18 +52,13 @@ func TestDatabaseOperations(t *testing.T) {
 						DimVacancyOrErr()
 					require.NoError(t, err)
 
-					applyDatePgType := &pgtype.Date{}
-					if err := applyDatePgType.Scan(dimVacancy.OpeningDate); err != nil {
-						t.Fatalf("failed to parse applyDatePgType for candidate: %v", err)
-					}
-
 					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
 						Create().
 						SetFactHiringProcessID(testFactHiringProcessId).
 						SetName("John Doe").
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
-						SetApplyDate(applyDatePgType).
+						SetApplyDate(dimVacancy.OpeningDate).
 						SetStatus(property.HiringProcessCandidateStatusInAnalysis).
 						SetScore(0).
 						Save(ctx)
@@ -120,8 +113,8 @@ func TestDatabaseOperations(t *testing.T) {
 		}
 	})
 
-	metricsService := NewMetricsService(intEnv.Client)
-	t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
+	if testResult := t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
+		metricsService := NewMetricsService(intEnv.Client)
 		metricsData, err := metricsService.GetMetrics(ctx)
 
 		require.NoError(t, err)
@@ -130,7 +123,8 @@ func TestDatabaseOperations(t *testing.T) {
 
 		require.NotEmpty(t, metricsData.CardInfos)
 		require.NotNil(t, metricsData.VacancySummary)
-		require.NotNil(t, metricsData.AvgHiringTime)
-
-	})
+		require.NotNil(t, metricsData.AverageHiringTime)
+	}); !testResult {
+		t.Fatalf("GetMetrics test failed")
+	}
 }

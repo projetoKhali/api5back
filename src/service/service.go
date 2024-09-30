@@ -10,10 +10,11 @@ import (
 type MetricsService struct {
 	dbClient *ent.Client
 }
+
 type MetricsData struct {
-	VacancySummary processing.VacancyStatusSummary      `json:"summary"`
-	CardInfos      processing.CardInfos                 `json:"cardInfos"`
-	AvgHiringTime  processing.AverageHiringTimePerMonth `json:"avgHiringTime"`
+	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
+	CardInfos         processing.CardInfos                 `json:"cards"`
+	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
 }
 
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
@@ -37,32 +38,41 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 		)
 	}
 
+	var errors []error
+
 	cardInfo, err := processing.ComputingCardInfo(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not calculate `CardInfo` data: %w",
 			err,
-		)
+		))
 	}
 	metricsData.CardInfos = cardInfo
 
 	vacancyInfo, err := processing.GenerateVacancyStatusSummary(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not generate `VacancyStatus` summary: %w",
 			err,
-		)
+		))
 	}
 	metricsData.VacancySummary = vacancyInfo
 
-	avgHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
+	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		errors = append(errors, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
 			err,
+		))
+	}
+	metricsData.AverageHiringTime = averageHiringTime
+
+	if len(errors) > 0 {
+		return metricsData, fmt.Errorf(
+			"failed to get metrics: %v",
+			errors,
 		)
 	}
-	metricsData.AvgHiringTime = avgHiringTime
 
 	return metricsData, nil
 }

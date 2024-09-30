@@ -2,10 +2,12 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type DimVacancy struct {
@@ -21,8 +23,12 @@ func (DimVacancy) Fields() []ent.Field {
 		field.Int("status").Default(1),
 		field.String("location"),
 		field.Int("dimUsrId"),
-		field.Time("openingDate"),
-		field.Time("closingDate"),
+		field.Other("openingDate", &pgtype.Date{}).SchemaType(map[string]string{
+			dialect.Postgres: "date",
+		}),
+		field.Other("closingDate", &pgtype.Date{}).SchemaType(map[string]string{
+			dialect.Postgres: "date",
+		}),
 	}
 }
 

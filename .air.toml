@@ -14,7 +14,8 @@ tmp_dir = "./bin"
     "testdata",
     "ent",
     "scripts",
-    "docs"
+    "docs",
+    "seeds"
   ]
   exclude_file = []
   exclude_regex = [

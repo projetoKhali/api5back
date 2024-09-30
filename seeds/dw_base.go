@@ -37,11 +37,26 @@ func DataWarehouse(client *ent.Client) error {
 
 	// Inserindo datas na tabela dim_datetime
 	dates := []ent.DimDatetime{
-		{Date: &pgtype.Date{Time: time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC), Valid: true}, Year: 2024, Month: 7, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0},
-		{Date: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true}, Year: 2024, Month: 8, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0},
-		{Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true}, Year: 2024, Month: 9, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0},
-		{Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true}, Year: 2024, Month: 9, Weekday: 2, Day: 0, Hour: 0, Minute: 0, Second: 0},
-		{Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true}, Year: 2024, Month: 9, Weekday: 3, Day: 0, Hour: 0, Minute: 0, Second: 0},
+		{
+			Date: &pgtype.Date{Time: time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			Year: 2024, Month: 7, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+		},
+		{
+			Date: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			Year: 2024, Month: 8, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+		},
+		{
+			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			Year: 2024, Month: 9, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+		},
+		{
+			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			Year: 2024, Month: 9, Weekday: 2, Day: 0, Hour: 0, Minute: 0, Second: 0,
+		},
+		{
+			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			Year: 2024, Month: 9, Weekday: 3, Day: 0, Hour: 0, Minute: 0, Second: 0,
+		},
 	}
 
 	for _, date := range dates {
@@ -62,15 +77,69 @@ func DataWarehouse(client *ent.Client) error {
 
 	// Inserindo vagas
 	vacancies := []ent.DimVacancy{
-		{Title: "Software Engineer", NumPositions: 1, ReqId: 1, Location: "São Paulo", DimUsrId: 1, OpeningDate: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC)},
-		{Title: "Data Scientist", NumPositions: 2, ReqId: 1, Location: "Rio de Janeiro", DimUsrId: 1, OpeningDate: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC)},
-		{Title: "HR Specialist", NumPositions: 1, ReqId: 1, Location: "São Paulo", DimUsrId: 2, OpeningDate: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC)},
-		{Title: "UX Designer", NumPositions: 2, ReqId: 1, Location: "Curitiba", DimUsrId: 3, OpeningDate: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC)},
-		{Title: "Software Engineer", NumPositions: 1, ReqId: 2, Location: "São Paulo", DimUsrId: 1, OpeningDate: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC)},
-		{Title: "UX Designer", NumPositions: 1, ReqId: 2, Location: "São Paulo", DimUsrId: 5, OpeningDate: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC)},
-		{Title: "Data Scientist", NumPositions: 1, ReqId: 3, Location: "Rio de Janeiro", DimUsrId: 4, OpeningDate: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC)},
-		{Title: "Product Manager", NumPositions: 1, ReqId: 3, Location: "Belo Horizonte", DimUsrId: 5, OpeningDate: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC)},
-		{Title: "HR Specialist", NumPositions: 1, ReqId: 4, Location: "São Paulo", DimUsrId: 3, OpeningDate: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), ClosingDate: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC)},
+		{
+			Title:    "Software Engineer",
+			DimUsrId: 1, NumPositions: 1, ReqId: 1,
+			Location:    "São Paulo",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "Data Scientist",
+			DimUsrId: 1, NumPositions: 2, ReqId: 1,
+			Location:    "Rio de Janeiro",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "HR Specialist",
+			DimUsrId: 2, NumPositions: 1, ReqId: 1,
+			Location:    "São Paulo",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 3, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 3, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "UX Designer",
+			DimUsrId: 3, NumPositions: 2, ReqId: 1,
+			Location:    "Curitiba",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "Software Engineer",
+			DimUsrId: 1, NumPositions: 1, ReqId: 2,
+			Location:    "São Paulo",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 2, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "UX Designer",
+			DimUsrId: 5, NumPositions: 1, ReqId: 2,
+			Location:    "São Paulo",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 11, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "Data Scientist",
+			DimUsrId: 4, NumPositions: 1, ReqId: 3,
+			Location:    "Rio de Janeiro",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 10, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "Product Manager",
+			DimUsrId: 5, NumPositions: 1, ReqId: 3,
+			Location:    "Belo Horizonte",
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 5, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
+		{
+			Title:    "HR Specialist",
+			DimUsrId: 3, NumPositions: 1, ReqId: 4,
+			Location:    "São Paulo",
+			OpeningDate: &pgtype.Date{Time: time.Date(2023, 12, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		},
 	}
 
 	for _, vacancy := range vacancies {
@@ -90,16 +159,66 @@ func DataWarehouse(client *ent.Client) error {
 
 	// Inserindo processos
 	processes := []ent.DimProcess{
-		{Title: "Desenvolvimento Ágil - Software Engineer", InitialDate: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), DimUsrId: 1},
-		{Title: "Recrutamento e Seleção - HR Specialist", InitialDate: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), DimUsrId: 2},
-		{Title: "Gestão de Produto - Product Manager", InitialDate: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), DimUsrId: 3},
-		{Title: "Experiência do Usuário - UX Designer", InitialDate: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), DimUsrId: 4},
-		{Title: "Análise de Dados - Data Scientist", InitialDate: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), DimUsrId: 5},
-		{Title: "Desenvolvimento de Software - Software Engineer e UX Designer", InitialDate: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), DimUsrId: 1},
-		{Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager", InitialDate: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), DimUsrId: 2},
-		{Title: "Processo de Recrutamento - HR Specialist e Software Engineer", InitialDate: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), DimUsrId: 3},
-		{Title: "Estratégia de Produto - Product Manager e UX Designer", InitialDate: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), DimUsrId: 4},
-		{Title: "Inovação em Dados - Data Scientist e HR Specialist", InitialDate: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), FinishDate: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), DimUsrId: 5},
+		{
+			Title:       "Desenvolvimento Ágil - Software Engineer",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    1,
+		},
+		{
+			Title:       "Recrutamento e Seleção - HR Specialist",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    2,
+		},
+		{
+			Title:       "Gestão de Produto - Product Manager",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    3,
+		},
+		{
+			Title:       "Experiência do Usuário - UX Designer",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    4,
+		},
+		{
+			Title:       "Análise de Dados - Data Scientist",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    5,
+		},
+		{
+			Title:       "Desenvolvimento de Software - Software Engineer e UX Designer",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    1,
+		},
+		{
+			Title:       "Análise de Dados e Relatórios - Data Scientist e Product Manager",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    2,
+		},
+		{
+			Title:       "Processo de Recrutamento - HR Specialist e Software Engineer",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    3,
+		},
+		{
+			Title:       "Estratégia de Produto - Product Manager e UX Designer",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    4,
+		},
+		{
+			Title:       "Inovação em Dados - Data Scientist e HR Specialist",
+			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:    5,
+		},
 	}
 
 	for _, process := range processes {
@@ -116,11 +235,76 @@ func DataWarehouse(client *ent.Client) error {
 
 	// Inserindo dados na tabela fact_hiring_process
 	facts := []ent.FactHiringProcess{
-		{DimProcessId: 1, DimUserId: int(userIDs[0]), DimVacancyId: 1, DimDateId: 1, MetTotalCandidatesApplied: 10, MetTotalCandidatesInterviewed: 5, MetTotalCandidatesHired: 3, MetSumDurationHiringProces: 30, MetSumSalaryInitial: 5000, MetTotalFeedbackPositive: 4, MetTotalNeutral: 2, MetTotalNegative: 1},
-		{DimProcessId: 2, DimUserId: int(userIDs[0]), DimVacancyId: 1, DimDateId: 1, MetTotalCandidatesApplied: 12, MetTotalCandidatesInterviewed: 6, MetTotalCandidatesHired: 4, MetSumDurationHiringProces: 25, MetSumSalaryInitial: 5500, MetTotalFeedbackPositive: 5, MetTotalNeutral: 3, MetTotalNegative: 2},
-		{DimProcessId: 3, DimUserId: int(userIDs[0]), DimVacancyId: 1, DimDateId: 1, MetTotalCandidatesApplied: 8, MetTotalCandidatesInterviewed: 4, MetTotalCandidatesHired: 2, MetSumDurationHiringProces: 20, MetSumSalaryInitial: 4500, MetTotalFeedbackPositive: 3, MetTotalNeutral: 2, MetTotalNegative: 1},
-		{DimProcessId: 4, DimUserId: int(userIDs[0]), DimVacancyId: 1, DimDateId: 1, MetTotalCandidatesApplied: 15, MetTotalCandidatesInterviewed: 8, MetTotalCandidatesHired: 5, MetSumDurationHiringProces: 35, MetSumSalaryInitial: 6000, MetTotalFeedbackPositive: 6, MetTotalNeutral: 4, MetTotalNegative: 2},
-		{DimProcessId: 5, DimUserId: int(userIDs[0]), DimVacancyId: 1, DimDateId: 1, MetTotalCandidatesApplied: 20, MetTotalCandidatesInterviewed: 10, MetTotalCandidatesHired: 6, MetSumDurationHiringProces: 40, MetSumSalaryInitial: 7000, MetTotalFeedbackPositive: 7, MetTotalNeutral: 5, MetTotalNegative: 3},
+		{
+			DimProcessId:                  1,
+			DimUserId:                     int(userIDs[0]),
+			DimVacancyId:                  1,
+			DimDateId:                     1,
+			MetTotalCandidatesApplied:     10,
+			MetTotalCandidatesInterviewed: 5,
+			MetTotalCandidatesHired:       3,
+			MetSumDurationHiringProces:    30,
+			MetSumSalaryInitial:           5000,
+			MetTotalFeedbackPositive:      4,
+			MetTotalNeutral:               2,
+			MetTotalNegative:              1,
+		},
+		{
+			DimProcessId:                  2,
+			DimUserId:                     int(userIDs[0]),
+			DimVacancyId:                  2,
+			DimDateId:                     1,
+			MetTotalCandidatesApplied:     12,
+			MetTotalCandidatesInterviewed: 6,
+			MetTotalCandidatesHired:       4,
+			MetSumDurationHiringProces:    25,
+			MetSumSalaryInitial:           5500,
+			MetTotalFeedbackPositive:      5,
+			MetTotalNeutral:               3,
+			MetTotalNegative:              2,
+		},
+		{
+			DimProcessId:                  3,
+			DimUserId:                     int(userIDs[0]),
+			DimVacancyId:                  3,
+			DimDateId:                     1,
+			MetTotalCandidatesApplied:     8,
+			MetTotalCandidatesInterviewed: 4,
+			MetTotalCandidatesHired:       2,
+			MetSumDurationHiringProces:    20,
+			MetSumSalaryInitial:           4500,
+			MetTotalFeedbackPositive:      3,
+			MetTotalNeutral:               2,
+			MetTotalNegative:              1,
+		},
+		{
+			DimProcessId:                  4,
+			DimUserId:                     int(userIDs[0]),
+			DimVacancyId:                  4,
+			DimDateId:                     1,
+			MetTotalCandidatesApplied:     15,
+			MetTotalCandidatesInterviewed: 8,
+			MetTotalCandidatesHired:       5,
+			MetSumDurationHiringProces:    35,
+			MetSumSalaryInitial:           6000,
+			MetTotalFeedbackPositive:      6,
+			MetTotalNeutral:               4,
+			MetTotalNegative:              2,
+		},
+		{
+			DimProcessId:                  5,
+			DimUserId:                     int(userIDs[0]),
+			DimVacancyId:                  5,
+			DimDateId:                     1,
+			MetTotalCandidatesApplied:     20,
+			MetTotalCandidatesInterviewed: 10,
+			MetTotalCandidatesHired:       6,
+			MetSumDurationHiringProces:    40,
+			MetSumSalaryInitial:           7000,
+			MetTotalFeedbackPositive:      7,
+			MetTotalNeutral:               5,
+			MetTotalNegative:              3,
+		},
 	}
 
 	for _, fact := range facts {
