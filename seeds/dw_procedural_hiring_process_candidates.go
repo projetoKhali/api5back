@@ -88,14 +88,15 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 				return fmt.Errorf("failed to get vacandy of FactHiringProcess: %v", err)
 			}
 
-			applyDate := factHiringProcessVacancy.OpeningDate.AddDate(
-				0, 0, rand.Intn(
-					int(factHiringProcessVacancy.
-						ClosingDate.
-						Sub(factHiringProcessVacancy.OpeningDate).
-						Hours()/24)+1,
-				),
-			)
+			applyDate := factHiringProcessVacancy.
+				OpeningDate.
+				Time.
+				AddDate(0, 0, rand.Intn(int(factHiringProcessVacancy.
+					ClosingDate.
+					Time.
+					Sub(factHiringProcessVacancy.OpeningDate.Time).
+					Hours()/24)+1,
+				))
 			applyDatePgType := &pgtype.Date{}
 			if err := applyDatePgType.Scan(applyDate); err != nil {
 				return fmt.Errorf("failed to generate random applyDate for candidate: %v", err)

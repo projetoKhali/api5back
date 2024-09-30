@@ -6,6 +6,7 @@ import (
 
 	"api5back/ent"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,18 +14,18 @@ func TestComputingCardInfo(t *testing.T) {
 	// Criação de dados fictícios de DimProcess
 	process1 := &ent.DimProcess{
 		Status:      1,
-		InitialDate: time.Now().Add(-10 * 24 * time.Hour), // Início há 10 dias
-		FinishDate:  time.Now().Add(2 * 24 * time.Hour),   // Termina em 2 dias
+		InitialDate: &pgtype.Date{Time: time.Now().Add(-10 * 24 * time.Hour), Valid: true}, // Início há 10 dias
+		FinishDate:  &pgtype.Date{Time: time.Now().Add(2 * 24 * time.Hour), Valid: true},   // Termina em 2 dias
 	}
 	process2 := &ent.DimProcess{
 		Status:      2,
-		InitialDate: time.Now().Add(-15 * 24 * time.Hour), // Início há 15 dias
-		FinishDate:  time.Now().Add(-5 * 24 * time.Hour),  // Terminou há 5 dias
+		InitialDate: &pgtype.Date{Time: time.Now().Add(-15 * 24 * time.Hour), Valid: true}, // Início há 15 dias
+		FinishDate:  &pgtype.Date{Time: time.Now().Add(-5 * 24 * time.Hour), Valid: true},  // Terminou há 5 dias
 	}
 	process3 := &ent.DimProcess{
 		Status:      3,
-		InitialDate: time.Now().Add(-30 * 24 * time.Hour), // Início há 30 dias
-		FinishDate:  time.Now().Add(-20 * 24 * time.Hour), // Terminou há 20 dias
+		InitialDate: &pgtype.Date{Time: time.Now().Add(-30 * 24 * time.Hour), Valid: true}, // Início há 30 dias
+		FinishDate:  &pgtype.Date{Time: time.Now().Add(-20 * 24 * time.Hour), Valid: true}, // Terminou há 20 dias
 	}
 
 	// Criação de dados fictícios de FactHiringProcess

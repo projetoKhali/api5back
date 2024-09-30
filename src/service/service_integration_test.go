@@ -12,7 +12,6 @@ import (
 	"api5back/src/database"
 	"api5back/src/property"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,18 +53,13 @@ func TestDatabaseOperations(t *testing.T) {
 						DimVacancyOrErr()
 					require.NoError(t, err)
 
-					applyDatePgType := &pgtype.Date{}
-					if err := applyDatePgType.Scan(dimVacancy.OpeningDate); err != nil {
-						t.Fatalf("failed to parse applyDatePgType for candidate: %v", err)
-					}
-
 					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
 						Create().
 						SetFactHiringProcessID(testFactHiringProcessId).
 						SetName("John Doe").
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
-						SetApplyDate(applyDatePgType).
+						SetApplyDate(dimVacancy.OpeningDate).
 						SetStatus(property.HiringProcessCandidateStatusInAnalysis).
 						SetScore(0).
 						Save(ctx)

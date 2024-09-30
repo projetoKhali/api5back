@@ -45,9 +45,12 @@ func ComputingCardInfo(
 		case 3:
 			cardInfos.CloseProcesses++
 		}
-		totalDuration := process.FinishDate.Sub(process.InitialDate)
+		totalDuration := process.
+			FinishDate.
+			Time.
+			Sub(process.InitialDate.Time)
 		twentyPercentDuration := totalDuration * 20 / 100
-		if time.Until(process.FinishDate) < twentyPercentDuration && process.Status == 1 {
+		if time.Until(process.FinishDate.Time) < twentyPercentDuration && process.Status == 1 {
 			cardInfos.ApproachingDeadlineProcesses++
 		}
 		totalHiringTime += hiring.MetSumDurationHiringProces
