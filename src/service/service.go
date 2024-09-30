@@ -1,16 +1,16 @@
 package service
 
 import (
-	"context"
-	"fmt"
-
 	"api5back/ent"
 	"api5back/src/processing"
+	"context"
+	"fmt"
 )
 
 type MetricsService struct {
 	dbClient *ent.Client
 }
+
 type MetricsData struct {
 	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
 	CardInfos         processing.CardInfos                 `json:"cards"`
