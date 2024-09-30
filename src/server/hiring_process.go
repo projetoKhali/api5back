@@ -39,7 +39,20 @@ func Dashboard(
 	return func(c *gin.Context) {
 		MetricsService := service.NewMetricsService(dwClient)
 
-		metricsData, err := MetricsService.GetMetrics(c)
+		hiringProcessName := c.Query("hiringProcess")
+		vacancyName := c.Query("vacancy")
+		startDate := c.Query("startDate")
+		endDate := c.Query("endDate")
+
+		metricsData, err := MetricsService.GetMetrics(
+			c,
+			service.GetMetricsFilter{
+				HiringProcessName: hiringProcessName,
+				VacancyName:       vacancyName,
+				StartDate:         startDate,
+				EndDate:           endDate,
+			},
+		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return

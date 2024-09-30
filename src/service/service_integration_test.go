@@ -4,12 +4,13 @@
 package service
 
 import (
+	"context"
+	"testing"
+
 	"api5back/ent/facthiringprocess"
 	"api5back/seeds"
 	"api5back/src/database"
 	"api5back/src/property"
-	"context"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -115,7 +116,15 @@ func TestDatabaseOperations(t *testing.T) {
 
 	if testResult := t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
 		metricsService := NewMetricsService(intEnv.Client)
-		metricsData, err := metricsService.GetMetrics(ctx)
+		metricsData, err := metricsService.GetMetrics(
+			ctx,
+			GetMetricsFilter{
+				HiringProcessName: "",
+				VacancyName:       "",
+				StartDate:         "",
+				EndDate:           "",
+			},
+		)
 
 		require.NoError(t, err)
 
