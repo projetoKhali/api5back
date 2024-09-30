@@ -252,7 +252,7 @@ func DataWarehouse(client *ent.Client) error {
 		{
 			DimProcessId:                  2,
 			DimUserId:                     int(userIDs[0]),
-			DimVacancyId:                  1,
+			DimVacancyId:                  2,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     12,
 			MetTotalCandidatesInterviewed: 6,
@@ -266,7 +266,7 @@ func DataWarehouse(client *ent.Client) error {
 		{
 			DimProcessId:                  3,
 			DimUserId:                     int(userIDs[0]),
-			DimVacancyId:                  1,
+			DimVacancyId:                  3,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     8,
 			MetTotalCandidatesInterviewed: 4,
@@ -280,7 +280,7 @@ func DataWarehouse(client *ent.Client) error {
 		{
 			DimProcessId:                  4,
 			DimUserId:                     int(userIDs[0]),
-			DimVacancyId:                  1,
+			DimVacancyId:                  4,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     15,
 			MetTotalCandidatesInterviewed: 8,
@@ -294,7 +294,7 @@ func DataWarehouse(client *ent.Client) error {
 		{
 			DimProcessId:                  5,
 			DimUserId:                     int(userIDs[0]),
-			DimVacancyId:                  1,
+			DimVacancyId:                  5,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     20,
 			MetTotalCandidatesInterviewed: 10,
