@@ -20,7 +20,7 @@ func ComputingCardInfo(
 	hiringData []*ent.FactHiringProcess,
 ) (CardInfos, error) {
 	if len(hiringData) == 0 {
-		return CardInfos{}, fmt.Errorf("the list is empty")
+		return CardInfos{}, nil
 	}
 
 	var cardInfos CardInfos

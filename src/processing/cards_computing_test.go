@@ -67,9 +67,8 @@ func TestComputingCardInfo_EmptyData(t *testing.T) {
 	// Chama a função com uma lista vazia
 	cardInfos, err := ComputingCardInfo([]*ent.FactHiringProcess{})
 
-	// Verifica se o erro foi retornado corretamente
-	assert.Error(t, err)
-	assert.Equal(t, "the list is empty", err.Error())
+	// Verifica se não houve erro
+	assert.NoError(t, err)
 
 	// Verifica se os valores do cardInfos são os valores padrão (zero)
 	assert.Equal(t, CardInfos{}, cardInfos)
