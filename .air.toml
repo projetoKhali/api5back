@@ -5,11 +5,23 @@ tmp_dir = "./bin"
 [build]
   args_bin = []
   bin = "./bin/main"
-  cmd = "go build -o ./bin/main ."
+  cmd = "go run scripts/generate/main.go && swag init && go build -o ./bin/main ."
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = [
+    "assets",
+    "tmp",
+    "vendor",
+    "testdata",
+    "ent",
+    "scripts",
+    "docs",
+    "seeds"
+  ]
   exclude_file = []
-  exclude_regex = ["_test.go"]
+  exclude_regex = [
+    "_test.go",
+    "_integration_test.go",
+  ]
   exclude_unchanged = false
   follow_symlink = false
   full_bin = ""

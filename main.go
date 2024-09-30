@@ -1,41 +1,25 @@
 package main
 
 import (
-	"net/http"
-
-	docs "api5back/docs"
-
-	"github.com/gin-gonic/gin"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"api5back/src/database"
+	"api5back/src/server"
+	"fmt"
 )
 
-// @BasePath /api/v1
-
-// PingExample godoc
-// @Summary ping example
-// @Schemes
-// @Description do ping
-// @Tags example
-// @Accept json
-// @Produce json
-// @Success 200 {string} Helloworld
-// @Router /example/helloworld [get]
-func Helloworld(g *gin.Context) {
-	g.JSON(http.StatusOK, "helloworld")
-}
-
 func main() {
-	r := gin.Default()
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	v1 := r.Group("/api/v1")
-	{
-		eg := v1.Group("/example")
-		{
-			eg.GET("/helloworld", Helloworld)
-		}
+	dbClient, err := database.Setup("DB")
+	if err != nil {
+		panic(fmt.Errorf("failed to setup normalized database: %v", err))
 	}
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	r.Run(":8080")
+	defer dbClient.Close()
 
+	dwClient, err := database.Setup("DW")
+	if err != nil {
+		panic(fmt.Errorf("failed to setup data warehouse: %v", err))
+	}
+	defer dwClient.Close()
+
+	server.
+		NewServer(dbClient, dwClient).
+		Run(":8080")
 }

@@ -17,13 +17,21 @@ sudo pacman -S go
 - Windows  
   https://go.dev/doc/install
 
-## Install [`Air`](https://github.com/air-verse/air)
+## Install [`Air`](https://github.com/air-verse/air) (recommended)
 
 Air is a tool that provides a live reload server for Go applications, updating
 the running server when the source code changes, similar to `nodemon` for Node.js.
 
 ```command
 go install github.com/air-verse/air@latest
+```
+
+## Install [`Swag`](https://github.com/swaggo/swag)
+
+Swag is a tool that generates API documentation from Go source code.
+
+```command
+go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 ## Setup [`Husky`](https://github.com/automation-co/husky)

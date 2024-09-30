@@ -1,0 +1,39 @@
+services:
+
+  # Instância 1 - Banco das entidades
+  postgres_entity:
+    image: postgres:latest
+    container_name: khali-api5-DB-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass_entity
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"  # Porta exposta para a instância de persistência
+    volumes:
+      - entity_data:/var/lib/postgresql/data  # Volume para persistência dos dados
+    networks:
+      - postgres_network
+
+  # Instância 2 - Data Warehouse (Modelo Estrela)
+  postgres_warehouse:
+    image: postgres:latest
+    container_name: khali-api5-DW-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass_warehouse
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"  # Porta exposta para o Data Warehouse
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data  # Volume para persistência dos dados
+    networks:
+      - postgres_network
+
+volumes:
+  entity_data:
+  warehouse_data:
+
+networks:
+  postgres_network:
+    driver: bridge
