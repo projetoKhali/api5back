@@ -1,8 +1,10 @@
 package server
 
 import (
-	"api5back/ent"
 	"net/http"
+
+	"api5back/ent"
+	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +37,14 @@ func Dashboard(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "dashboard")
+		MetricsService := service.NewMetricsService(dwClient)
+
+		metricsData, err := MetricsService.GetMetrics(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, metricsData)
 	}
 }
