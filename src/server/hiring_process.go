@@ -20,9 +20,9 @@ func HiringProcessDashboard(
 			eg.GET("/dashboard", Dashboard(dbClient, dwClient))
 		}
 
-		userGroup := v1.Group("/users")
+		suggestions := v1.Group("/suggestions")
 		{
-			userGroup.GET("/", UserList(dwClient))
+			suggestions.GET("/recruiter", UserList(dwClient))
 		}
 	}
 }
