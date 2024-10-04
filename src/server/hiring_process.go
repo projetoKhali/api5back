@@ -8,6 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type SuggestionsResponse struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 func HiringProcessDashboard(
 	engine *gin.Engine,
 	dbClient *ent.Client,
@@ -73,7 +78,7 @@ func Dashboard(
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} map[string]interface{}
+// @Success 200 {array} SuggestionsResponse
 // @Router /users/ [get]
 func UserList(
 	dwClient *ent.Client,
@@ -86,11 +91,12 @@ func UserList(
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		var response []map[string]interface{}
+
+		var response []SuggestionsResponse
 		for _, user := range users {
-			response = append(response, map[string]interface{}{
-				"id":   user.ID,
-				"name": user.Name,
+			response = append(response, SuggestionsResponse{
+				ID:   user.ID,
+				Name: user.Name,
 			})
 		}
 
