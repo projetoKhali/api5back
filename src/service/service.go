@@ -1,10 +1,17 @@
 package service
 
 import (
-	"api5back/ent"
-	"api5back/src/processing"
 	"context"
 	"fmt"
+	"time"
+
+	"api5back/ent"
+	"api5back/ent/dimprocess"
+	"api5back/ent/dimvacancy"
+	"api5back/ent/facthiringprocess"
+	"api5back/src/processing"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type MetricsService struct {
@@ -17,22 +24,93 @@ type MetricsData struct {
 	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
 }
 
+type GetMetricsFilter struct {
+	HiringProcessName string `json:"hiringProcess"`
+	VacancyName       string `json:"vacancy"`
+	StartDate         string `json:"startDate"`
+	EndDate           string `json:"endDate"`
+}
+
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
 	return &MetricsService{dbClient: dbclient}
 }
 
-func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
-	var metricsData MetricsData
-
-	hiringProcess, err := s.dbClient.
+func (s *MetricsService) GetMetrics(
+	ctx context.Context,
+	filter GetMetricsFilter,
+) (*MetricsData, error) {
+	query := s.dbClient.
 		FactHiringProcess.
 		Query().
 		WithDimVacancy().
 		WithDimProcess().
-		WithHiringProcessCandidates().
-		All(ctx)
+		WithHiringProcessCandidates()
+
+	if filter.HiringProcessName != "" {
+		query = query.Where(
+			facthiringprocess.HasDimProcessWith(
+				dimprocess.TitleContains(
+					filter.HiringProcessName,
+				),
+			),
+		)
+	}
+
+	if filter.VacancyName != "" {
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.TitleContains(
+					filter.VacancyName,
+				),
+			),
+		)
+	}
+
+	if filter.StartDate != "" {
+		hiringProcessStartDate, err := ParseStringToPgtypeDate(
+			"2006-01-02",
+			filter.StartDate,
+		)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"could not parse `StartDate`: %w",
+				err,
+			)
+		}
+
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.ClosingDateGTE(
+					&hiringProcessStartDate,
+				),
+			),
+		)
+	}
+
+	if filter.EndDate != "" {
+		hiringProcessEndDate, err := ParseStringToPgtypeDate(
+			"2006-01-02",
+			filter.EndDate,
+		)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"could not parse `EndDate`: %w",
+				err,
+			)
+		}
+
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.ClosingDateLTE(
+					&hiringProcessEndDate,
+				),
+			),
+		)
+	}
+
+	hiringProcess, err := query.All(ctx)
 	if err != nil {
-		return metricsData, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"could not retrieve `FactHiringProcess` data: %w",
 			err,
 		)
@@ -47,7 +125,6 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 			err,
 		))
 	}
-	metricsData.CardInfos = cardInfo
 
 	vacancyInfo, err := processing.GenerateVacancyStatusSummary(hiringProcess)
 	if err != nil {
@@ -56,7 +133,6 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 			err,
 		))
 	}
-	metricsData.VacancySummary = vacancyInfo
 
 	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
 	if err != nil {
@@ -65,14 +141,32 @@ func (s *MetricsService) GetMetrics(ctx context.Context) (MetricsData, error) {
 			err,
 		))
 	}
-	metricsData.AverageHiringTime = averageHiringTime
 
 	if len(errors) > 0 {
-		return metricsData, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"failed to get metrics: %v",
 			errors,
 		)
 	}
 
-	return metricsData, nil
+	return &MetricsData{
+		CardInfos:         cardInfo,
+		VacancySummary:    vacancyInfo,
+		AverageHiringTime: averageHiringTime,
+	}, nil
+}
+
+func ParseStringToPgtypeDate(
+	layout string,
+	dateString string,
+) (pgDate pgtype.Date, err error) {
+	t, err := time.Parse(layout, dateString)
+	if err != nil {
+		return pgDate, fmt.Errorf("failed to parse date: %v", err)
+	}
+
+	return pgtype.Date{
+		Time:  t,
+		Valid: true,
+	}, nil
 }
