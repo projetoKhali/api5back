@@ -4,10 +4,14 @@ import (
 	"api5back/ent"
 	"api5back/src/service"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+type SuggestionsResponse struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
 
 func HiringProcessDashboard(
 	engine *gin.Engine,
@@ -24,7 +28,7 @@ func HiringProcessDashboard(
 		suggestions := v1.Group("/suggestions")
 		{
 			suggestions.GET("/recruiter", UserList(dwClient))
-			suggestions.GET("/process", HiringProcessList(dwClient))
+			suggestions.POST("/process", HiringProcessList((dwClient)))
 		}
 	}
 }
@@ -75,7 +79,7 @@ func Dashboard(
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} map[string]interface{}
+// @Success 200 {array} SuggestionsResponse
 // @Router /users/ [get]
 func UserList(
 	dwClient *ent.Client,
@@ -88,11 +92,12 @@ func UserList(
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		var response []map[string]interface{}
+
+		var response []SuggestionsResponse
 		for _, user := range users {
-			response = append(response, map[string]interface{}{
-				"id":   user.ID,
-				"name": user.Name,
+			response = append(response, SuggestionsResponse{
+				Id:   user.ID,
+				Name: user.Name,
 			})
 		}
 
@@ -107,23 +112,21 @@ func UserList(
 // @Tags hiring-process
 // @Accept json
 // @Produce json
-// @Success 200 {array} map[string]interface{}
-// @Router /hiring-process [get]
+// @Success 200 {array} SuggestionsResponse
+// @Router /hiring-process [post]
 func HiringProcessList(
 	dbClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		hiringProcessService := service.NewHiringProcessService(dbClient)
-
-		userIDParams := c.QueryArray("userID")
 		var userIDs []int
 
-		for _, userIDParam := range userIDParams {
-			id, err := strconv.Atoi(userIDParam)
-			if err == nil {
-				userIDs = append(userIDs, id)
-			}
+		// Parse the body for user IDs
+		if err := c.ShouldBindJSON(&userIDs); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
 		}
+
+		hiringProcessService := service.NewHiringProcessService(dbClient)
 
 		processes, err := hiringProcessService.ListHiringProcesses(c.Request.Context(), userIDs)
 		if err != nil {
@@ -131,11 +134,11 @@ func HiringProcessList(
 			return
 		}
 
-		var response []map[string]interface{}
+		var response []SuggestionsResponse
 		for _, process := range processes {
-			response = append(response, map[string]interface{}{
-				"id":    process.ID,
-				"title": process.Title,
+			response = append(response, SuggestionsResponse{
+				Id:   process.ID,
+				Name: process.Title,
 			})
 		}
 
