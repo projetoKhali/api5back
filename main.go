@@ -1,10 +1,11 @@
 package main
 
 import (
-	"api5back/src/database"
-	"api5back/src/server"
 	"fmt"
 	"net/http"
+
+	"api5back/src/database"
+	"api5back/src/server"
 )
 
 func main() {
@@ -25,6 +26,8 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Content-Type", "*/*")
 		if r.Method == "OPTIONS" {
 			return
 		}
