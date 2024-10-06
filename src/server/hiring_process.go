@@ -82,7 +82,7 @@ func UserList(
 	return func(c *gin.Context) {
 		users, err := service.GetUsers(c, dwClient)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -107,7 +107,7 @@ func HiringProcessList(
 
 		// Parse the body for user IDs
 		if err := c.ShouldBindJSON(&userIDs); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -116,7 +116,7 @@ func HiringProcessList(
 			userIDs,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
