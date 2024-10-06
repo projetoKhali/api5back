@@ -5,6 +5,7 @@ import (
 
 	"api5back/ent"
 	"api5back/ent/dimuser"
+	"api5back/src/model"
 )
 
 func GetUsers(
@@ -18,5 +19,14 @@ func GetUsers(
 	if err != nil {
 		return nil, err
 	}
+
+	var response []model.Suggestion
+	for _, user := range users {
+		response = append(response, model.Suggestion{
+			Id:   user.ID,
+			Name: user.Name,
+		})
+	}
+
 	return users, nil
 }

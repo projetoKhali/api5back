@@ -1,17 +1,13 @@
 package server
 
 import (
+	"net/http"
+
 	"api5back/ent"
 	"api5back/src/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-type SuggestionsResponse struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
 
 func HiringProcessDashboard(
 	engine *gin.Engine,
@@ -78,7 +74,7 @@ func Dashboard(
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} SuggestionsResponse
+// @Success 200 {array} model.Suggestion
 // @Router /users/ [get]
 func UserList(
 	dwClient *ent.Client,
@@ -90,15 +86,7 @@ func UserList(
 			return
 		}
 
-		var response []SuggestionsResponse
-		for _, user := range users {
-			response = append(response, SuggestionsResponse{
-				Id:   user.ID,
-				Name: user.Name,
-			})
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, users)
 	}
 }
 
@@ -109,7 +97,7 @@ func UserList(
 // @Tags hiring-process
 // @Accept json
 // @Produce json
-// @Success 200 {array} SuggestionsResponse
+// @Success 200 {array} model.Suggestion
 // @Router /hiring-process [post]
 func HiringProcessList(
 	dbClient *ent.Client,
@@ -132,14 +120,6 @@ func HiringProcessList(
 			return
 		}
 
-		var response []SuggestionsResponse
-		for _, process := range processes {
-			response = append(response, SuggestionsResponse{
-				Id:   process.ID,
-				Name: process.Title,
-			})
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, processes)
 	}
 }

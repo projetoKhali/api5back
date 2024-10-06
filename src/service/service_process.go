@@ -5,6 +5,7 @@ import (
 
 	"api5back/ent"
 	"api5back/ent/dimprocess"
+	"api5back/src/model"
 )
 
 func ListHiringProcesses(
@@ -22,5 +23,14 @@ func ListHiringProcesses(
 	if err != nil {
 		return nil, err
 	}
+
+	var response []model.Suggestion
+	for _, process := range processes {
+		response = append(response, model.Suggestion{
+			Id:   process.ID,
+			Name: process.Title,
+		})
+	}
+
 	return processes, nil
 }
