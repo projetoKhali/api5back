@@ -1,21 +1,17 @@
 package service
 
 import (
+	"context"
+
 	"api5back/ent"
 	"api5back/ent/dimuser"
-	"context"
 )
 
-type UserService struct {
-	dwClient *ent.Client
-}
-
-func NewUserService(dwClient *ent.Client) *UserService {
-	return &UserService{dwClient: dwClient}
-}
-
-func (s *UserService) GetUsers(ctx context.Context) ([]*ent.DimUser, error) {
-	users, err := s.dwClient.DimUser.
+func GetUsers(
+	ctx context.Context,
+	client *ent.Client,
+) ([]*ent.DimUser, error) {
+	users, err := client.DimUser.
 		Query().
 		Select(dimuser.FieldID, dimuser.FieldName).
 		All(ctx)

@@ -14,10 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type MetricsService struct {
-	dbClient *ent.Client
-}
-
 type MetricsData struct {
 	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
 	CardInfos         processing.CardInfos                 `json:"cards"`
@@ -30,16 +26,14 @@ type GetMetricsFilter struct {
 	StartDate         string `json:"startDate"`
 	EndDate           string `json:"endDate"`
 }
-
-func NewMetricsService(dbclient *ent.Client) *MetricsService {
-	return &MetricsService{dbClient: dbclient}
 }
 
-func (s *MetricsService) GetMetrics(
+func GetMetrics(
 	ctx context.Context,
-	filter GetMetricsFilter,
+	client *ent.Client,
+	filter DashboardMetricsFilter,
 ) (*MetricsData, error) {
-	query := s.dbClient.
+	query := client.
 		FactHiringProcess.
 		Query().
 		WithDimVacancy().

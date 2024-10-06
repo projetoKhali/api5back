@@ -20,15 +20,15 @@ func HiringProcessDashboard(
 ) {
 	v1 := engine.Group("/api/v1")
 	{
-		eg := v1.Group("/hiring-process")
+		hiringProcess := v1.Group("/hiring-process")
 		{
-			eg.GET("/dashboard", Dashboard(dbClient, dwClient))
+			hiringProcess.GET("/dashboard", Dashboard(dwClient))
 		}
 
 		suggestions := v1.Group("/suggestions")
 		{
 			suggestions.GET("/recruiter", UserList(dwClient))
-			suggestions.POST("/process", HiringProcessList((dwClient)))
+			suggestions.POST("/process", HiringProcessList(dwClient))
 		}
 	}
 }
@@ -43,7 +43,6 @@ func HiringProcessDashboard(
 // @Success 200 {string} Dashboard
 // @Router /hiring-process/dashboard [get]
 func Dashboard(
-	dbClient *ent.Client,
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -54,8 +53,8 @@ func Dashboard(
 		startDate := c.Query("startDate")
 		endDate := c.Query("endDate")
 
-		metricsData, err := MetricsService.GetMetrics(
-			c,
+		metricsData, err := service.GetMetrics(
+			c, dwClient,
 			service.GetMetricsFilter{
 				HiringProcessName: hiringProcessName,
 				VacancyName:       vacancyName,
@@ -85,9 +84,7 @@ func UserList(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		userService := service.NewUserService(dwClient)
-
-		users, err := userService.GetUsers(c.Request.Context())
+		users, err := service.GetUsers(c, dwClient)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -126,9 +123,10 @@ func HiringProcessList(
 			return
 		}
 
-		hiringProcessService := service.NewHiringProcessService(dbClient)
-
-		processes, err := hiringProcessService.ListHiringProcesses(c.Request.Context(), userIDs)
+		processes, err := service.ListHiringProcesses(
+			c, dbClient,
+			userIDs,
+		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
