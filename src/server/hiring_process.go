@@ -18,7 +18,7 @@ func HiringProcessDashboard(
 	{
 		hiringProcess := v1.Group("/hiring-process")
 		{
-			hiringProcess.GET("/dashboard", Dashboard(dwClient))
+			hiringProcess.POST("/dashboard", Dashboard(dwClient))
 		}
 
 		suggestions := v1.Group("/suggestions")
@@ -33,30 +33,26 @@ func HiringProcessDashboard(
 // @Summary dashboard
 // @Schemes
 // @Description show dashboard
-// @Tags hiring-process
+// @Tags dashboard
 // @Accept json
+// @Param body body service.DashboardMetricsFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {string} Dashboard
-// @Router /hiring-process/dashboard [get]
+// @Router /hiring-process/dashboard [post]
 func Dashboard(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		MetricsService := service.NewMetricsService(dwClient)
+		c.Header("Content-Type", "application/json")
 
-		hiringProcessName := c.Query("hiringProcess")
-		vacancyName := c.Query("vacancy")
-		startDate := c.Query("startDate")
-		endDate := c.Query("endDate")
+		var dashboardMetricsFilter service.DashboardMetricsFilter
+		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
 
 		metricsData, err := service.GetMetrics(
-			c, dwClient,
-			service.GetMetricsFilter{
-				HiringProcessName: hiringProcessName,
-				VacancyName:       vacancyName,
-				StartDate:         startDate,
-				EndDate:           endDate,
-			},
+			c, dwClient, dashboardMetricsFilter,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
@@ -76,9 +72,7 @@ func Dashboard(
 // @Produce json
 // @Success 200 {array} model.Suggestion
 // @Router /users/ [get]
-func UserList(
-	dwClient *ent.Client,
-) func(c *gin.Context) {
+func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		users, err := service.GetUsers(c, dwClient)
 		if err != nil {

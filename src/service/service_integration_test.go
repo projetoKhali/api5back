@@ -118,7 +118,7 @@ func TestDatabaseOperations(t *testing.T) {
 		metricsService := NewMetricsService(intEnv.Client)
 		metricsData, err := metricsService.GetMetrics(
 			ctx,
-			GetMetricsFilter{
+			DashboardMetricsFilter{
 				HiringProcessName: "",
 				VacancyName:       "",
 				StartDate:         "",

@@ -20,12 +20,14 @@ type MetricsData struct {
 	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
 }
 
-type GetMetricsFilter struct {
-	HiringProcessName string `json:"hiringProcess"`
-	VacancyName       string `json:"vacancy"`
-	StartDate         string `json:"startDate"`
-	EndDate           string `json:"endDate"`
-}
+type DashboardMetricsFilter struct {
+	Recruiters      []int `json:"recruiters"`
+	HiringProcesses []int `json:"hiringProcesses"`
+	Vacancies       []int `json:"vacancies"`
+	DateRange       *struct {
+		StartDate string `json:"startDate"`
+		EndDate   string `json:"endDate"`
+	} `json:"dateRange"`
 }
 
 func GetMetrics(
@@ -40,66 +42,64 @@ func GetMetrics(
 		WithDimProcess().
 		WithHiringProcessCandidates()
 
-	if filter.HiringProcessName != "" {
+	if len(filter.HiringProcesses) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimProcessWith(
-				dimprocess.TitleContains(
-					filter.HiringProcessName,
-				),
+				dimprocess.IDIn(filter.HiringProcesses...),
 			),
 		)
 	}
 
-	if filter.VacancyName != "" {
+	if len(filter.Vacancies) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.TitleContains(
-					filter.VacancyName,
-				),
+				dimvacancy.IDIn(filter.Vacancies...),
 			),
 		)
 	}
 
-	if filter.StartDate != "" {
-		hiringProcessStartDate, err := ParseStringToPgtypeDate(
-			"2006-01-02",
-			filter.StartDate,
-		)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"could not parse `StartDate`: %w",
-				err,
+	if filter.DateRange != nil {
+		if filter.DateRange.StartDate != "" {
+			hiringProcessStartDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				filter.DateRange.StartDate,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `StartDate`: %w",
+					err,
+				)
+			}
+
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.ClosingDateGTE(
+						&hiringProcessStartDate,
+					),
+				),
 			)
 		}
 
-		query = query.Where(
-			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.ClosingDateGTE(
-					&hiringProcessStartDate,
-				),
-			),
-		)
-	}
+		if filter.DateRange.EndDate != "" {
+			hiringProcessEndDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				filter.DateRange.EndDate,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `EndDate`: %w",
+					err,
+				)
+			}
 
-	if filter.EndDate != "" {
-		hiringProcessEndDate, err := ParseStringToPgtypeDate(
-			"2006-01-02",
-			filter.EndDate,
-		)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"could not parse `EndDate`: %w",
-				err,
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.ClosingDateLTE(
+						&hiringProcessEndDate,
+					),
+				),
 			)
 		}
-
-		query = query.Where(
-			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.ClosingDateLTE(
-					&hiringProcessEndDate,
-				),
-			),
-		)
 	}
 
 	hiringProcess, err := query.All(ctx)
