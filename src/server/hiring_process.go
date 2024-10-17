@@ -29,6 +29,7 @@ func HiringProcessDashboard(
 		{
 			suggestions.GET("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
+			suggestions.POST("/vacancies", VacancyList(dwClient))
 		}
 	}
 }
@@ -139,6 +140,45 @@ func HiringProcessList(
 			response = append(response, SuggestionsResponse{
 				Id:   process.ID,
 				Name: process.Title,
+			})
+		}
+
+		c.JSON(http.StatusOK, response)
+	}
+}
+
+// HiringProcessList godoc
+// @Summary List hiring processes
+// @Schemes
+// @Description Return a list of hiring processes with id and title
+// @Tags hiring-process
+// @Accept json
+// @Produce json
+// @Success 200 {array} SuggestionsResponse
+// @Router /suggestions/vacancies [post]
+func VacancyList(
+	dwClient *ent.Client,
+) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var processesIds []int
+		if err := c.ShouldBindJSON(&processesIds); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		vacancyService := service.NewVacancyService(dwClient)
+
+		vacancies, err := vacancyService.GetVacancySuggestions(c.Request.Context(), processesIds)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var response []SuggestionsResponse
+		for _, vacancy := range vacancies {
+			response = append(response, SuggestionsResponse{
+				Id:   vacancy.ID,
+				Name: vacancy.Title,
 			})
 		}
 
