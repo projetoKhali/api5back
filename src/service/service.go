@@ -31,6 +31,20 @@ type GetMetricsFilter struct {
 	EndDate           string `json:"endDate"`
 }
 
+type DateRange struct {
+	StartDate time.Time `json:"startDate" form:"startDate" time_format:"2006-01-02"`
+	EndDate   time.Time `json:"endDate" form:"endDate" time_format:"2006-01-02"`
+}
+
+type VacancyTableFilter struct {
+	Recruiters    []int     `json:"recruiters"`
+	Processes     []int     `json:"processes"`
+	Vacancies     []int     `json:"vacancies"`
+	DateRange     DateRange `json:"dataRange"`
+	ProcessStatus string    `json:"processStatus"`
+	VacancyStatus string    `json:"vacancyStatus"`
+}
+
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
 	return &MetricsService{dbClient: dbclient}
 }
@@ -134,7 +148,7 @@ func (s *MetricsService) GetMetrics(
 		))
 	}
 
-	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
+	averageHiringTime, err := processing.GenerateAverageHiringTimePerMonth(hiringProcess)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
@@ -169,4 +183,46 @@ func ParseStringToPgtypeDate(
 		Time:  t,
 		Valid: true,
 	}, nil
+}
+
+type VacancyServiceTable struct {
+	dwClient *ent.Client
+}
+
+func NewVacancyServiceTable(client *ent.Client) *VacancyServiceTable {
+	return &VacancyServiceTable{dwClient: client}
+}
+
+func (vs *VacancyServiceTable) GetVacancyTable(
+	ctx context.Context,
+	filter VacancyTableFilter,
+) ([]*ent.FactHiringProcess, error) {
+	query := vs.dwClient.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
+
+	if len(filter.Recruiters) > 0 {
+		query = query.Where(
+			facthiringprocess.DimUserIdIn(filter.Recruiters...),
+		)
+	}
+
+	if len(filter.Processes) > 0 {
+		query = query.Where(
+			facthiringprocess.DimProcessIdIn(filter.Processes...),
+		)
+	}
+
+	if len(filter.Vacancies) > 0 {
+		query = query.Where(
+			facthiringprocess.DimVacancyIdIn(filter.Vacancies...),
+		)
+	}
+
+	vacancies, err := query.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Vacancies:", vacancies)
+
+	return vacancies, nil
 }
