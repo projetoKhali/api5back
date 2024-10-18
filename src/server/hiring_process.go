@@ -22,7 +22,7 @@ func HiringProcessDashboard(
 	{
 		eg := v1.Group("/hiring-process")
 		{
-			eg.GET("/dashboard", Dashboard(dbClient, dwClient))
+			eg.POST("/dashboard", Dashboard(dbClient, dwClient))
 		}
 
 		suggestions := v1.Group("/suggestions")
@@ -50,18 +50,21 @@ func Dashboard(
 	return func(c *gin.Context) {
 		MetricsService := service.NewMetricsService(dwClient)
 
-		hiringProcessName := c.Query("hiringProcess")
-		vacancyName := c.Query("vacancy")
-		startDate := c.Query("startDate")
-		endDate := c.Query("endDate")
+		var requestData service.GetMetricsFilter
+
+		if err := c.ShouldBindJSON(&requestData); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
 		metricsData, err := MetricsService.GetMetrics(
 			c,
 			service.GetMetricsFilter{
-				HiringProcessName: hiringProcessName,
-				VacancyName:       vacancyName,
-				StartDate:         startDate,
-				EndDate:           endDate,
+				HiringProcessIds:      requestData.HiringProcessIds,
+				VacancyIds:            requestData.VacancyIds,
+				DateRange:             requestData.DateRange,
+				HiringProcessStatuses: requestData.HiringProcessStatuses,
+				VacancyStatuses:       requestData.VacancyStatuses,
 			},
 		)
 		if err != nil {

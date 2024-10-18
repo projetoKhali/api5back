@@ -25,10 +25,16 @@ type MetricsData struct {
 }
 
 type GetMetricsFilter struct {
-	HiringProcessName string `json:"hiringProcess"`
-	VacancyName       string `json:"vacancy"`
-	StartDate         string `json:"startDate"`
-	EndDate           string `json:"endDate"`
+	HiringProcessIds      []int     `json:"hiringProcess"`
+	VacancyIds            []int     `json:"vacancy"`
+	HiringProcessStatuses []int     `json:"hiringProcessStatuses"`
+	VacancyStatuses       []int     `json:"vacancyStatuses"`
+	DateRange             dateRange `json:"dateRange"`
+}
+
+type dateRange struct {
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
 }
 
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
@@ -46,30 +52,42 @@ func (s *MetricsService) GetMetrics(
 		WithDimProcess().
 		WithHiringProcessCandidates()
 
-	if filter.HiringProcessName != "" {
+	if len(filter.HiringProcessIds) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimProcessWith(
-				dimprocess.TitleContains(
-					filter.HiringProcessName,
-				),
+				dimprocess.IDIn(filter.HiringProcessIds...),
 			),
 		)
 	}
 
-	if filter.VacancyName != "" {
+	if len(filter.VacancyIds) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.TitleContains(
-					filter.VacancyName,
-				),
+				dimvacancy.IDIn(filter.VacancyIds...),
 			),
 		)
 	}
 
-	if filter.StartDate != "" {
+	if len(filter.VacancyStatuses) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.StatusIn(filter.VacancyStatuses...),
+			),
+		)
+	}
+
+	if len(filter.HiringProcessStatuses) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimProcessWith(
+				dimprocess.StatusIn(filter.HiringProcessStatuses...),
+			),
+		)
+	}
+
+	if filter.DateRange.StartDate != "" {
 		hiringProcessStartDate, err := ParseStringToPgtypeDate(
 			"2006-01-02",
-			filter.StartDate,
+			filter.DateRange.StartDate,
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -87,10 +105,10 @@ func (s *MetricsService) GetMetrics(
 		)
 	}
 
-	if filter.EndDate != "" {
+	if filter.DateRange.EndDate != "" {
 		hiringProcessEndDate, err := ParseStringToPgtypeDate(
 			"2006-01-02",
-			filter.EndDate,
+			filter.DateRange.EndDate,
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
