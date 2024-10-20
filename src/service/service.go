@@ -31,6 +31,20 @@ type GetMetricsFilter struct {
 	EndDate           string `json:"endDate"`
 }
 
+type DateRange struct {
+	StartDate string `json:"startDate" form:"startDate" time_format:"2024-10-01T00:00:00Z"`
+	EndDate   string `json:"endDate" form:"endDate" time_format:"2024-10-01T00:00:00Z"`
+}
+
+type VacancyTableFilter struct {
+	Recruiters    []int      `json:"recruiters"`
+	Processes     []int      `json:"processes"`
+	Vacancies     []int      `json:"vacancies"`
+	DateRange     *DateRange `json:"dateRange"`
+	ProcessStatus []int      `json:"processStatus"`
+	VacancyStatus []int      `json:"vacancyStatus"`
+}
+
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
 	return &MetricsService{dbClient: dbclient}
 }
@@ -101,7 +115,7 @@ func (s *MetricsService) GetMetrics(
 
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.ClosingDateLTE(
+				dimvacancy.OpeningDateLTE(
 					&hiringProcessEndDate,
 				),
 			),
@@ -134,7 +148,7 @@ func (s *MetricsService) GetMetrics(
 		))
 	}
 
-	averageHiringTime, err := processing.GenerateAverageHiringTime(hiringProcess)
+	averageHiringTime, err := processing.GenerateAverageHiringTimePerMonth(hiringProcess)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
@@ -169,4 +183,110 @@ func ParseStringToPgtypeDate(
 		Time:  t,
 		Valid: true,
 	}, nil
+}
+
+type VacancyServiceTable struct {
+	dwClient *ent.Client
+}
+
+func NewVacancyServiceTable(client *ent.Client) *VacancyServiceTable {
+	return &VacancyServiceTable{dwClient: client}
+}
+
+func (vs *VacancyServiceTable) GetVacancyTable(
+	ctx context.Context,
+	filter VacancyTableFilter,
+) ([]*ent.FactHiringProcess, error) {
+	query := vs.dwClient.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
+
+	if len(filter.Recruiters) > 0 {
+		query = query.Where(
+			facthiringprocess.DimUserIdIn(filter.Recruiters...),
+		)
+	}
+
+	if len(filter.Processes) > 0 {
+		query = query.Where(
+			facthiringprocess.DimProcessIdIn(filter.Processes...),
+		)
+	}
+
+	if len(filter.Vacancies) > 0 {
+		query = query.Where(
+			facthiringprocess.DimVacancyIdIn(filter.Vacancies...),
+		)
+	}
+
+	if filter.DateRange != nil {
+
+		if filter.DateRange.StartDate != "" {
+
+			startDateString := filter.DateRange.StartDate
+			hiringProcessStartDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				startDateString,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `StartDate`: %w",
+					err,
+				)
+			}
+
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.ClosingDateGTE(
+						&hiringProcessStartDate,
+					),
+				),
+			)
+		}
+
+		if filter.DateRange.EndDate != "" {
+
+			endDateString := filter.DateRange.EndDate
+			hiringProcessEndDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				endDateString,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `EndDate`: %w",
+					err,
+				)
+			}
+
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.OpeningDateLTE(
+						&hiringProcessEndDate,
+					),
+				),
+			)
+		}
+
+	}
+
+	if len(filter.ProcessStatus) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimProcessWith(
+				dimprocess.StatusIn(filter.ProcessStatus...),
+			),
+		)
+	}
+
+	if len(filter.VacancyStatus) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.StatusIn(filter.VacancyStatus...),
+			),
+		)
+	}
+
+	vacancies, err := query.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return vacancies, nil
 }

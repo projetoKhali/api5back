@@ -137,3 +137,67 @@ func TestDatabaseOperations(t *testing.T) {
 		t.Fatalf("GetMetrics test failed")
 	}
 }
+
+func TestTableDashboard(t *testing.T) {
+	ctx := context.Background()
+	var intEnv *database.IntegrationEnvironment = nil
+
+	if testResult := t.Run("Setup database connection", func(t *testing.T) {
+		intEnv = database.DefaultIntegrationEnvironment(ctx).
+			WithSeeds(seeds.DataWarehouse)
+
+		require.NotNil(t, intEnv)
+		require.NoError(t, intEnv.Error)
+		require.NotNil(t, intEnv.Client)
+	}); !testResult {
+		t.Fatalf("Setup test failed")
+	}
+
+	if testResult := t.Run("Vacancy Table returns all FactHiringProcess", func(t *testing.T) {
+		vacancyServiceTable := NewVacancyServiceTable(intEnv.Client)
+		vacancies, err := vacancyServiceTable.GetVacancyTable(
+			ctx,
+			VacancyTableFilter{
+				Recruiters:    []int{},
+				Processes:     []int{},
+				Vacancies:     []int{},
+				DateRange:     nil,
+				ProcessStatus: []int{},
+				VacancyStatus: []int{},
+			},
+		)
+
+		require.NoError(t, err)
+		require.NotNil(t, vacancies)
+		require.Equal(t, 5, len(vacancies))
+
+	}); !testResult {
+		t.Fatalf("GetMetrics test failed")
+	}
+
+	if testResult := t.Run("Vacancy Table returns correct number of FactHiringProcess", func(t *testing.T) {
+		vacancyServiceTable := NewVacancyServiceTable(intEnv.Client)
+		vacancies, err := vacancyServiceTable.GetVacancyTable(
+			ctx,
+			VacancyTableFilter{
+				Recruiters: []int{},
+				Processes:  []int{},
+				Vacancies:  []int{},
+				DateRange: &DateRange{
+					StartDate: "2024-07-16",
+					EndDate:   "2024-08-12",
+				},
+				ProcessStatus: []int{},
+				VacancyStatus: []int{},
+			},
+		)
+
+		require.NoError(t, err)
+		require.NotNil(t, vacancies)
+		require.Equal(t, 1, len(vacancies))
+
+	}); !testResult {
+		t.Fatalf("GetVacancyTable test failed")
+	}
+
+}
