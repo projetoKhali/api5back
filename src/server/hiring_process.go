@@ -210,8 +210,8 @@ func VacancyList(
 		var response []SuggestionsResponse
 		for _, vacancy := range vacancies {
 			response = append(response, SuggestionsResponse{
-				Id:   vacancy.Edges.DimVacancy.ID,
-				Name: vacancy.Edges.DimVacancy.Title,
+				Id:   vacancy.ID,
+				Name: vacancy.Title,
 			})
 		}
 

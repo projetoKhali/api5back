@@ -14,7 +14,12 @@ func NewVacancyService(client *ent.Client) *VacancyService {
 	return &VacancyService{dbClient: client}
 }
 
-func (vs *VacancyService) GetVacancySuggestions(ctx context.Context, processesIds []int) ([]*ent.FactHiringProcess, error) {
+type UniqueVacancy struct {
+	ID    int
+	Title string
+}
+
+func (vs *VacancyService) GetVacancySuggestions(ctx context.Context, processesIds []int) ([]UniqueVacancy, error) {
 	query := vs.dbClient.FactHiringProcess.Query()
 
 	if len(processesIds) > 0 {
@@ -28,5 +33,23 @@ func (vs *VacancyService) GetVacancySuggestions(ctx context.Context, processesId
 		return nil, err
 	}
 
-	return vacancies, nil
+	uniqueVacancies := make(map[int]UniqueVacancy)
+
+	for _, fact := range vacancies {
+		if fact.Edges.DimVacancy != nil {
+			vacancy := fact.Edges.DimVacancy
+			uniqueVacancies[vacancy.ID] = UniqueVacancy{
+				ID:    vacancy.ID,
+				Title: vacancy.Title,
+			}
+		}
+	}
+
+	// Convert the map to a slice
+	result := make([]UniqueVacancy, 0, len(uniqueVacancies))
+	for _, v := range uniqueVacancies {
+		result = append(result, v)
+	}
+
+	return result, nil
 }
