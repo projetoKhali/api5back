@@ -47,6 +47,7 @@ func Dashboard(
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 
+		// TODO: change to pointer
 		var dashboardMetricsFilter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
@@ -70,6 +71,7 @@ func TableData(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
 		var userIDs []int
 
 		// Parse the body for user IDs
@@ -91,6 +93,7 @@ func TableData(
 // @Router /suggestions/recruiter/ [get]
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
 		users, err := service.GetUsers(c, dwClient)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
@@ -115,7 +118,8 @@ func HiringProcessList(
 	dbClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var userIDs []int
+		c.Header("Content-Type", "application/json")
+		var userIDs *[]int
 
 		// Parse the body for user IDs
 		if err := c.ShouldBindJSON(&userIDs); err != nil {
@@ -142,7 +146,7 @@ func HiringProcessList(
 // @Description Return a list of hiring processes with id and title
 // @Tags suggestions
 // @Accept json
-// @Param body body []int true "User IDs"
+// @Param body body []int false "User IDs"
 // @Produce json
 // @Success 200 {array} model.Suggestion
 // @Router /suggestions/vacancies [post]
@@ -150,7 +154,8 @@ func VacancyList(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var processesIds []int
+		c.Header("Content-Type", "application/json")
+		var processesIds *[]int
 		if err := c.ShouldBindJSON(&processesIds); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 			return
@@ -183,6 +188,7 @@ func VacancyTable(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
 		var filter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&filter); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
