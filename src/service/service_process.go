@@ -11,12 +11,12 @@ import (
 func ListHiringProcesses(
 	ctx context.Context,
 	client *ent.Client,
-	userIDs []int,
+	userIDs *[]int,
 ) ([]model.Suggestion, error) {
 	query := client.DimProcess.Query()
 
-	if len(userIDs) > 0 {
-		query = query.Where(dimprocess.DimUsrIdIn(userIDs...))
+	if userIDs != nil {
+		query = query.Where(dimprocess.DimUsrIdIn(*userIDs...))
 	}
 
 	processes, err := query.All(ctx)

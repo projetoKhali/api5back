@@ -11,12 +11,12 @@ import (
 func GetVacancySuggestions(
 	ctx context.Context,
 	client *ent.Client,
-	processesIds []int,
+	processesIds *[]int,
 ) ([]model.Suggestion, error) {
 	query := client.FactHiringProcess.Query()
 
-	if len(processesIds) > 0 {
-		query = query.Where(facthiringprocess.DimProcessIdIn(processesIds...))
+	if processesIds != nil {
+		query = query.Where(facthiringprocess.DimProcessIdIn(*processesIds...))
 		query = query.WithDimVacancy()
 
 	}
