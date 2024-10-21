@@ -9,6 +9,7 @@ import (
 	"api5back/ent/dimprocess"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
+	"api5back/src/model"
 	"api5back/src/processing"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -28,28 +29,11 @@ type FactHiringProcessFilter struct {
 	VacancyStatus []int      `json:"vacancyStatus"`
 }
 
-type MetricsData struct {
-	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
-	CardInfos         processing.CardInfos                 `json:"cards"`
-	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
-}
-
-type TableData struct {
-	Title             string   `json:"title"`
-	NumPositions      int      `json:"numPositions"`
-	NumCandidates     int      `json:"numCandidates"`
-	CompetitionRate   *float32 `json:"competitionRate"`
-	NumInterviewed    int      `json:"numInterviewed"`
-	NumHired          int      `json:"numHired"`
-	AverageHiringTime *float32 `json:"averageHiringTime"`
-	NumFeedback       int      `json:"numFeedback"`
-}
-
 func GetMetrics(
 	ctx context.Context,
 	client *ent.Client,
 	filter FactHiringProcessFilter,
-) (*MetricsData, error) {
+) (*model.MetricsData, error) {
 	query := client.
 		FactHiringProcess.
 		Query().
@@ -158,7 +142,7 @@ func GetMetrics(
 		)
 	}
 
-	return &MetricsData{
+	return &model.MetricsData{
 		CardInfos:         cardInfo,
 		VacancySummary:    vacancyInfo,
 		AverageHiringTime: averageHiringTime,
@@ -192,7 +176,7 @@ func GetVacancyTable(
 	ctx context.Context,
 	client *ent.Client,
 	filter FactHiringProcessFilter,
-) ([]TableData, error) {
+) ([]model.TableData, error) {
 	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
 
 	if len(filter.Recruiters) > 0 {
@@ -284,7 +268,7 @@ func GetVacancyTable(
 		return nil, err
 	}
 
-	var tableDatas []TableData
+	var tableDatas []model.TableData
 	for _, vacancy := range vacancies {
 
 		numPositions := vacancy.Edges.DimVacancy.NumPositions
@@ -305,7 +289,7 @@ func GetVacancyTable(
 		}
 
 		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
-		tableDatas = append(tableDatas, TableData{
+		tableDatas = append(tableDatas, model.TableData{
 			Title:             vacancy.Edges.DimVacancy.Title,
 			NumPositions:      numPositions,
 			NumCandidates:     vacancy.MetTotalCandidatesApplied,
