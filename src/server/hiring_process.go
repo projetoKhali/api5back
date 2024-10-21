@@ -5,16 +5,12 @@ import (
 	"net/http"
 
 	"api5back/ent"
+	"api5back/src/model"
 	"api5back/src/processing"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-type SuggestionsResponse struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
 
 type TableResponse struct {
 	Title             string   `json:"title"`
@@ -185,9 +181,9 @@ func VacancyList(
 			return
 		}
 
-		var response []SuggestionsResponse
+		var response []model.Suggestion
 		for _, vacancy := range vacancies {
-			response = append(response, SuggestionsResponse{
+			response = append(response, model.Suggestion{
 				Id:   vacancy.ID,
 				Name: vacancy.Title,
 			})
