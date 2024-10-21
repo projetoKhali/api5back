@@ -23,8 +23,8 @@ func GetUsers(
 	var response []model.Suggestion
 	for _, user := range users {
 		response = append(response, model.Suggestion{
-			Id:   user.ID,
-			Name: user.Name,
+			Id:    user.ID,
+			Title: user.Name,
 		})
 	}
 

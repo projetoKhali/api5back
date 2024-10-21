@@ -1,6 +1,6 @@
 package model
 
 type Suggestion struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id    int    `json:"id"`
+	Title string `json:"title"`
 }
