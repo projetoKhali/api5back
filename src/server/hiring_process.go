@@ -40,9 +40,9 @@ func HiringProcessDashboard(
 // @Summary dashboard
 // @Schemes
 // @Description show dashboard
-// @Tags dashboard
+// @Tags hiring-process
 // @Accept json
-// @Param body body service.DashboardMetricsFilter true "Metrics filter"
+// @Param body body service.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {string} Dashboard
 // @Router /hiring-process/dashboard [post]
@@ -89,11 +89,11 @@ func TableData(
 // @Summary List users
 // @Schemes
 // @Description Return a list of users with id and name
-// @Tags users
+// @Tags suggestions
 // @Accept json
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /users/ [get]
+// @Router /suggestions/recruiter/ [get]
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		users, err := service.GetUsers(c, dwClient)
@@ -110,11 +110,12 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 // @Summary List hiring processes
 // @Schemes
 // @Description Return a list of hiring processes with id and title
-// @Tags hiring-process
+// @Tags suggestions
 // @Accept json
+// @Param body body []int true "User IDs"
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /hiring-process [post]
+// @Router /suggestions/process [post]
 func HiringProcessList(
 	dbClient *ent.Client,
 ) func(c *gin.Context) {
@@ -144,10 +145,11 @@ func HiringProcessList(
 // @Summary List hiring processes
 // @Schemes
 // @Description Return a list of hiring processes with id and title
-// @Tags hiring-process
+// @Tags suggestions
 // @Accept json
+// @Param body body []int true "User IDs"
 // @Produce json
-// @Success 200 {array} SuggestionsResponse
+// @Success 200 {array} model.Suggestion
 // @Router /suggestions/vacancies [post]
 func VacancyList(
 	dwClient *ent.Client,
@@ -183,12 +185,13 @@ func VacancyList(
 // HiringProcessList godoc
 // @Summary List hiring processes
 // @Schemes
-// @Description Return a list of hiring processes with id and title
+// @Description Return a list of vacancies with summarized information
 // @Tags hiring-process
 // @Accept json
+// @Param body body service.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
-// @Success 200 {array} SuggestionsResponse
-// @Router /suggestions/vacancies [post]
+// @Success 200 {array} model.Suggestion
+// @Router /table/dashboard [post]
 func VacancyTable(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
