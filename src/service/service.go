@@ -7,6 +7,7 @@ import (
 
 	"api5back/ent"
 	"api5back/ent/dimprocess"
+	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
@@ -53,6 +54,14 @@ func GetMetrics(
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
 				dimvacancy.IDIn(filter.Vacancies...),
+			),
+		)
+	}
+
+	if len(filter.Recruiters) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimUserWith(
+				dimuser.IDIn(filter.Recruiters...),
 			),
 		)
 	}

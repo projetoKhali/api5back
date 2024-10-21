@@ -13,12 +13,11 @@ func GetVacancySuggestions(
 	client *ent.Client,
 	processesIds *[]int,
 ) ([]model.Suggestion, error) {
-	query := client.FactHiringProcess.Query()
+	query := client.FactHiringProcess.Query().WithDimVacancy() // Com WithDimVacancy sempre incluído
 
-	if processesIds != nil {
+	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
+	if processesIds != nil && len(*processesIds) > 0 {
 		query = query.Where(facthiringprocess.DimProcessIdIn(*processesIds...))
-		query = query.WithDimVacancy()
-
 	}
 
 	vacancies, err := query.All(ctx)
@@ -38,7 +37,7 @@ func GetVacancySuggestions(
 		}
 	}
 
-	// Convert the map to a slice
+	// Convertendo o map para slice
 	result := make([]model.Suggestion, 0, len(uniqueVacancies))
 	for _, v := range uniqueVacancies {
 		result = append(result, v)

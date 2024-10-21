@@ -15,7 +15,8 @@ func ListHiringProcesses(
 ) ([]model.Suggestion, error) {
 	query := client.DimProcess.Query()
 
-	if userIDs != nil {
+	// Verificar se o array de userIDs não é nil e se tem elementos
+	if userIDs != nil && len(*userIDs) > 0 {
 		query = query.Where(dimprocess.DimUsrIdIn(*userIDs...))
 	}
 
