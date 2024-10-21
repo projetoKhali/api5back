@@ -5,18 +5,14 @@ import (
 
 	"api5back/ent"
 	"api5back/ent/facthiringprocess"
+	"api5back/src/model"
 )
-
-type UniqueVacancy struct {
-	ID    int
-	Title string
-}
 
 func GetVacancySuggestions(
 	ctx context.Context,
 	client *ent.Client,
 	processesIds []int,
-) ([]UniqueVacancy, error) {
+) ([]model.Suggestion, error) {
 	query := client.FactHiringProcess.Query()
 
 	if len(processesIds) > 0 {
@@ -30,20 +26,20 @@ func GetVacancySuggestions(
 		return nil, err
 	}
 
-	uniqueVacancies := make(map[int]UniqueVacancy)
+	uniqueVacancies := make(map[int]model.Suggestion)
 
 	for _, fact := range vacancies {
 		if fact.Edges.DimVacancy != nil {
 			vacancy := fact.Edges.DimVacancy
-			uniqueVacancies[vacancy.ID] = UniqueVacancy{
-				ID:    vacancy.ID,
-				Title: vacancy.Title,
+			uniqueVacancies[vacancy.ID] = model.Suggestion{
+				Id:   vacancy.ID,
+				Name: vacancy.Title,
 			}
 		}
 	}
 
 	// Convert the map to a slice
-	result := make([]UniqueVacancy, 0, len(uniqueVacancies))
+	result := make([]model.Suggestion, 0, len(uniqueVacancies))
 	for _, v := range uniqueVacancies {
 		result = append(result, v)
 	}

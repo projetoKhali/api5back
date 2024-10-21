@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"api5back/ent"
-	"api5back/src/model"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
@@ -166,15 +165,7 @@ func VacancyList(
 			return
 		}
 
-		var response []model.Suggestion
-		for _, vacancy := range vacancies {
-			response = append(response, model.Suggestion{
-				Id:   vacancy.ID,
-				Name: vacancy.Title,
-			})
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, vacancies)
 	}
 }
 

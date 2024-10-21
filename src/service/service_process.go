@@ -12,7 +12,7 @@ func ListHiringProcesses(
 	ctx context.Context,
 	client *ent.Client,
 	userIDs []int,
-) ([]*ent.DimProcess, error) {
+) ([]model.Suggestion, error) {
 	query := client.DimProcess.Query()
 
 	if len(userIDs) > 0 {
@@ -32,5 +32,5 @@ func ListHiringProcesses(
 		})
 	}
 
-	return processes, nil
+	return response, nil
 }

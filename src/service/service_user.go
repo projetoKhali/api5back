@@ -11,7 +11,7 @@ import (
 func GetUsers(
 	ctx context.Context,
 	client *ent.Client,
-) ([]*ent.DimUser, error) {
+) ([]model.Suggestion, error) {
 	users, err := client.DimUser.
 		Query().
 		Select(dimuser.FieldID, dimuser.FieldName).
@@ -28,5 +28,5 @@ func GetUsers(
 		})
 	}
 
-	return users, nil
+	return response, nil
 }
