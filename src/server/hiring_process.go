@@ -26,7 +26,7 @@ func HiringProcessDashboard(
 		{
 			suggestions.GET("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
-			suggestions.POST("/vacancies", VacancyList(dwClient))
+			suggestions.POST("/vacancy", VacancyList(dwClient))
 		}
 	}
 }
