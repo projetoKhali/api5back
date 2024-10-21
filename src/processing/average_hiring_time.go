@@ -28,7 +28,7 @@ type Month struct {
 	HiredCandidates     float64
 }
 
-func GenerateAverageHiringTime(
+func GenerateAverageHiringTimePerMonth(
 	data []*ent.FactHiringProcess,
 ) (AverageHiringTimePerMonth, error) {
 	monthsValues := [12]Month{}
@@ -74,4 +74,35 @@ func GenerateAverageHiringTime(
 	}
 
 	return result, nil
+}
+
+func GenerateAverageHiringTimePerFactHiringProcess(
+	fact_hiring_process *ent.FactHiringProcess,
+) (float32, error) {
+
+	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
+	if err != nil {
+		return 0, fmt.Errorf(
+			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+			err,
+		)
+	}
+
+	hiredCandidates := 0.0
+	days := 0.0
+
+	for _, candidate := range candidates {
+		if candidate.Status == property.HiringProcessCandidateStatusHired {
+			interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
+			intervalDays := interval.Hours() / 24
+			hiredCandidates += 1
+			days += intervalDays
+
+		}
+	}
+
+	result := float32(days / hiredCandidates)
+
+	return result, nil
+
 }
