@@ -48,6 +48,11 @@ seeds:
 	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS))
 	@:
 
+sy: seeds-y
+seeds-y:
+	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS)) -y
+	@:
+
 db-up: database-up
 database-up:
 	docker-compose up -d
