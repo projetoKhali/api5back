@@ -20,6 +20,7 @@ func HiringProcessDashboard(
 		hiringProcess := v1.Group("/hiring-process")
 		{
 			hiringProcess.POST("/dashboard", Dashboard(dwClient))
+			hiringProcess.POST("/table", VacancyTable(dwClient))
 		}
 
 		suggestions := v1.Group("/suggestions")
@@ -27,11 +28,6 @@ func HiringProcessDashboard(
 			suggestions.GET("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
 			suggestions.POST("/vacancies", VacancyList(dwClient))
-		}
-
-		table := v1.Group("/table")
-		{
-			table.POST("/dashboard", VacancyTable(dwClient))
 		}
 	}
 }
@@ -191,7 +187,7 @@ func VacancyList(
 // @Param body body service.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /table/dashboard [post]
+// @Router /api/v1/hiring-process/table [post]
 func VacancyTable(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
