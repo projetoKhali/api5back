@@ -14,12 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type MetricsData struct {
-	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
-	CardInfos         processing.CardInfos                 `json:"cards"`
-	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
-}
-
 type DateRange struct {
 	StartDate string `json:"startDate" form:"startDate" time_format:"2024-10-01T00:00:00Z"`
 	EndDate   string `json:"endDate" form:"endDate" time_format:"2024-10-01T00:00:00Z"`
@@ -32,6 +26,23 @@ type FactHiringProcessFilter struct {
 	DateRange     *DateRange `json:"dateRange"`
 	ProcessStatus []int      `json:"processStatus"`
 	VacancyStatus []int      `json:"vacancyStatus"`
+}
+
+type MetricsData struct {
+	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
+	CardInfos         processing.CardInfos                 `json:"cards"`
+	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
+}
+
+type TableData struct {
+	Title             string   `json:"title"`
+	NumPositions      int      `json:"numPositions"`
+	NumCandidates     int      `json:"numCandidates"`
+	CompetitionRate   *float32 `json:"competitionRate"`
+	NumInterviewed    int      `json:"numInterviewed"`
+	NumHired          int      `json:"numHired"`
+	AverageHiringTime *float32 `json:"averageHiringTime"`
+	NumFeedback       int      `json:"numFeedback"`
 }
 
 func GetMetrics(
@@ -181,7 +192,7 @@ func GetVacancyTable(
 	ctx context.Context,
 	client *ent.Client,
 	filter FactHiringProcessFilter,
-) ([]*ent.FactHiringProcess, error) {
+) ([]TableData, error) {
 	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
 
 	if len(filter.Recruiters) > 0 {
@@ -273,5 +284,38 @@ func GetVacancyTable(
 		return nil, err
 	}
 
-	return vacancies, nil
+	var tableDatas []TableData
+	for _, vacancy := range vacancies {
+
+		numPositions := vacancy.Edges.DimVacancy.NumPositions
+		var competitionRate *float32
+		if numPositions > 0 {
+			rate := float32(vacancy.MetTotalCandidatesApplied) / float32(numPositions)
+			competitionRate = &rate
+		} else {
+			competitionRate = nil
+		}
+
+		hiringTime, err := processing.GenerateAverageHiringTimePerFactHiringProcess(vacancy)
+		var averageHiringTime *float32
+		if err != nil {
+			averageHiringTime = nil
+		} else {
+			averageHiringTime = &(hiringTime)
+		}
+
+		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
+		tableDatas = append(tableDatas, TableData{
+			Title:             vacancy.Edges.DimVacancy.Title,
+			NumPositions:      numPositions,
+			NumCandidates:     vacancy.MetTotalCandidatesApplied,
+			CompetitionRate:   competitionRate,
+			NumInterviewed:    vacancy.MetTotalCandidatesInterviewed,
+			NumHired:          vacancy.MetTotalCandidatesHired,
+			AverageHiringTime: averageHiringTime,
+			NumFeedback:       numFeedback,
+		})
+	}
+
+	return tableDatas, nil
 }

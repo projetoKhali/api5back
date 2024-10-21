@@ -1,27 +1,14 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"api5back/ent"
 	"api5back/src/model"
-	"api5back/src/processing"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-type TableResponse struct {
-	Title             string   `json:"title"`
-	NumPositions      int      `json:"numPositions"`
-	NumCandidates     int      `json:"numCandidates"`
-	CompetitionRate   *float32 `json:"competitionRate"`
-	NumInterviewed    int      `json:"numInterviewed"`
-	NumHired          int      `json:"numHired"`
-	AverageHiringTime *float32 `json:"averageHiringTime"`
-	NumFeedback       int      `json:"numFeedback"`
-}
 
 func HiringProcessDashboard(
 	engine *gin.Engine,
@@ -221,41 +208,6 @@ func VacancyTable(
 			return
 		}
 
-		fmt.Println("Vagas retornadas:", vacancies)
-
-		var response []TableResponse
-		for _, vacancy := range vacancies {
-
-			numPositions := vacancy.Edges.DimVacancy.NumPositions
-			var competitionRate *float32
-			if numPositions > 0 {
-				rate := float32(vacancy.MetTotalCandidatesApplied) / float32(numPositions)
-				competitionRate = &rate
-			} else {
-				competitionRate = nil
-			}
-
-			hiringTime, err := processing.GenerateAverageHiringTimePerFactHiringProcess(vacancy)
-			var averageHiringTime *float32
-			if err != nil {
-				averageHiringTime = nil
-			} else {
-				averageHiringTime = &(hiringTime)
-			}
-
-			numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
-			response = append(response, TableResponse{
-				Title:             vacancy.Edges.DimVacancy.Title,
-				NumPositions:      numPositions,
-				NumCandidates:     vacancy.MetTotalCandidatesApplied,
-				CompetitionRate:   competitionRate,
-				NumInterviewed:    vacancy.MetTotalCandidatesInterviewed,
-				NumHired:          vacancy.MetTotalCandidatesHired,
-				AverageHiringTime: averageHiringTime,
-				NumFeedback:       numFeedback,
-			})
-		}
-
-		c.JSON(http.StatusOK, response)
+		c.JSON(http.StatusOK, vacancies)
 	}
 }
