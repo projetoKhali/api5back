@@ -149,7 +149,7 @@ func HiringProcessList(
 // @Param body body []int false "User IDs"
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /suggestions/vacancies [post]
+// @Router /suggestions/vacancy [post]
 func VacancyList(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
@@ -183,7 +183,7 @@ func VacancyList(
 // @Param body body service.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /api/v1/hiring-process/table [post]
+// @Router /hiring-process/table [post]
 func VacancyTable(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
