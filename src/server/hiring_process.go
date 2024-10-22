@@ -16,7 +16,8 @@ type SuggestionsResponse struct {
 }
 
 type TableResponse struct {
-	Title             string   `json:"title"`
+	ProcessTitle      string   `json:"processTitle"`
+	VacancyTitle      string   `json:"vacancyTitle"`
 	NumPositions      int      `json:"numPositions"`
 	NumCandidates     int      `json:"numCandidates"`
 	CompetitionRate   *float32 `json:"competitionRate"`
@@ -272,7 +273,8 @@ func VacancyTable(
 
 			numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
 			response = append(response, TableResponse{
-				Title:             vacancy.Edges.DimVacancy.Title,
+				ProcessTitle:      vacancy.Edges.DimProcess.Title,
+				VacancyTitle:      vacancy.Edges.DimVacancy.Title,
 				NumPositions:      numPositions,
 				NumCandidates:     vacancy.MetTotalCandidatesApplied,
 				CompetitionRate:   competitionRate,
