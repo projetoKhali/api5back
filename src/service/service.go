@@ -7,36 +7,21 @@ import (
 
 	"api5back/ent"
 	"api5back/ent/dimprocess"
+	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
+	"api5back/src/model"
 	"api5back/src/processing"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
-
-type MetricsService struct {
-	dbClient *ent.Client
-}
-
-type MetricsData struct {
-	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
-	CardInfos         processing.CardInfos                 `json:"cards"`
-	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
-}
-
-type GetMetricsFilter struct {
-	HiringProcessName string `json:"hiringProcess"`
-	VacancyName       string `json:"vacancy"`
-	StartDate         string `json:"startDate"`
-	EndDate           string `json:"endDate"`
-}
 
 type DateRange struct {
 	StartDate string `json:"startDate" form:"startDate" time_format:"2024-10-01T00:00:00Z"`
 	EndDate   string `json:"endDate" form:"endDate" time_format:"2024-10-01T00:00:00Z"`
 }
 
-type VacancyTableFilter struct {
+type FactHiringProcessFilter struct {
 	Recruiters    []int      `json:"recruiters"`
 	Processes     []int      `json:"processes"`
 	Vacancies     []int      `json:"vacancies"`
@@ -45,81 +30,84 @@ type VacancyTableFilter struct {
 	VacancyStatus []int      `json:"vacancyStatus"`
 }
 
-func NewMetricsService(dbclient *ent.Client) *MetricsService {
-	return &MetricsService{dbClient: dbclient}
-}
-
-func (s *MetricsService) GetMetrics(
+func GetMetrics(
 	ctx context.Context,
-	filter GetMetricsFilter,
-) (*MetricsData, error) {
-	query := s.dbClient.
+	client *ent.Client,
+	filter FactHiringProcessFilter,
+) (*model.MetricsData, error) {
+	query := client.
 		FactHiringProcess.
 		Query().
 		WithDimVacancy().
 		WithDimProcess().
 		WithHiringProcessCandidates()
 
-	if filter.HiringProcessName != "" {
+	if len(filter.Processes) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimProcessWith(
-				dimprocess.TitleContains(
-					filter.HiringProcessName,
-				),
+				dimprocess.IDIn(filter.Processes...),
 			),
 		)
 	}
 
-	if filter.VacancyName != "" {
+	if len(filter.Vacancies) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.TitleContains(
-					filter.VacancyName,
-				),
+				dimvacancy.IDIn(filter.Vacancies...),
 			),
 		)
 	}
 
-	if filter.StartDate != "" {
-		hiringProcessStartDate, err := ParseStringToPgtypeDate(
-			"2006-01-02",
-			filter.StartDate,
+	if len(filter.Recruiters) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimUserWith(
+				dimuser.IDIn(filter.Recruiters...),
+			),
 		)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"could not parse `StartDate`: %w",
-				err,
+	}
+
+	if filter.DateRange != nil {
+		if filter.DateRange.StartDate != "" {
+			hiringProcessStartDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				filter.DateRange.StartDate,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `StartDate`: %w",
+					err,
+				)
+			}
+
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.ClosingDateGTE(
+						&hiringProcessStartDate,
+					),
+				),
 			)
 		}
 
-		query = query.Where(
-			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.ClosingDateGTE(
-					&hiringProcessStartDate,
-				),
-			),
-		)
-	}
+		if filter.DateRange.EndDate != "" {
+			hiringProcessEndDate, err := ParseStringToPgtypeDate(
+				"2006-01-02",
+				filter.DateRange.EndDate,
+			)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"could not parse `EndDate`: %w",
+					err,
+				)
+			}
 
-	if filter.EndDate != "" {
-		hiringProcessEndDate, err := ParseStringToPgtypeDate(
-			"2006-01-02",
-			filter.EndDate,
-		)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"could not parse `EndDate`: %w",
-				err,
+			query = query.Where(
+				facthiringprocess.HasDimVacancyWith(
+					dimvacancy.OpeningDateLTE(
+						&hiringProcessEndDate,
+					),
+				),
 			)
 		}
-
-		query = query.Where(
-			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.OpeningDateLTE(
-					&hiringProcessEndDate,
-				),
-			),
-		)
 	}
 
 	hiringProcess, err := query.All(ctx)
@@ -163,7 +151,7 @@ func (s *MetricsService) GetMetrics(
 		)
 	}
 
-	return &MetricsData{
+	return &model.MetricsData{
 		CardInfos:         cardInfo,
 		VacancySummary:    vacancyInfo,
 		AverageHiringTime: averageHiringTime,
@@ -193,11 +181,12 @@ func NewVacancyServiceTable(client *ent.Client) *VacancyServiceTable {
 	return &VacancyServiceTable{dwClient: client}
 }
 
-func (vs *VacancyServiceTable) GetVacancyTable(
+func GetVacancyTable(
 	ctx context.Context,
-	filter VacancyTableFilter,
-) ([]*ent.FactHiringProcess, error) {
-	query := vs.dwClient.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
+	client *ent.Client,
+	filter FactHiringProcessFilter,
+) ([]model.TableData, error) {
+	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
 
 	if len(filter.Recruiters) > 0 {
 		query = query.Where(
@@ -288,5 +277,38 @@ func (vs *VacancyServiceTable) GetVacancyTable(
 		return nil, err
 	}
 
-	return vacancies, nil
+	var tableDatas []model.TableData
+	for _, vacancy := range vacancies {
+
+		numPositions := vacancy.Edges.DimVacancy.NumPositions
+		var competitionRate *float32
+		if numPositions > 0 {
+			rate := float32(vacancy.MetTotalCandidatesApplied) / float32(numPositions)
+			competitionRate = &rate
+		} else {
+			competitionRate = nil
+		}
+
+		hiringTime, err := processing.GenerateAverageHiringTimePerFactHiringProcess(vacancy)
+		var averageHiringTime *float32
+		if err != nil {
+			averageHiringTime = nil
+		} else {
+			averageHiringTime = &(hiringTime)
+		}
+
+		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
+		tableDatas = append(tableDatas, model.TableData{
+			Title:             vacancy.Edges.DimVacancy.Title,
+			NumPositions:      numPositions,
+			NumCandidates:     vacancy.MetTotalCandidatesApplied,
+			CompetitionRate:   competitionRate,
+			NumInterviewed:    vacancy.MetTotalCandidatesInterviewed,
+			NumHired:          vacancy.MetTotalCandidatesHired,
+			AverageHiringTime: averageHiringTime,
+			NumFeedback:       numFeedback,
+		})
+	}
+
+	return tableDatas, nil
 }
