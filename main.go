@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"api5back/src/database"
 	"api5back/src/server"
-	"fmt"
 )
 
 func main() {
@@ -19,7 +21,18 @@ func main() {
 	}
 	defer dwClient.Close()
 
-	server.
-		NewServer(dbClient, dwClient).
-		Run(":8080")
+	srv := server.NewServer(dbClient, dwClient)
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Content-Type", "*/*")
+		if r.Method == "OPTIONS" {
+			return
+		}
+		srv.ServeHTTP(w, r)
+	})
+
+	http.ListenAndServe(":8080", nil)
 }

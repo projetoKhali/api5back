@@ -140,8 +140,8 @@ func TestAverageHiringTime(t *testing.T) {
 		t.Fatalf("Failed to select FactHiringProcess with HiringProcessCandidates: %v", err)
 	}
 
-	if testResult := t.Run("Test GenerateAverageHiringTime processing function", func(t *testing.T) {
-		months, err := GenerateAverageHiringTime(factHiringProcesses)
+	if testResult := t.Run("Test GenerateAverageHiringTimePerMonth processing function", func(t *testing.T) {
+		months, err := GenerateAverageHiringTimePerMonth(factHiringProcesses)
 		require.NoError(t, err)
 
 		assert.Equal(t, float32(0), months.January)
@@ -157,6 +157,6 @@ func TestAverageHiringTime(t *testing.T) {
 		assert.Equal(t, float32(0), months.November)
 		assert.Equal(t, float32(0), months.December)
 	}); !testResult {
-		t.Fatalf("Failed to test GenerateAverageHiringTime processing function: %v", err)
+		t.Fatalf("Failed to test GenerateAverageHiringTimePerMonth processing function: %v", err)
 	}
 }
