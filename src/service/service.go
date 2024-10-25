@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -43,6 +44,13 @@ type VacancyTableFilter struct {
 	DateRange     *DateRange `json:"dateRange"`
 	ProcessStatus []int      `json:"processStatus"`
 	VacancyStatus []int      `json:"vacancyStatus"`
+	Page          *int       `json:"page"`
+	PageSize      *int       `json:"pageSize"`
+}
+
+type FactHiringProcessReturn struct {
+	FactHiringProcess []*ent.FactHiringProcess `json:"factHiringProcess"`
+	NumMaxPages       int                      `json:"numMaxPages"`
 }
 
 func NewMetricsService(dbclient *ent.Client) *MetricsService {
@@ -196,7 +204,7 @@ func NewVacancyServiceTable(client *ent.Client) *VacancyServiceTable {
 func (vs *VacancyServiceTable) GetVacancyTable(
 	ctx context.Context,
 	filter VacancyTableFilter,
-) ([]*ent.FactHiringProcess, error) {
+) (*FactHiringProcessReturn, error) {
 	query := vs.dwClient.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
 
 	if len(filter.Recruiters) > 0 {
@@ -283,10 +291,38 @@ func (vs *VacancyServiceTable) GetVacancyTable(
 		)
 	}
 
+	if filter.Page == nil {
+		defaultPage := 1
+		filter.Page = &defaultPage
+	}
+	if filter.PageSize == nil {
+		defaultPageSize := 10
+		filter.PageSize = &defaultPageSize
+	}
+	if *filter.Page <= 0 || *filter.PageSize <= 0 {
+		return nil, errors.New(
+			"invalid page number or size",
+		)
+	}
+
+	totalRecords, err := query.Count(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not get total records: %w", err)
+	}
+
+	numMaxPages := (totalRecords + *filter.PageSize - 1) / *filter.PageSize
+
+	offset := (*filter.Page - 1) * *filter.PageSize
+	query = query.Offset(offset).Limit(*filter.PageSize)
+
 	vacancies, err := query.All(ctx)
+
 	if err != nil {
 		return nil, err
 	}
 
-	return vacancies, nil
+	return &FactHiringProcessReturn{
+		FactHiringProcess: vacancies,
+		NumMaxPages:       numMaxPages,
+	}, nil
 }

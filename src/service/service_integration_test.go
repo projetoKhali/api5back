@@ -155,7 +155,7 @@ func TestTableDashboard(t *testing.T) {
 
 	if testResult := t.Run("Vacancy Table returns all FactHiringProcess", func(t *testing.T) {
 		vacancyServiceTable := NewVacancyServiceTable(intEnv.Client)
-		vacancies, err := vacancyServiceTable.GetVacancyTable(
+		factHiringProcessReturnPointer, err := vacancyServiceTable.GetVacancyTable(
 			ctx,
 			VacancyTableFilter{
 				Recruiters:    []int{},
@@ -164,12 +164,14 @@ func TestTableDashboard(t *testing.T) {
 				DateRange:     nil,
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
+				Page:          nil,
+				PageSize:      nil,
 			},
 		)
 
 		require.NoError(t, err)
-		require.NotNil(t, vacancies)
-		require.Equal(t, 5, len(vacancies))
+		require.NotNil(t, factHiringProcessReturnPointer.FactHiringProcess)
+		require.Equal(t, 5, len(factHiringProcessReturnPointer.FactHiringProcess))
 
 	}); !testResult {
 		t.Fatalf("GetMetrics test failed")
@@ -177,7 +179,7 @@ func TestTableDashboard(t *testing.T) {
 
 	if testResult := t.Run("Vacancy Table returns correct number of FactHiringProcess", func(t *testing.T) {
 		vacancyServiceTable := NewVacancyServiceTable(intEnv.Client)
-		vacancies, err := vacancyServiceTable.GetVacancyTable(
+		factHiringProcessReturnPointer, err := vacancyServiceTable.GetVacancyTable(
 			ctx,
 			VacancyTableFilter{
 				Recruiters: []int{},
@@ -189,12 +191,14 @@ func TestTableDashboard(t *testing.T) {
 				},
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
+				Page:          nil,
+				PageSize:      nil,
 			},
 		)
 
 		require.NoError(t, err)
-		require.NotNil(t, vacancies)
-		require.Equal(t, 1, len(vacancies))
+		require.NotNil(t, factHiringProcessReturnPointer.FactHiringProcess)
+		require.Equal(t, 1, len(factHiringProcessReturnPointer.FactHiringProcess))
 
 	}); !testResult {
 		t.Fatalf("GetVacancyTable test failed")

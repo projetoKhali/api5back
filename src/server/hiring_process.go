@@ -4,7 +4,6 @@ import (
 	"api5back/ent"
 	"api5back/src/processing"
 	"api5back/src/service"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +24,11 @@ type TableResponse struct {
 	NumHired          int      `json:"numHired"`
 	AverageHiringTime *float32 `json:"averageHiringTime"`
 	NumFeedback       int      `json:"numFeedback"`
+}
+
+type TableResponseAndPages struct {
+	TableResponses []TableResponse `json:"tableResponses"`
+	NumMaxPages    int             `json:"numMaxPages"`
 }
 
 func HiringProcessDashboard(
@@ -242,17 +246,15 @@ func VacancyTable(
 
 		vacancyServiceTablePointer := service.NewVacancyServiceTable(dwClient)
 
-		vacancies, err := vacancyServiceTablePointer.GetVacancyTable(c.Request.Context(), filter)
+		factHiringProcessReturnPointer, err := vacancyServiceTablePointer.GetVacancyTable(c.Request.Context(), filter)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		fmt.Println("Vagas retornadas:", vacancies)
-
-		var response []TableResponse
-		for _, vacancy := range vacancies {
+		var tableResponses []TableResponse
+		for _, vacancy := range (*factHiringProcessReturnPointer).FactHiringProcess {
 
 			numPositions := vacancy.Edges.DimVacancy.NumPositions
 			var competitionRate *float32
@@ -272,7 +274,7 @@ func VacancyTable(
 			}
 
 			numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
-			response = append(response, TableResponse{
+			tableResponses = append(tableResponses, TableResponse{
 				ProcessTitle:      vacancy.Edges.DimProcess.Title,
 				VacancyTitle:      vacancy.Edges.DimVacancy.Title,
 				NumPositions:      numPositions,
@@ -283,6 +285,11 @@ func VacancyTable(
 				AverageHiringTime: averageHiringTime,
 				NumFeedback:       numFeedback,
 			})
+		}
+
+		response := TableResponseAndPages{
+			tableResponses,
+			factHiringProcessReturnPointer.NumMaxPages,
 		}
 
 		c.JSON(http.StatusOK, response)
