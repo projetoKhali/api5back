@@ -22,7 +22,7 @@ func (DimProcess) Fields() []ent.Field {
 		}),
 		field.Other("finishDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
-		}),
+		}).Optional(),
 		field.Int("status").Default(1),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),
