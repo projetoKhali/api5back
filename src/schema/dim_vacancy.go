@@ -19,7 +19,7 @@ func (DimVacancy) Fields() []ent.Field {
 		field.Int("id"),
 		field.String("title"),
 		field.Int("numPositions"),
-		field.Int("reqId"),
+		field.Int("reqId").Optional(),
 		field.Int("status").Default(1),
 		field.String("location"),
 		field.Int("dimUsrId"),
