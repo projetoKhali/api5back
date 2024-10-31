@@ -31,7 +31,9 @@ swag: swagger
 swagger:
 	swag init
 
-sch: schema
+sch:
+	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
 schema:
 	go run scripts/schema/main.go $(filter-out $@,$(MAKECMDGOALS))
 	@:
@@ -46,6 +48,13 @@ migrate:
 
 seeds:
 	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS))
+	@:
+
+sy:
+	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS)) -y
+	@:
+seeds-y:
+	go run scripts/seeds/main.go $(filter-out $@,$(MAKECMDGOALS)) -y
 	@:
 
 db-up: database-up

@@ -88,19 +88,26 @@ func main() {
 		panic(sb.String())
 	}
 
-	// ask for confirmation
-	fmt.Printf(
-		"scripts/seeds • Running seed `%s`, confirm? (y/N): ",
-		targetSeedsPreset.Name,
-	)
-
-	confirm, err := askForConfirmation()
-	if err != nil {
-		panic(fmt.Errorf("scripts/seeds • failed to ask for confirmation: %v", err))
+	confirm := true
+	if len(os.Args) > 2 && os.Args[2] == "-y" {
+		confirm = false
 	}
 
-	if !confirm {
-		return
+	if confirm {
+		// ask for confirmation
+		fmt.Printf(
+			"scripts/seeds • Running seed `%s`, confirm? (y/N): ",
+			targetSeedsPreset.Name,
+		)
+
+		confirm, err := askForConfirmation()
+		if err != nil {
+			panic(fmt.Errorf("scripts/seeds • failed to ask for confirmation: %v", err))
+		}
+
+		if !confirm {
+			return
+		}
 	}
 
 	seeds.Execute("DW", targetSeedsPreset.SeedsFunc)
