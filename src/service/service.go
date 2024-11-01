@@ -194,7 +194,7 @@ func GetVacancyTable(
 	client *ent.Client,
 	filter FactHiringProcessFilter,
 ) (*FactHiringProcessReturn, error) {
-	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy()
+	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy().WithHiringProcessCandidates()
 
 	if len(filter.Recruiters) > 0 {
 		query = query.Where(

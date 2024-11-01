@@ -101,6 +101,12 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 		}
 	}
 
+	if hiredCandidates == 0 {
+		return 0, fmt.Errorf(
+			"`No hired candidates found: %w",
+			err,
+		)
+	}
 	result := float32(days / hiredCandidates)
 
 	return result, nil
