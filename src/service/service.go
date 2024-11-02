@@ -181,14 +181,6 @@ func ParseStringToPgtypeDate(
 	}, nil
 }
 
-type VacancyServiceTable struct {
-	dwClient *ent.Client
-}
-
-func NewVacancyServiceTable(client *ent.Client) *VacancyServiceTable {
-	return &VacancyServiceTable{dwClient: client}
-}
-
 func GetVacancyTable(
 	ctx context.Context,
 	client *ent.Client,
@@ -305,7 +297,6 @@ func GetVacancyTable(
 	query = query.Offset(offset).Limit(*filter.PageSize)
 
 	vacancies, err := query.All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
