@@ -9,7 +9,8 @@ type MetricsData struct {
 }
 
 type TableData struct {
-	Title             string   `json:"title"`
+	ProcessTitle      string   `json:"processTitle"`
+	VacancyTitle      string   `json:"vacancyTitle"`
 	NumPositions      int      `json:"numPositions"`
 	NumCandidates     int      `json:"numCandidates"`
 	CompetitionRate   *float32 `json:"competitionRate"`

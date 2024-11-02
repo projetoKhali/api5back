@@ -332,7 +332,8 @@ func GetVacancyTable(
 
 		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
 		tableDatas = append(tableDatas, model.TableData{
-			Title:             vacancy.Edges.DimVacancy.Title,
+			ProcessTitle:      vacancy.Edges.DimProcess.Title,
+			VacancyTitle:      vacancy.Edges.DimVacancy.Title,
 			NumPositions:      numPositions,
 			NumCandidates:     vacancy.MetTotalCandidatesApplied,
 			CompetitionRate:   competitionRate,
