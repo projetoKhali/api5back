@@ -15,24 +15,25 @@ func DataWarehouse(client *ent.Client) error {
 	ctx := context.Background()
 
 	users := []ent.DimUser{
-		{Name: "Alice Santos", Occupation: "Recruiter"},
-		{Name: "Bob Ferreira", Occupation: "HR Manager"},
-		{Name: "Carla Mendes", Occupation: "Software Engineer"},
-		{Name: "David Costa", Occupation: "Data Analyst"},
-		{Name: "Eva Lima", Occupation: "Product Manager"},
+		{DbId: 1, Name: "Alice Santos", Occupation: "Recruiter"},
+		{DbId: 2, Name: "Bob Ferreira", Occupation: "HR Manager"},
+		{DbId: 3, Name: "Carla Mendes", Occupation: "Software Engineer"},
+		{DbId: 4, Name: "David Costa", Occupation: "Data Analyst"},
+		{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
 	}
 
 	var userIDs []int64
 
 	for _, user := range users {
 		createdUser, err := client.DimUser.Create().
+			SetDbId(user.DbId).
 			SetName(user.Name).
 			SetOccupation(user.Occupation).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create user %s: %v", user.Name, err)
 		}
-		userIDs = append(userIDs, int64(createdUser.ID))
+		userIDs = append(userIDs, int64(createdUser.DbId))
 	}
 
 	// Inserindo datas na tabela dim_datetime
@@ -78,63 +79,63 @@ func DataWarehouse(client *ent.Client) error {
 	// Inserindo vagas
 	vacancies := []ent.DimVacancy{
 		{
-			Title:    "Software Engineer",
+			DbId: 1, Title: "Software Engineer",
 			DimUsrId: 1, NumPositions: 1, ReqId: 1,
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "Data Scientist",
+			DbId: 2, Title: "Data Scientist",
 			DimUsrId: 1, NumPositions: 2, ReqId: 1,
 			Location:    "Rio de Janeiro",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "HR Specialist",
+			DbId: 3, Title: "HR Specialist",
 			DimUsrId: 2, NumPositions: 1, ReqId: 1,
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 3, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 3, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "UX Designer",
+			DbId: 4, Title: "UX Designer",
 			DimUsrId: 3, NumPositions: 2, ReqId: 1,
 			Location:    "Curitiba",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "Software Engineer",
+			DbId: 5, Title: "Software Engineer",
 			DimUsrId: 1, NumPositions: 1, ReqId: 2,
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 2, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "UX Designer",
+			DbId: 6, Title: "UX Designer",
 			DimUsrId: 5, NumPositions: 1, ReqId: 2,
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 11, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "Data Scientist",
+			DbId: 7, Title: "Data Scientist",
 			DimUsrId: 4, NumPositions: 1, ReqId: 3,
 			Location:    "Rio de Janeiro",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 10, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "Product Manager",
+			DbId: 8, Title: "Product Manager",
 			DimUsrId: 5, NumPositions: 1, ReqId: 3,
 			Location:    "Belo Horizonte",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 5, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 		},
 		{
-			Title:    "HR Specialist",
+			DbId: 9, Title: "HR Specialist",
 			DimUsrId: 3, NumPositions: 1, ReqId: 4,
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2023, 12, 5, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -144,6 +145,7 @@ func DataWarehouse(client *ent.Client) error {
 
 	for _, vacancy := range vacancies {
 		_, err := client.DimVacancy.Create().
+			SetDbId(vacancy.DbId).
 			SetTitle(vacancy.Title).
 			SetNumPositions(vacancy.NumPositions).
 			SetReqId(vacancy.ReqId).
@@ -160,61 +162,61 @@ func DataWarehouse(client *ent.Client) error {
 	// Inserindo processos
 	processes := []ent.DimProcess{
 		{
-			Title:       "Desenvolvimento Ágil - Software Engineer",
+			DbId: 1, Title: "Desenvolvimento Ágil - Software Engineer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    1,
 		},
 		{
-			Title:       "Recrutamento e Seleção - HR Specialist",
+			DbId: 2, Title: "Recrutamento e Seleção - HR Specialist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    2,
 		},
 		{
-			Title:       "Gestão de Produto - Product Manager",
+			DbId: 3, Title: "Gestão de Produto - Product Manager",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    3,
 		},
 		{
-			Title:       "Experiência do Usuário - UX Designer",
+			DbId: 4, Title: "Experiência do Usuário - UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    4,
 		},
 		{
-			Title:       "Análise de Dados - Data Scientist",
+			DbId: 5, Title: "Análise de Dados - Data Scientist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    5,
 		},
 		{
-			Title:       "Desenvolvimento de Software - Software Engineer e UX Designer",
+			DbId: 6, Title: "Desenvolvimento de Software - Software Engineer e UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    1,
 		},
 		{
-			Title:       "Análise de Dados e Relatórios - Data Scientist e Product Manager",
+			DbId: 7, Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    2,
 		},
 		{
-			Title:       "Processo de Recrutamento - HR Specialist e Software Engineer",
+			DbId: 8, Title: "Processo de Recrutamento - HR Specialist e Software Engineer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    3,
 		},
 		{
-			Title:       "Estratégia de Produto - Product Manager e UX Designer",
+			DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    4,
 		},
 		{
-			Title:       "Inovação em Dados - Data Scientist e HR Specialist",
+			DbId: 10, Title: "Inovação em Dados - Data Scientist e HR Specialist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    5,
@@ -223,6 +225,7 @@ func DataWarehouse(client *ent.Client) error {
 
 	for _, process := range processes {
 		_, err := client.DimProcess.Create().
+			SetDbId(process.DbId).
 			SetTitle(process.Title).
 			SetInitialDate(process.InitialDate).
 			SetFinishDate(process.FinishDate).

@@ -16,6 +16,7 @@ type DimVacancy struct {
 
 func (DimVacancy) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("dbId"),
 		field.String("title"),
 		field.Int("numPositions"),
 		field.Int("reqId"),
