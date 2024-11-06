@@ -14,7 +14,6 @@ type DimUser struct {
 
 func (DimUser) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
 		field.String("name"),
 		field.String("occupation"),
 	}
