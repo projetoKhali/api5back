@@ -28,7 +28,7 @@ func ListHiringProcesses(
 	var response []model.Suggestion
 	for _, process := range processes {
 		response = append(response, model.Suggestion{
-			Id:    process.ID,
+			Id:    process.DbId,
 			Title: process.Title,
 		})
 	}

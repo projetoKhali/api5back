@@ -31,7 +31,7 @@ func GetVacancySuggestions(
 		if fact.Edges.DimVacancy != nil {
 			vacancy := fact.Edges.DimVacancy
 			uniqueVacancies[vacancy.ID] = model.Suggestion{
-				Id:    vacancy.ID,
+				Id:    vacancy.DbId,
 				Title: vacancy.Title,
 			}
 		}
