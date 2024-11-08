@@ -38,19 +38,18 @@ type FactHiringProcessReturn struct {
 	NumMaxPages       int               `json:"numMaxPages"`
 }
 
-func GetMetrics(
-	ctx context.Context,
-	client *ent.Client,
+func applyQueryFilters(
+	query *ent.FactHiringProcessQuery,
 	filter FactHiringProcessFilter,
-) (*model.MetricsData, error) {
-	query := client.
-		FactHiringProcess.
-		Query().
-		WithDimVacancy().
-		WithDimProcess().
-		WithHiringProcessCandidates()
-
-	if len(filter.Processes) > 0 {
+) (*ent.FactHiringProcessQuery, error) {
+	if filter.Recruiters != nil && len(filter.Recruiters) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimUserWith(
+				dimuser.IDIn(filter.Recruiters...),
+			),
+		)
+	}
+	if filter.Processes != nil && len(filter.Processes) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimProcessWith(
 				dimprocess.IDIn(filter.Processes...),
@@ -58,18 +57,10 @@ func GetMetrics(
 		)
 	}
 
-	if len(filter.Vacancies) > 0 {
+	if filter.Vacancies != nil && len(filter.Vacancies) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
 				dimvacancy.IDIn(filter.Vacancies...),
-			),
-		)
-	}
-
-	if len(filter.Recruiters) > 0 {
-		query = query.Where(
-			facthiringprocess.HasDimUserWith(
-				dimuser.IDIn(filter.Recruiters...),
 			),
 		)
 	}
@@ -116,6 +107,30 @@ func GetMetrics(
 				),
 			)
 		}
+	}
+
+	return query, nil
+}
+
+func GetMetrics(
+	ctx context.Context,
+	client *ent.Client,
+	filter FactHiringProcessFilter,
+) (*model.MetricsData, error) {
+	query, err := applyQueryFilters(
+		client.
+			FactHiringProcess.
+			Query().
+			WithDimVacancy().
+			WithDimProcess().
+			WithHiringProcessCandidates(),
+		filter,
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"could not apply filters: %w",
+			err,
+		)
 	}
 
 	hiringProcess, err := query.All(ctx)
@@ -186,89 +201,19 @@ func GetVacancyTable(
 	client *ent.Client,
 	filter FactHiringProcessFilter,
 ) (*FactHiringProcessReturn, error) {
-	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy().WithHiringProcessCandidates()
-
-	if len(filter.Recruiters) > 0 {
-		query = query.Where(
-			facthiringprocess.DimUserIdIn(filter.Recruiters...),
-		)
-	}
-
-	if len(filter.Processes) > 0 {
-		query = query.Where(
-			facthiringprocess.DimProcessIdIn(filter.Processes...),
-		)
-	}
-
-	if len(filter.Vacancies) > 0 {
-		query = query.Where(
-			facthiringprocess.DimVacancyIdIn(filter.Vacancies...),
-		)
-	}
-
-	if filter.DateRange != nil {
-
-		if filter.DateRange.StartDate != "" {
-
-			startDateString := filter.DateRange.StartDate
-			hiringProcessStartDate, err := ParseStringToPgtypeDate(
-				"2006-01-02",
-				startDateString,
-			)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"could not parse `StartDate`: %w",
-					err,
-				)
-			}
-
-			query = query.Where(
-				facthiringprocess.HasDimVacancyWith(
-					dimvacancy.ClosingDateGTE(
-						&hiringProcessStartDate,
-					),
-				),
-			)
-		}
-
-		if filter.DateRange.EndDate != "" {
-
-			endDateString := filter.DateRange.EndDate
-			hiringProcessEndDate, err := ParseStringToPgtypeDate(
-				"2006-01-02",
-				endDateString,
-			)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"could not parse `EndDate`: %w",
-					err,
-				)
-			}
-
-			query = query.Where(
-				facthiringprocess.HasDimVacancyWith(
-					dimvacancy.OpeningDateLTE(
-						&hiringProcessEndDate,
-					),
-				),
-			)
-		}
-
-	}
-
-	if len(filter.ProcessStatus) > 0 {
-		query = query.Where(
-			facthiringprocess.HasDimProcessWith(
-				dimprocess.StatusIn(filter.ProcessStatus...),
-			),
-		)
-	}
-
-	if len(filter.VacancyStatus) > 0 {
-		query = query.Where(
-			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.StatusIn(filter.VacancyStatus...),
-			),
+	query, err := applyQueryFilters(
+		client.
+			FactHiringProcess.
+			Query().
+			WithDimProcess().
+			WithDimVacancy().
+			WithHiringProcessCandidates(),
+		filter,
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"could not apply filters: %w",
+			err,
 		)
 	}
 
