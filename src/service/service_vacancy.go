@@ -6,6 +6,8 @@ import (
 	"api5back/ent"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 func GetVacancySuggestions(
@@ -13,7 +15,17 @@ func GetVacancySuggestions(
 	client *ent.Client,
 	processesIds *[]int,
 ) ([]model.Suggestion, error) {
-	query := client.FactHiringProcess.Query().WithDimVacancy() // Com WithDimVacancy sempre incluído
+	query := client.
+		FactHiringProcess.
+		Query().
+		Modify(func(s *sql.Selector) {
+			s.Select("DISTINCT ON (t1.db_id) *")
+			s.Join(sql.Table("dim_vacancy t1")).On(
+				s.C("dim_vacancy_id"), sql.Table("t1").C("id"),
+			)
+		}).
+		Order(ent.Desc(facthiringprocess.FieldID)).
+		WithDimVacancy() // Com WithDimVacancy sempre incluído
 
 	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
 	if processesIds != nil && len(*processesIds) > 0 {

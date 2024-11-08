@@ -33,5 +33,5 @@ func createPostgresClient(databaseUrl string) (*ent.Client, error) {
 	}
 
 	drv := entsql.OpenDB(dialect.Postgres, db)
-	return ent.NewClient(ent.Driver(drv)), nil
+	return ent.NewClient(ent.Driver(drv), ent.Debug()), nil
 }

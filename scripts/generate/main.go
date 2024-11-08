@@ -14,6 +14,7 @@ func entConfig() *gen.Config {
 		Target:  "ent",
 		Package: "api5back/ent",
 		Features: []gen.Feature{
+			gen.FeatureModifier,
 			gen.FeatureExecQuery,
 		},
 	}

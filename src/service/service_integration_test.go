@@ -7,7 +7,8 @@ import (
 	"context"
 	"testing"
 
-	"api5back/ent/facthiringprocess"
+	"api5back/ent"
+	"api5back/ent/dimvacancy"
 	"api5back/seeds"
 	"api5back/src/database"
 	"api5back/src/property"
@@ -31,31 +32,23 @@ func TestDatabaseOperations(t *testing.T) {
 	}
 
 	t.Run("Test hiring_process_candidate table operations", func(t *testing.T) {
-		var testFactHiringProcessId int
+		var testVacancyDbId int
 		var hiringProcessCandidateId int
 
 		for _, TestCase := range []database.TestCase{
 			{
 				Name: "Insert a hiring_process_candidate into the table",
 				Run: func(t *testing.T) {
-					factHiringProcess, err := intEnv.
+					dimVacancy, err := intEnv.
 						Client.
-						FactHiringProcess.
+						DimVacancy.
 						Query().
-						WithDimVacancy().
 						First(ctx)
-					require.NoError(t, err)
-
-					testFactHiringProcessId = factHiringProcess.ID
-
-					dimVacancy, err := factHiringProcess.
-						Edges.
-						DimVacancyOrErr()
 					require.NoError(t, err)
 
 					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
 						Create().
-						SetFactHiringProcessID(testFactHiringProcessId).
+						SetDimVacancyDbId(dimVacancy.DbId).
 						SetName("John Doe").
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
@@ -73,17 +66,22 @@ func TestDatabaseOperations(t *testing.T) {
 			{
 				Name: "Select candidate list from the edges of a FactHiringProcess",
 				Run: func(t *testing.T) {
-					factHiringProcesses, err := intEnv.
+					dimVacancy, err := intEnv.
 						Client.
-						FactHiringProcess.
+						DimVacancy.
 						Query().
-						WithDimVacancy().
 						WithHiringProcessCandidates().
-						Where(facthiringprocess.ID(testFactHiringProcessId)).
+						Where(dimvacancy.DbId(testVacancyDbId)).
+						Order(
+							ent.Desc(dimvacancy.FieldClosingDate),
+							ent.Desc(dimvacancy.FieldID),
+						).
 						First(ctx)
 					require.NoError(t, err)
 
-					candidates, err := factHiringProcesses.
+					require.NoError(t, err)
+
+					candidates, err := dimVacancy.
 						Edges.
 						HiringProcessCandidatesOrErr()
 					require.NoError(t, err)

@@ -23,7 +23,7 @@ func (HiringProcessCandidate) Fields() []ent.Field {
 		field.String("email"),
 		field.String("phone"),
 		field.Float("score"),
-		field.Int("factHiringProcessId").
+		field.Int("dimVacancyDbId").
 			Immutable(),
 		field.Other("applyDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
@@ -39,8 +39,8 @@ func (HiringProcessCandidate) Fields() []ent.Field {
 
 func (HiringProcessCandidate) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("factHiringProcess", FactHiringProcess.Type).
-			Field("factHiringProcessId").
+		edge.To("dimVacancy", DimVacancy.Type).
+			Field("dimVacancyDbId").
 			Unique().
 			Required().
 			Immutable(),

@@ -14,6 +14,7 @@ import (
 	"api5back/src/model"
 	"api5back/src/processing"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -46,9 +47,12 @@ func GetMetrics(
 	query := client.
 		FactHiringProcess.
 		Query().
+		Modify(func(s *sql.Selector) {
+			s.Select("ON (dim_vacancy.db_id) *")
+		}).
+		Order(ent.Desc(facthiringprocess.FieldID)).
 		WithDimVacancy().
-		WithDimProcess().
-		WithHiringProcessCandidates()
+		WithDimProcess()
 
 	if len(filter.Processes) > 0 {
 		query = query.Where(
@@ -118,7 +122,7 @@ func GetMetrics(
 		}
 	}
 
-	hiringProcess, err := query.All(ctx)
+	hiringProcesses, err := query.All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"could not retrieve `FactHiringProcess` data: %w",
@@ -128,7 +132,7 @@ func GetMetrics(
 
 	var errors []error
 
-	cardInfo, err := processing.ComputingCardInfo(hiringProcess)
+	cardInfo, err := processing.ComputingCardInfo(hiringProcesses)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not calculate `CardInfo` data: %w",
@@ -136,7 +140,7 @@ func GetMetrics(
 		))
 	}
 
-	vacancyInfo, err := processing.GenerateVacancyStatusSummary(hiringProcess)
+	vacancyInfo, err := processing.GenerateVacancyStatusSummary(hiringProcesses)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not generate `VacancyStatus` summary: %w",
@@ -144,7 +148,14 @@ func GetMetrics(
 		))
 	}
 
-	averageHiringTime, err := processing.GenerateAverageHiringTimePerMonth(hiringProcess)
+	var dimVacancies []*ent.DimVacancy
+	for _, hp := range hiringProcesses {
+		if hp.Edges.DimVacancy != nil {
+			dimVacancies = append(dimVacancies, hp.Edges.DimVacancy)
+		}
+	}
+
+	averageHiringTime, err := processing.GenerateAverageHiringTimePerMonth(dimVacancies)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not generate `AvgHiringTime` data: %w",
@@ -186,7 +197,11 @@ func GetVacancyTable(
 	client *ent.Client,
 	filter FactHiringProcessFilter,
 ) (*FactHiringProcessReturn, error) {
-	query := client.FactHiringProcess.Query().WithDimProcess().WithDimVacancy().WithHiringProcessCandidates()
+	query := client.
+		FactHiringProcess.
+		Query().
+		WithDimProcess().
+		WithDimVacancy()
 
 	if len(filter.Recruiters) > 0 {
 		query = query.Where(

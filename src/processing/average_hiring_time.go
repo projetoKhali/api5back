@@ -29,15 +29,17 @@ type Month struct {
 }
 
 func GenerateAverageHiringTimePerMonth(
-	data []*ent.FactHiringProcess,
+	dimVacancies []*ent.DimVacancy,
 ) (AverageHiringTimePerMonth, error) {
 	monthsValues := [12]Month{}
 
-	for _, process := range data {
-		candidates, err := process.Edges.HiringProcessCandidatesOrErr()
+	for _, dimVacancy := range dimVacancies {
+		candidates, err := dimVacancy.
+			Edges.
+			HiringProcessCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
-				"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+				"`HiringProcessCandidates` of `DimVacancy` not found: %w",
 				err,
 			)
 		}
@@ -79,8 +81,19 @@ func GenerateAverageHiringTimePerMonth(
 func GenerateAverageHiringTimePerFactHiringProcess(
 	fact_hiring_process *ent.FactHiringProcess,
 ) (float32, error) {
+	vacancy, err := fact_hiring_process.
+		Edges.
+		DimVacancyOrErr()
+	if err != nil {
+		return 0, fmt.Errorf(
+			"`DimVacancy` of `FactHiringProcess` not found: %w",
+			err,
+		)
+	}
 
-	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
+	candidates, err := vacancy.
+		Edges.
+		HiringProcessCandidatesOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
 			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
@@ -110,5 +123,4 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 	result := float32(days / hiredCandidates)
 
 	return result, nil
-
 }
