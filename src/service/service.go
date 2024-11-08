@@ -109,6 +109,22 @@ func applyQueryFilters(
 		}
 	}
 
+	if filter.ProcessStatus != nil && len(filter.ProcessStatus) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimProcessWith(
+				dimprocess.StatusIn(filter.ProcessStatus...),
+			),
+		)
+	}
+
+	if filter.VacancyStatus != nil && len(filter.VacancyStatus) > 0 {
+		query = query.Where(
+			facthiringprocess.HasDimVacancyWith(
+				dimvacancy.StatusIn(filter.VacancyStatus...),
+			),
+		)
+	}
+
 	return query, nil
 }
 
