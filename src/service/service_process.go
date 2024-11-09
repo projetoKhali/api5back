@@ -13,7 +13,9 @@ func ListHiringProcesses(
 	client *ent.Client,
 	userIDs *[]int,
 ) ([]model.Suggestion, error) {
-	query := client.DimProcess.Query()
+	query := client.
+		DimProcess.
+		Query()
 
 	// Verificar se o array de userIDs não é nil e se tem elementos
 	if userIDs != nil && len(*userIDs) > 0 {

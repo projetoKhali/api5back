@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"api5back/ent"
-	"api5back/ent/dimuser"
 	"api5back/src/model"
 )
 
@@ -14,7 +13,6 @@ func GetUsers(
 ) ([]model.Suggestion, error) {
 	users, err := client.DimUser.
 		Query().
-		Select(dimuser.FieldID, dimuser.FieldName).
 		All(ctx)
 	if err != nil {
 		return nil, err
