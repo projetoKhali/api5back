@@ -2,10 +2,13 @@ package seeds
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"time"
 
 	"api5back/ent"
+	"api5back/src/property"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -384,7 +387,7 @@ func DataWarehouse(client *ent.Client) error {
 		},
 	}
 
-	for _, fact := range facts {
+	for factId, fact := range facts {
 		_, err := client.FactHiringProcess.Create().
 			SetMetTotalCandidatesApplied(fact.MetTotalCandidatesApplied).
 			SetMetTotalCandidatesInterviewed(fact.MetTotalCandidatesInterviewed).
@@ -402,7 +405,117 @@ func DataWarehouse(client *ent.Client) error {
 		if err != nil {
 			return fmt.Errorf("failed to create fact hiring process: %v", err)
 		}
+
+		currentCandidateDbId := 1
+		totalCandidates := fact.MetTotalCandidatesApplied + fact.MetTotalCandidatesInterviewed + fact.MetTotalCandidatesHired
+		totalCandidatesRemaining := totalCandidates - fact.MetTotalCandidatesHired - fact.MetTotalCandidatesInterviewed
+
+		for candidateStatus, candidateCategory := range [4]int{
+			totalCandidatesRemaining / 2,
+			fact.MetTotalCandidatesInterviewed,
+			fact.MetTotalCandidatesHired,
+			totalCandidatesRemaining / 2,
+		} {
+			for j := 0; j < candidateCategory; j++ {
+
+				t := float64(j) / float64(totalCandidates-1)
+				candidateName := generateName(currentCandidateDbId)
+				candidateApplyDate := lerpDate(
+					*vacancies[fact.DimVacancyId-1].OpeningDate,
+					*vacancies[fact.DimVacancyId-1].ClosingDate,
+					t,
+				)
+
+				candidateBuilder := client.HiringProcessCandidate.Create().
+					SetDbId(currentCandidateDbId).
+					SetName(candidateName).
+					SetEmail(fmt.Sprintf("%s_%d@mail.com", candidateName, currentCandidateDbId)).
+					SetPhone(pseudoRandomPhoneIdempotent(currentCandidateDbId)).
+					SetScore(pseudoRandomScoreIdempotent(currentCandidateDbId)).
+					SetFactHiringProcessID(factId + 1).
+					SetApplyDate(candidateApplyDate).
+					SetStatus(property.HiringProcessCandidateStatus(candidateStatus))
+
+				if property.HiringProcessCandidateStatus(candidateStatus) > property.HiringProcessCandidateStatusInAnalysis {
+					candidateBuilder.SetUpdatedAt(lerpDate(
+						*candidateApplyDate,
+						*vacancies[fact.DimVacancyId-1].ClosingDate,
+						0.5,
+					))
+				}
+
+				_, err := candidateBuilder.Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed to create fact candidate: %v", err)
+				}
+
+				currentCandidateDbId++
+			}
+		}
 	}
 
 	return nil
+}
+
+func generateName(index int) string {
+	// Convert the index to bytes and hash it
+	indexBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(indexBytes, uint64(index))
+	hash := sha256.Sum256(indexBytes)
+
+	// Use first byte for first name and second byte for last name
+	firstName := firstNames[int(hash[0])%len(firstNames)]
+	lastName := lastNames[int(hash[1])%len(lastNames)]
+
+	// Combine into full name
+	return fmt.Sprintf("%s %s", firstName, lastName)
+}
+
+func pseudoRandomPhoneIdempotent(index int) string {
+	// Convert the index to bytes
+	indexBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(indexBytes, uint64(index))
+
+	// Compute SHA-256 hash of the index
+	hash := sha256.Sum256(indexBytes)
+
+	// Use the first 5 bytes of the hash to generate a consistent 10-digit number
+	phonePart1 := int(binary.BigEndian.Uint16(hash[:2]) % 1000)   // 3 digits
+	phonePart2 := int(binary.BigEndian.Uint16(hash[2:4]) % 1000)  // 3 digits
+	phonePart3 := int(binary.BigEndian.Uint16(hash[4:6]) % 10000) // 4 digits
+
+	// Format into phone number style and return as a string
+	return fmt.Sprintf("11%03d%03d%04d", phonePart1, phonePart2, phonePart3)
+}
+
+func pseudoRandomScoreIdempotent(index int) float64 {
+	// Convert the index to bytes
+	indexBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(indexBytes, uint64(index))
+
+	// Compute SHA-256 hash of the index
+	hash := sha256.Sum256(indexBytes)
+
+	// Use the first 8 bytes of the hash to get a consistent integer
+	hashInt := binary.BigEndian.Uint64(hash[:8])
+
+	// Map hashInt to a float between 0.0 and 100.0
+	return float64(hashInt%10000) / 100.0
+}
+
+// lerpDate linearly interpolates between two pgtype.Date values based on t (0 to 1).
+func lerpDate(date1, date2 pgtype.Date, t float64) *pgtype.Date {
+	t1 := date1.Time
+	t2 := date2.Time
+
+	if t < 0 {
+		t = 0
+	} else if t > 1 {
+		t = 1
+	}
+
+	// Calculate the interpolated duration between t1 and t2
+	interpolated := t1.Add(time.Duration(float64(t2.Sub(t1)) * t))
+
+	return &pgtype.Date{Time: interpolated, Valid: true}
 }
