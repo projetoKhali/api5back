@@ -4,42 +4,35 @@ import (
 	"fmt"
 
 	"api5back/ent"
+	"api5back/src/property"
 )
 
 type VacancyStatusSummary struct {
-	Open      int `json:"open"`
-	Analyzing int `json:"analyzing"`
-	Closed    int `json:"closed"`
+	Open      int `json:"open" default:"0"`
+	Analyzing int `json:"analyzing" default:"0"`
+	Closed    int `json:"closed" default:"0"`
 }
 
 func GenerateVacancyStatusSummary(
 	data []*ent.FactHiringProcess,
 ) (VacancyStatusSummary, error) {
-	var summary VacancyStatusSummary
+	countByStatus := make(map[property.DimVacancyStatus]int)
 
 	for _, process := range data {
 		vacancy, err := process.Edges.DimVacancyOrErr()
 		if err != nil {
-			return summary, fmt.Errorf(
+			return VacancyStatusSummary{}, fmt.Errorf(
 				"`DimVacancy` of `FactHiringProcess` not found: %w",
 				err,
 			)
 		}
 
-		switch vacancy.Status {
-		case 0:
-			summary.Open++
-		case 1:
-			summary.Analyzing++
-		case 2:
-			summary.Closed++
-		default:
-			return summary, fmt.Errorf(
-				"invalid vacancy status: %d",
-				vacancy.Status,
-			)
-		}
+		countByStatus[vacancy.Status]++
 	}
 
-	return summary, nil
+	return VacancyStatusSummary{
+		Open:      countByStatus[property.DimVacancyStatusOpen],
+		Analyzing: countByStatus[property.DimVacancyStatusInAnalysis],
+		Closed:    countByStatus[property.DimVacancyStatusClosed],
+	}, nil
 }

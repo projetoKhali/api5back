@@ -57,10 +57,10 @@ func TestComputingCardInfo(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verifica os valores retornados
-	assert.Equal(t, 1, cardInfos.OpenProcesses)
-	assert.Equal(t, 1, cardInfos.ExpiredProcesses)
-	assert.Equal(t, 1, cardInfos.CloseProcesses)
-	assert.Equal(t, 1, cardInfos.ApproachingDeadlineProcesses)
+	assert.Equal(t, 1, cardInfos.Open)
+	assert.Equal(t, 1, cardInfos.InProgress)
+	assert.Equal(t, 1, cardInfos.Closed)
+	assert.Equal(t, 1, cardInfos.ApproachingDeadline)
 	assert.Equal(t, 15, cardInfos.AverageHiringTime)
 }
 
