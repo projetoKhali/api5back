@@ -36,7 +36,7 @@ func ComputingCardsInfo(
 			return CardInfos{}, fmt.Errorf("error getting `dim_process` of factHiringProcess: %+v", err)
 		}
 
-		countByStatus[process.Status]++
+		countByStatus[property.DimProcessStatus(process.Status+1)]++
 
 		totalDuration := process.
 			FinishDate.

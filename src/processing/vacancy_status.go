@@ -19,7 +19,9 @@ func GenerateVacancyStatusSummary(
 	countByStatus := make(map[property.DimVacancyStatus]int)
 
 	for _, process := range data {
-		vacancy, err := process.Edges.DimVacancyOrErr()
+		vacancy, err := process.
+			Edges.
+			DimVacancyOrErr()
 		if err != nil {
 			return VacancyStatusSummary{}, fmt.Errorf(
 				"`DimVacancy` of `FactHiringProcess` not found: %w",
@@ -27,7 +29,7 @@ func GenerateVacancyStatusSummary(
 			)
 		}
 
-		countByStatus[vacancy.Status]++
+		countByStatus[property.DimVacancyStatus(vacancy.Status+1)]++
 	}
 
 	return VacancyStatusSummary{
