@@ -1,11 +1,10 @@
 package processing
 
 import (
-	"fmt"
-	"reflect"
-
 	"api5back/ent"
 	"api5back/src/property"
+	"fmt"
+	"reflect"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -34,7 +33,9 @@ func GenerateAverageHiringTimePerMonth(
 	monthsValues := [12]Month{}
 
 	for _, process := range data {
-		candidates, err := process.Edges.HiringProcessCandidatesOrErr()
+		candidates, err := process.
+			Edges.
+			HiringProcessCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
 				"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
@@ -79,7 +80,6 @@ func GenerateAverageHiringTimePerMonth(
 func GenerateAverageHiringTimePerFactHiringProcess(
 	fact_hiring_process *ent.FactHiringProcess,
 ) (float32, error) {
-
 	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
@@ -110,5 +110,4 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 	result := float32(days / hiredCandidates)
 
 	return result, nil
-
 }

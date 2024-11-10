@@ -1,0 +1,62 @@
+name: Go
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
+    - name: Start services with Docker Compose
+      run: |
+        docker-compose -f docker-compose.yml up -d
+
+    - name: Export Environment Variables
+      run: |
+        echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+        echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+        echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+        echo "DB_PASS=${{ secrets.DB_PASS }}" >> $GITHUB_ENV
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+        echo "DW_HOST=${{ secrets.DW_HOST }}" >> $GITHUB_ENV
+        echo "DW_PORT=${{ secrets.DW_PORT }}" >> $GITHUB_ENV
+        echo "DW_USER=${{ secrets.DW_USER }}" >> $GITHUB_ENV
+        echo "DW_PASS=${{ secrets.DW_PASS }}" >> $GITHUB_ENV
+        echo "DW_NAME=${{ secrets.DW_NAME }}" >> $GITHUB_ENV
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.0'
+
+    - name: Run Generate Script
+      run: go run scripts/generate/main.go
+
+    - name: Run Migrate Script
+      run: go run scripts/migrate/main.go
+
+    - name: Run Seeds Script
+      run: go run scripts/seeds/main.go
+
+    - name: Build
+      run: go run main.go
+
+    - name: Test
+      run: |
+        echo "Running all *_test.go files:"
+        find . -name '*_test.go'  # Lista todos os arquivos de teste
+        go test -v ./...

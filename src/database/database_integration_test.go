@@ -55,6 +55,7 @@ func TestBaseDatabaseOperations(t *testing.T) {
 				Run: func(t *testing.T) {
 					testDimUser, err = intEnv.Client.DimUser.
 						Create().
+						SetDbId(1).
 						SetName("John Doe").
 						SetOccupation("Software Engineer").
 						Save(ctx)
