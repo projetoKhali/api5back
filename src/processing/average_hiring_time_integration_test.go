@@ -59,6 +59,7 @@ func CreateTestData(
 			candidates = append(candidates, client.
 				HiringProcessCandidate.
 				Create().
+				SetDbId(j).
 				SetName(fmt.Sprintf("Candidate[%d][%d]", i, j)).
 				SetEmail("can@didate.com").
 				SetPhone("123456789").
@@ -146,13 +147,13 @@ func TestAverageHiringTime(t *testing.T) {
 
 		assert.Equal(t, float32(0), months.January)
 		assert.Equal(t, float32(0), months.February)
-		assert.Equal(t, float32(7.5), months.March)
+		assert.Equal(t, float32(8.5), months.March)
 		assert.Equal(t, float32(0), months.April)
 		assert.Equal(t, float32(0), months.May)
-		assert.Equal(t, float32(0), months.June)
-		assert.Equal(t, float32(0), months.July)
+		assert.Equal(t, float32(14.5), months.June)
+		assert.Equal(t, float32(13.5), months.July)
 		assert.Equal(t, float32(0), months.August)
-		assert.Equal(t, float32(0), months.September)
+		assert.Equal(t, float32(13.666667), months.September)
 		assert.Equal(t, float32(1), months.October)
 		assert.Equal(t, float32(0), months.November)
 		assert.Equal(t, float32(0), months.December)
