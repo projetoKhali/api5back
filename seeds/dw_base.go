@@ -409,7 +409,23 @@ func DataWarehouse(client *ent.Client) error {
 		},
 	}
 
+	logCurrentCandidate := 1
+	var logTotalCandidates int
+
+	for _, fact := range facts {
+		logTotalCandidates += fact.MetTotalCandidatesApplied
+	}
+
 	for factId, fact := range facts {
+		factProgressString := fmt.Sprintf(
+			"Creating fact hiring process %d/%d (%d%%)",
+			factId+1,
+			len(facts),
+			int(float64(factId+1)/float64(len(facts))*100),
+		)
+
+		fmt.Printf("%s\n", factProgressString)
+
 		_, err := client.FactHiringProcess.Create().
 			SetMetTotalCandidatesApplied(fact.MetTotalCandidatesApplied).
 			SetMetTotalCandidatesInterviewed(fact.MetTotalCandidatesInterviewed).
@@ -428,20 +444,26 @@ func DataWarehouse(client *ent.Client) error {
 			return fmt.Errorf("failed to create fact hiring process: %v", err)
 		}
 
-		currentCandidateDbId := 1
-		totalCandidates := fact.MetTotalCandidatesApplied + fact.MetTotalCandidatesInterviewed + fact.MetTotalCandidatesHired
-		totalCandidatesRemaining := totalCandidates - fact.MetTotalCandidatesHired - fact.MetTotalCandidatesInterviewed
+		factCurrentCandidateDbId := 1
+		factTotalCandidatesRemaining := fact.MetTotalCandidatesApplied - fact.MetTotalCandidatesHired - fact.MetTotalCandidatesInterviewed
 
 		for candidateStatus, candidateCategory := range [4]int{
-			totalCandidatesRemaining / 2,
+			factTotalCandidatesRemaining / 2,
 			fact.MetTotalCandidatesInterviewed,
 			fact.MetTotalCandidatesHired,
-			totalCandidatesRemaining / 2,
+			factTotalCandidatesRemaining / 2,
 		} {
 			for j := 0; j < candidateCategory; j++ {
+				fmt.Printf(
+					"%s • Creating fact candidate %d/%d (%d%%)\n",
+					factProgressString,
+					logCurrentCandidate,
+					logTotalCandidates,
+					int(float64(logCurrentCandidate)/float64(logTotalCandidates)*100),
+				)
 
-				t := float64(j) / float64(totalCandidates-1)
-				candidateName := generateName(currentCandidateDbId)
+				t := float64(j) / float64(fact.MetTotalCandidatesApplied-1)
+				candidateName := generateName(factCurrentCandidateDbId)
 				candidateApplyDate := lerpDate(
 					*vacancies[fact.DimVacancyId-1].OpeningDate,
 					*vacancies[fact.DimVacancyId-1].ClosingDate,
@@ -449,11 +471,11 @@ func DataWarehouse(client *ent.Client) error {
 				)
 
 				candidateBuilder := client.HiringProcessCandidate.Create().
-					SetDbId(currentCandidateDbId).
+					SetDbId(factCurrentCandidateDbId).
 					SetName(candidateName).
-					SetEmail(fmt.Sprintf("%s_%d@mail.com", candidateName, currentCandidateDbId)).
-					SetPhone(pseudoRandomPhoneIdempotent(currentCandidateDbId)).
-					SetScore(pseudoRandomScoreIdempotent(currentCandidateDbId)).
+					SetEmail(fmt.Sprintf("%s_%d@mail.com", candidateName, factCurrentCandidateDbId)).
+					SetPhone(pseudoRandomPhoneIdempotent(factCurrentCandidateDbId)).
+					SetScore(pseudoRandomScoreIdempotent(factCurrentCandidateDbId)).
 					SetFactHiringProcessID(factId + 1).
 					SetApplyDate(candidateApplyDate).
 					SetStatus(property.HiringProcessCandidateStatus(candidateStatus))
@@ -471,9 +493,14 @@ func DataWarehouse(client *ent.Client) error {
 					return fmt.Errorf("failed to create fact candidate: %v", err)
 				}
 
-				currentCandidateDbId++
+				factCurrentCandidateDbId++
+				logCurrentCandidate++
+
+				fmt.Print("\033[F\033[K") // \033[F moves up a line, \033[K clears the line
 			}
 		}
+
+		fmt.Print("\033[F\033[K") // \033[F moves up a line, \033[K clears the line
 	}
 
 	return nil
