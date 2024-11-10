@@ -82,8 +82,8 @@ func DataWarehouse(client *ent.Client) error {
 			DbId: 1, Title: "Software Engineer",
 			DimUsrId: 1, NumPositions: 1, ReqId: 1,
 			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			OpeningDate: &pgtype.Date{Time: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			ClosingDate: &pgtype.Date{Time: time.Date(2024, 12, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 			Status:      property.DimVacancyStatusOpen,
 		},
 		{
