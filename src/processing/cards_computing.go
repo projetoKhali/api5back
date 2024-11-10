@@ -16,7 +16,7 @@ type CardInfos struct {
 	AverageHiringTime   int `json:"averageHiringTime" default:"0"`
 }
 
-func ComputingCardInfo(
+func ComputingCardsInfo(
 	factHiringProcesses []*ent.FactHiringProcess,
 ) (CardInfos, error) {
 	if len(factHiringProcesses) == 0 {
@@ -25,7 +25,8 @@ func ComputingCardInfo(
 
 	countByStatus := make(map[property.DimProcessStatus]int)
 	approachingDeadline := 0
-	totalHiringTime := 0
+	totalHiringTime := 0.0
+	totalCandidates := 0
 
 	for _, factHiringProcess := range factHiringProcesses {
 		process, err := factHiringProcess.
@@ -48,7 +49,21 @@ func ComputingCardInfo(
 			approachingDeadline++
 		}
 
-		totalHiringTime += factHiringProcess.MetSumDurationHiringProces
+		candidates, err := factHiringProcess.
+			Edges.
+			HiringProcessCandidatesOrErr()
+		if err != nil {
+			return CardInfos{}, fmt.Errorf("error getting `hiring_process_candidates` of factHiringProcess: %+v", err)
+		}
+
+		for _, candidate := range candidates {
+			if candidate.Status == property.HiringProcessCandidateStatusHired {
+				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
+				intervalDays := interval.Hours() / 24
+				totalHiringTime += intervalDays
+				totalCandidates++
+			}
+		}
 	}
 
 	return CardInfos{
@@ -56,6 +71,6 @@ func ComputingCardInfo(
 		InProgress:          countByStatus[property.DimProcessStatusInProgress],
 		Closed:              countByStatus[property.DimProcessStatusClosed],
 		ApproachingDeadline: approachingDeadline,
-		AverageHiringTime:   totalHiringTime / len(factHiringProcesses),
+		AverageHiringTime:   int(totalHiringTime / float64(totalCandidates)),
 	}, nil
 }

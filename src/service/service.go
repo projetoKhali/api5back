@@ -170,7 +170,7 @@ func GetMetrics(
 
 	var errors []error
 
-	cardInfo, err := processing.ComputingCardInfo(hiringProcess)
+	cardInfo, err := processing.ComputingCardsInfo(hiringProcess)
 	if err != nil {
 		errors = append(errors, fmt.Errorf(
 			"could not calculate `CardInfo` data: %w",
