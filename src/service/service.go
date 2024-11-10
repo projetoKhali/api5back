@@ -13,6 +13,7 @@ import (
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
 	"api5back/src/processing"
+	"api5back/src/property"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -110,17 +111,27 @@ func applyQueryFilters(
 	}
 
 	if filter.ProcessStatus != nil && len(filter.ProcessStatus) > 0 {
+		var processStatuses []property.DimProcessStatus
+		for _, status := range filter.ProcessStatus {
+			processStatuses = append(processStatuses, property.DimProcessStatus(status))
+		}
+
 		query = query.Where(
 			facthiringprocess.HasDimProcessWith(
-				dimprocess.StatusIn(filter.ProcessStatus...),
+				dimprocess.StatusIn(processStatuses...),
 			),
 		)
 	}
 
 	if filter.VacancyStatus != nil && len(filter.VacancyStatus) > 0 {
+		var vacancyStatuses []property.DimVacancyStatus
+		for _, status := range filter.VacancyStatus {
+			vacancyStatuses = append(vacancyStatuses, property.DimVacancyStatus(status))
+		}
+
 		query = query.Where(
 			facthiringprocess.HasDimVacancyWith(
-				dimvacancy.StatusIn(filter.VacancyStatus...),
+				dimvacancy.StatusIn(vacancyStatuses...),
 			),
 		)
 	}

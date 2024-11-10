@@ -84,6 +84,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 2, Title: "Data Scientist",
@@ -91,6 +92,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "Rio de Janeiro",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 3, Title: "HR Specialist",
@@ -98,6 +100,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 3, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 3, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 4, Title: "UX Designer",
@@ -105,6 +108,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "Curitiba",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 5, Title: "Software Engineer",
@@ -112,6 +116,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 2, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 6, Title: "UX Designer",
@@ -119,6 +124,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 11, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 7, Title: "Data Scientist",
@@ -126,6 +132,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "Rio de Janeiro",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 10, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 8, Title: "Product Manager",
@@ -133,6 +140,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "Belo Horizonte",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 5, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusOpen,
 		},
 		{
 			DbId: 9, Title: "HR Specialist",
@@ -140,6 +148,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "São Paulo",
 			OpeningDate: &pgtype.Date{Time: time.Date(2023, 12, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusInAnalysis,
 		},
 		{
 			DbId: 10, Title: "Data Engineer",
@@ -147,6 +156,7 @@ func DataWarehouse(client *ent.Client) error {
 			Location:    "Sergipe",
 			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			Status:      property.DimVacancyStatusClosed,
 		},
 	}
 
@@ -160,6 +170,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetOpeningDate(vacancy.OpeningDate).
 			SetClosingDate(vacancy.ClosingDate).
 			SetDimUsrId(vacancy.DimUsrId).
+			SetStatus(vacancy.Status).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create vacancy %s: %v", vacancy.Title, err)
@@ -173,60 +184,70 @@ func DataWarehouse(client *ent.Client) error {
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    1,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 2, Title: "Recrutamento e Seleção - HR Specialist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    2,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 3, Title: "Gestão de Produto - Product Manager",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    3,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 4, Title: "Experiência do Usuário - UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    4,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 5, Title: "Análise de Dados - Data Scientist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    5,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 6, Title: "Desenvolvimento de Software - Software Engineer e UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    1,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 7, Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    2,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 8, Title: "Processo de Recrutamento - HR Specialist e Software Engineer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    3,
+			Status:      property.DimProcessStatusOpen,
 		},
 		{
 			DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    4,
+			Status:      property.DimProcessStatusInProgress,
 		},
 		{
 			DbId: 10, Title: "Inovação em Dados - Data Scientist e HR Specialist",
 			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 			DimUsrId:    5,
+			Status:      property.DimProcessStatusClosed,
 		},
 	}
 
@@ -237,6 +258,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetInitialDate(process.InitialDate).
 			SetFinishDate(process.FinishDate).
 			SetDimUsrId(int(process.DimUsrId)).
+			SetStatus(process.Status).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create process %s: %v", process.Title, err)
