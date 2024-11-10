@@ -22,10 +22,8 @@ func DataWarehouse(client *ent.Client) error {
 		{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
 	}
 
-	var userIDs []int64
-
 	for _, user := range users {
-		createdUser, err := client.DimUser.Create().
+		_, err := client.DimUser.Create().
 			SetDbId(user.DbId).
 			SetName(user.Name).
 			SetOccupation(user.Occupation).
@@ -33,7 +31,6 @@ func DataWarehouse(client *ent.Client) error {
 		if err != nil {
 			return fmt.Errorf("failed to create user %s: %v", user.Name, err)
 		}
-		userIDs = append(userIDs, int64(createdUser.DbId))
 	}
 
 	// Inserindo datas na tabela dim_datetime
@@ -246,8 +243,8 @@ func DataWarehouse(client *ent.Client) error {
 	// Inserindo dados na tabela fact_hiring_process
 	facts := []ent.FactHiringProcess{
 		{
+			DimUserId:                     1,
 			DimProcessId:                  1,
-			DimUserId:                     int(userIDs[0]),
 			DimVacancyId:                  1,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     10,
@@ -260,8 +257,8 @@ func DataWarehouse(client *ent.Client) error {
 			MetTotalNegative:              1,
 		},
 		{
+			DimUserId:                     2,
 			DimProcessId:                  2,
-			DimUserId:                     int(userIDs[1]),
 			DimVacancyId:                  2,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     12,
@@ -274,8 +271,8 @@ func DataWarehouse(client *ent.Client) error {
 			MetTotalNegative:              2,
 		},
 		{
+			DimUserId:                     3,
 			DimProcessId:                  3,
-			DimUserId:                     int(userIDs[2]),
 			DimVacancyId:                  3,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     8,
@@ -288,8 +285,8 @@ func DataWarehouse(client *ent.Client) error {
 			MetTotalNegative:              1,
 		},
 		{
+			DimUserId:                     4,
 			DimProcessId:                  4,
-			DimUserId:                     int(userIDs[3]),
 			DimVacancyId:                  4,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     15,
@@ -302,8 +299,8 @@ func DataWarehouse(client *ent.Client) error {
 			MetTotalNegative:              2,
 		},
 		{
+			DimUserId:                     5,
 			DimProcessId:                  5,
-			DimUserId:                     int(userIDs[4]),
 			DimVacancyId:                  5,
 			DimDateId:                     1,
 			MetTotalCandidatesApplied:     20,
