@@ -56,6 +56,7 @@ func TestDatabaseOperations(t *testing.T) {
 					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
 						Create().
 						SetFactHiringProcessID(testFactHiringProcessId).
+						SetDbId(1).
 						SetName("John Doe").
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
@@ -164,12 +165,14 @@ func TestTableDashboard(t *testing.T) {
 				DateRange:     nil,
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
+				Page:          nil,
+				PageSize:      nil,
 			},
 		)
 
 		require.NoError(t, err)
 		require.NotNil(t, vacancies)
-		require.Equal(t, 5, len(vacancies))
+		require.Equal(t, 10, len(vacancies.FactHiringProcess))
 	}); !testResult {
 		t.Fatalf("GetVacancyTable no filter test failed")
 	}
@@ -187,12 +190,14 @@ func TestTableDashboard(t *testing.T) {
 				},
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
+				Page:          nil,
+				PageSize:      nil,
 			},
 		)
 
 		require.NoError(t, err)
 		require.NotNil(t, vacancies)
-		require.Equal(t, 1, len(vacancies))
+		require.Equal(t, 1, len(vacancies.FactHiringProcess))
 	}); !testResult {
 		t.Fatalf("GetVacancyTable dateRange test failed")
 	}

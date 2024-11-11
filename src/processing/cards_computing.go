@@ -5,58 +5,72 @@ import (
 	"time"
 
 	"api5back/ent"
+	"api5back/src/property"
 )
 
-// CardInfos is a struct that contains the card computing data
 type CardInfos struct {
-	OpenProcesses                int `json:"openProcess"`
-	ExpiredProcesses             int `json:"expirededProcess"`
-	ApproachingDeadlineProcesses int `json:"approachingDeadlineProcess"`
-	CloseProcesses               int `json:"closeProcess"`
-	AverageHiringTime            int `json:"averageHiringTime"`
+	Open                int `json:"open" default:"0"`
+	InProgress          int `json:"inProgress" default:"0"`
+	Closed              int `json:"closed" default:"0"`
+	ApproachingDeadline int `json:"approachingDeadline" default:"0"`
+	AverageHiringTime   int `json:"averageHiringTime" default:"0"`
 }
 
-func ComputingCardInfo(
-	hiringData []*ent.FactHiringProcess,
+func ComputingCardsInfo(
+	factHiringProcesses []*ent.FactHiringProcess,
 ) (CardInfos, error) {
-	if len(hiringData) == 0 {
+	if len(factHiringProcesses) == 0 {
 		return CardInfos{}, nil
 	}
 
-	var cardInfos CardInfos
-	cardInfos.OpenProcesses = 0
-	cardInfos.ExpiredProcesses = 0
-	cardInfos.ApproachingDeadlineProcesses = 0
-	cardInfos.CloseProcesses = 0
-	cardInfos.AverageHiringTime = 0
-	totalHiringTime := 0
+	countByStatus := make(map[property.DimProcessStatus]int)
+	approachingDeadline := 0
+	totalHiringTime := 0.0
+	totalCandidates := 0
 
-	for _, hiring := range hiringData {
-		process, err := hiring.Edges.DimProcessOrErr()
+	for _, factHiringProcess := range factHiringProcesses {
+		process, err := factHiringProcess.
+			Edges.
+			DimProcessOrErr()
 		if err != nil {
-			return cardInfos, fmt.Errorf("error getting process data: %v", err)
+			return CardInfos{}, fmt.Errorf("error getting `dim_process` of factHiringProcess: %+v", err)
 		}
 
-		switch process.Status {
-		case 1:
-			cardInfos.OpenProcesses++
-		case 2:
-			cardInfos.ExpiredProcesses++
-		case 3:
-			cardInfos.CloseProcesses++
-		}
+		countByStatus[property.DimProcessStatus(process.Status+1)]++
+
 		totalDuration := process.
 			FinishDate.
 			Time.
 			Sub(process.InitialDate.Time)
+
 		twentyPercentDuration := totalDuration * 20 / 100
+
 		if time.Until(process.FinishDate.Time) < twentyPercentDuration && process.Status == 1 {
-			cardInfos.ApproachingDeadlineProcesses++
+			approachingDeadline++
 		}
-		totalHiringTime += hiring.MetSumDurationHiringProces
+
+		candidates, err := factHiringProcess.
+			Edges.
+			HiringProcessCandidatesOrErr()
+		if err != nil {
+			return CardInfos{}, fmt.Errorf("error getting `hiring_process_candidates` of factHiringProcess: %+v", err)
+		}
+
+		for _, candidate := range candidates {
+			if candidate.Status == property.HiringProcessCandidateStatusHired {
+				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
+				intervalDays := interval.Hours() / 24
+				totalHiringTime += intervalDays
+				totalCandidates++
+			}
+		}
 	}
 
-	cardInfos.AverageHiringTime = totalHiringTime / len(hiringData)
-
-	return cardInfos, nil
+	return CardInfos{
+		Open:                countByStatus[property.DimProcessStatusOpen],
+		InProgress:          countByStatus[property.DimProcessStatusInProgress],
+		Closed:              countByStatus[property.DimProcessStatusClosed],
+		ApproachingDeadline: approachingDeadline,
+		AverageHiringTime:   int(totalHiringTime / float64(totalCandidates)),
+	}, nil
 }

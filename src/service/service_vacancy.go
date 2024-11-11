@@ -13,11 +13,16 @@ func GetVacancySuggestions(
 	client *ent.Client,
 	processesIds *[]int,
 ) ([]model.Suggestion, error) {
-	query := client.FactHiringProcess.Query().WithDimVacancy() // Com WithDimVacancy sempre incluído
+	query := client.
+		FactHiringProcess.
+		Query().
+		WithDimVacancy() // Com WithDimVacancy sempre incluído
 
 	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
 	if processesIds != nil && len(*processesIds) > 0 {
-		query = query.Where(facthiringprocess.DimProcessIdIn(*processesIds...))
+		query = query.
+			Where(facthiringprocess.
+				DimProcessIdIn(*processesIds...))
 	}
 
 	vacancies, err := query.All(ctx)
@@ -31,7 +36,7 @@ func GetVacancySuggestions(
 		if fact.Edges.DimVacancy != nil {
 			vacancy := fact.Edges.DimVacancy
 			uniqueVacancies[vacancy.ID] = model.Suggestion{
-				Id:    vacancy.ID,
+				Id:    vacancy.DbId,
 				Title: vacancy.Title,
 			}
 		}
