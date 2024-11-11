@@ -27,27 +27,28 @@ def create_dim_datetime():
 
     return df_dim_datetime
 
-df_dim_datetime = create_dim_datetime()
+dim_datetime = create_dim_datetime()
 
-df_dim_user = df_user.rename(columns={
-    'usr_id': 'id',
+dim_user = df_user.rename(columns={
+    'usr_id': 'db_id',
     'usr_name': 'name',
     'usr_ocupation': 'occupation'
-})[['id', 'name', 'occupation']]
+})[['db_id', 'name', 'occupation']]
 
-df_dim_process = df_process.rename(columns={
-    'pc_id': 'id',
+
+dim_process = df_process.rename(columns={
+    'pc_id': 'db_id',
     'pc_title': 'title',
     'pc_initial_date': 'initial_date',
     'pc_finish_date': 'finish_date',
     'pc_status': 'status',
     'usr_id': 'dim_usr_id',
     'pc_description': 'description'
-})[['id', 'title', 'initial_date', 
+})[['db_id', 'title', 'initial_date', 
     'finish_date', 'status', 'dim_usr_id', 'description']]
 
-df_dim_vacancy = df_vacancy.rename(columns={
-    'vc_id': 'id',
+dim_vacancy = df_vacancy.rename(columns={
+    'vc_id': 'db_id',
     'vc_title': 'title',
     'vc_num_positions' : 'num_positions',
     'vc_status': 'status',
@@ -55,8 +56,41 @@ df_dim_vacancy = df_vacancy.rename(columns={
     'usr_id' : 'dim_usr_id',
     'vc_opening_date' : 'opening_date',
     'vc_closing_date' : 'closing_date'
-})[['id', 'title', 'num_positions', 
+})[['db_id', 'title', 'num_positions', 
     'status', 'location', 'dim_usr_id', 'opening_date', 'closing_date']]
+
+candidate_complete = df_candidates.merge(
+    df_vacancy_candidate[['cd_id', 'vc_cd_insert_date', 'vc_id']],
+    on='cd_id',
+    how='left'
+)
+
+candidate_columns = candidate_complete.rename(columns={
+    'cd_id' : 'db_id',
+    'cd_name' : 'name',
+    'cd_email' : 'email',
+    'cd_phone' : 'phone',
+    'cd_status' : 'status',
+    'cd_score' : 'score',
+    'cd_last_update' : 'updated_at',
+    'vc_cd_insert_date' : 'apply_date',
+    'vc_id' :  'fact_hiring_process_id'
+})
+
+columns = [
+    'db_id',
+    'name',
+    'email',
+    'phone',
+    'score',
+    'apply_date',
+    'status',
+    'updated_at',
+    'fact_hiring_process_id'
+]
+
+
+hiring_process_candidate = candidate_columns[columns]
 
 def create_fact_table(df_process, df_vacancy, df_vacancy_candidate, df_interview, df_feedback, df_hiring):
     """Cria a tabela fato com todas as métricas e dimensões necessárias."""
@@ -91,10 +125,8 @@ def create_fact_table(df_process, df_vacancy, df_vacancy_candidate, df_interview
     })
     
     fact_table = fact_table.reset_index(drop=True)
-    fact_table['id'] = fact_table.index + 1
     
     columns = [
-        'id',
         'met_total_candidates_applied',
         'met_total_candidates_interviewed',
         'met_total_candidates_hired',
@@ -133,16 +165,19 @@ if __name__ == "__main__":
     )
     
     print("Dimensão DateTime:")
-    print(df_dim_datetime.head())
+    print(dim_datetime.head())
 
     print("Dimensão User:")
-    print(df_dim_user.head())
+    print(dim_user.head())
 
     print("\nDimensão Process:")
-    print(df_dim_process.head())
+    print(dim_process.head())
 
     print("\nDimensão Vacancy:")
-    print(df_dim_vacancy.head())
+    print(dim_vacancy.head())
+
+    print("\nDimensão Candidate:")
+    print(hiring_process_candidate.head())
     
     print("\nFact Hiring Process:")
     print(fact_hiring_process.head())

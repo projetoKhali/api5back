@@ -1,31 +1,28 @@
 package service
 
 import (
+	"context"
+
 	"api5back/ent"
 	"api5back/ent/facthiringprocess"
-	"context"
+	"api5back/src/model"
 )
 
-type VacancyService struct {
-	dbClient *ent.Client
-}
+func GetVacancySuggestions(
+	ctx context.Context,
+	client *ent.Client,
+	processesIds *[]int,
+) ([]model.Suggestion, error) {
+	query := client.
+		FactHiringProcess.
+		Query().
+		WithDimVacancy() // Com WithDimVacancy sempre incluído
 
-func NewVacancyService(client *ent.Client) *VacancyService {
-	return &VacancyService{dbClient: client}
-}
-
-type UniqueVacancy struct {
-	ID    int
-	Title string
-}
-
-func (vs *VacancyService) GetVacancySuggestions(ctx context.Context, processesIds []int) ([]UniqueVacancy, error) {
-	query := vs.dbClient.FactHiringProcess.Query()
-
-	if len(processesIds) > 0 {
-		query = query.Where(facthiringprocess.DimProcessIdIn(processesIds...))
-		query = query.WithDimVacancy()
-
+	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
+	if processesIds != nil && len(*processesIds) > 0 {
+		query = query.
+			Where(facthiringprocess.
+				DimProcessIdIn(*processesIds...))
 	}
 
 	vacancies, err := query.All(ctx)
@@ -33,20 +30,20 @@ func (vs *VacancyService) GetVacancySuggestions(ctx context.Context, processesId
 		return nil, err
 	}
 
-	uniqueVacancies := make(map[int]UniqueVacancy)
+	uniqueVacancies := make(map[int]model.Suggestion)
 
 	for _, fact := range vacancies {
 		if fact.Edges.DimVacancy != nil {
 			vacancy := fact.Edges.DimVacancy
-			uniqueVacancies[vacancy.ID] = UniqueVacancy{
-				ID:    vacancy.ID,
+			uniqueVacancies[vacancy.ID] = model.Suggestion{
+				Id:    vacancy.DbId,
 				Title: vacancy.Title,
 			}
 		}
 	}
 
-	// Convert the map to a slice
-	result := make([]UniqueVacancy, 0, len(uniqueVacancies))
+	// Convertendo o map para slice
+	result := make([]model.Suggestion, 0, len(uniqueVacancies))
 	for _, v := range uniqueVacancies {
 		result = append(result, v)
 	}

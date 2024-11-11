@@ -1,11 +1,10 @@
 package processing
 
 import (
-	"fmt"
-	"reflect"
-
 	"api5back/ent"
 	"api5back/src/property"
+	"fmt"
+	"reflect"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -28,13 +27,15 @@ type Month struct {
 	HiredCandidates     float64
 }
 
-func GenerateAverageHiringTime(
+func GenerateAverageHiringTimePerMonth(
 	data []*ent.FactHiringProcess,
 ) (AverageHiringTimePerMonth, error) {
 	monthsValues := [12]Month{}
 
 	for _, process := range data {
-		candidates, err := process.Edges.HiringProcessCandidatesOrErr()
+		candidates, err := process.
+			Edges.
+			HiringProcessCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
 				"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
@@ -72,6 +73,41 @@ func GenerateAverageHiringTime(
 			resultValue.FieldByName(fieldName).SetFloat(float64(avg))
 		}
 	}
+
+	return result, nil
+}
+
+func GenerateAverageHiringTimePerFactHiringProcess(
+	fact_hiring_process *ent.FactHiringProcess,
+) (float32, error) {
+	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
+	if err != nil {
+		return 0, fmt.Errorf(
+			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+			err,
+		)
+	}
+
+	hiredCandidates := 0.0
+	days := 0.0
+
+	for _, candidate := range candidates {
+		if candidate.Status == property.HiringProcessCandidateStatusHired {
+			interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
+			intervalDays := interval.Hours() / 24
+			hiredCandidates += 1
+			days += intervalDays
+
+		}
+	}
+
+	if hiredCandidates == 0 {
+		return 0, fmt.Errorf(
+			"`No hired candidates found: %w",
+			err,
+		)
+	}
+	result := float32(days / hiredCandidates)
 
 	return result, nil
 }

@@ -1,29 +1,39 @@
 package service
 
 import (
+	"context"
+
 	"api5back/ent"
 	"api5back/ent/dimprocess"
-	"context"
+	"api5back/src/model"
 )
 
-type HiringProcessService struct {
-	client *ent.Client
-}
+func ListHiringProcesses(
+	ctx context.Context,
+	client *ent.Client,
+	userIDs *[]int,
+) ([]model.Suggestion, error) {
+	query := client.
+		DimProcess.
+		Query()
 
-func NewHiringProcessService(client *ent.Client) *HiringProcessService {
-	return &HiringProcessService{client: client}
-}
-
-func (s *HiringProcessService) ListHiringProcesses(ctx context.Context, userIDs []int) ([]*ent.DimProcess, error) {
-	query := s.client.DimProcess.Query()
-
-	if len(userIDs) > 0 {
-		query = query.Where(dimprocess.DimUsrIdIn(userIDs...))
+	// Verificar se o array de userIDs não é nil e se tem elementos
+	if userIDs != nil && len(*userIDs) > 0 {
+		query = query.Where(dimprocess.DimUsrIdIn(*userIDs...))
 	}
 
 	processes, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return processes, nil
+
+	var response []model.Suggestion
+	for _, process := range processes {
+		response = append(response, model.Suggestion{
+			Id:    process.DbId,
+			Title: process.Title,
+		})
+	}
+
+	return response, nil
 }

@@ -1,26 +1,30 @@
 package service
 
 import (
-	"api5back/ent"
-	"api5back/ent/dimuser"
 	"context"
+
+	"api5back/ent"
+	"api5back/src/model"
 )
 
-type UserService struct {
-	dwClient *ent.Client
-}
-
-func NewUserService(dwClient *ent.Client) *UserService {
-	return &UserService{dwClient: dwClient}
-}
-
-func (s *UserService) GetUsers(ctx context.Context) ([]*ent.DimUser, error) {
-	users, err := s.dwClient.DimUser.
+func GetUsers(
+	ctx context.Context,
+	client *ent.Client,
+) ([]model.Suggestion, error) {
+	users, err := client.DimUser.
 		Query().
-		Select(dimuser.FieldID, dimuser.FieldName).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return users, nil
+
+	var response []model.Suggestion
+	for _, user := range users {
+		response = append(response, model.Suggestion{
+			Id:    user.DbId,
+			Title: user.Name,
+		})
+	}
+
+	return response, nil
 }

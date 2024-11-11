@@ -5,7 +5,7 @@
 bin/
 docs/
 etl_loader_*
-etl/__pycache__/
+etl/__pycache__/*
 
 # Generated files except `generate.go`
 ent/*

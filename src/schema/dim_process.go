@@ -16,6 +16,7 @@ type DimProcess struct {
 
 func (DimProcess) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("dbId"),
 		field.String("title"),
 		field.Other("initialDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
