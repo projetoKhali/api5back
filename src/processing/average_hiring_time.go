@@ -1,10 +1,11 @@
 package processing
 
 import (
-	"api5back/ent"
-	"api5back/src/property"
 	"fmt"
 	"reflect"
+
+	"api5back/ent"
+	"api5back/src/property"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -35,16 +36,16 @@ func GenerateAverageHiringTimePerMonth(
 	for _, process := range data {
 		candidates, err := process.
 			Edges.
-			HiringProcessCandidatesOrErr()
+			DimCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
-				"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+				"`DimCandidates` of `FactHiringProcess` not found: %w",
 				err,
 			)
 		}
 
 		for _, candidate := range candidates {
-			if candidate.Status == property.HiringProcessCandidateStatusHired {
+			if candidate.Status == property.DimCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
 				monthIndex := candidate.UpdatedAt.Time.Month() - 1
@@ -80,10 +81,10 @@ func GenerateAverageHiringTimePerMonth(
 func GenerateAverageHiringTimePerFactHiringProcess(
 	fact_hiring_process *ent.FactHiringProcess,
 ) (float32, error) {
-	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
+	candidates, err := fact_hiring_process.Edges.DimCandidatesOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
-			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+			"`DimCandidates` of `FactHiringProcess` not found: %w",
 			err,
 		)
 	}
@@ -92,7 +93,7 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 	days := 0.0
 
 	for _, candidate := range candidates {
-		if candidate.Status == property.HiringProcessCandidateStatusHired {
+		if candidate.Status == property.DimCandidateStatusHired {
 			interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 			intervalDays := interval.Hours() / 24
 			hiredCandidates += 1

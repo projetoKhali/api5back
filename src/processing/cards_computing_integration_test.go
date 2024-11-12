@@ -23,11 +23,11 @@ func createTestData(
 ) (
 	[]*ent.DimProcessCreate,
 	[]*ent.FactHiringProcessCreate,
-	[]*ent.HiringProcessCandidateCreate,
+	[]*ent.DimCandidateCreate,
 ) {
 	var processes []*ent.DimProcessCreate
 	var factHiringProcesses []*ent.FactHiringProcessCreate
-	var candidates []*ent.HiringProcessCandidateCreate
+	var candidates []*ent.DimCandidateCreate
 
 	for datePairIndex, datePair := range [3][2]string{
 		{"2022-01-19", "2022-01-21"},
@@ -57,7 +57,7 @@ func createTestData(
 		)
 
 		candidates = append(candidates, client.
-			HiringProcessCandidate.
+			DimCandidate.
 			Create().
 			SetName(fmt.Sprintf("Candidate [%d]", datePairIndex)).
 			SetEmail("can@didate.com").
@@ -117,7 +117,7 @@ func TestComputingCardInfo(t *testing.T) {
 			FactHiringProcess.
 			Query().
 			WithDimProcess().
-			WithHiringProcessCandidates().
+			WithDimCandidates().
 			All(ctx)
 
 		require.NoError(t, err)

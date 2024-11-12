@@ -58,7 +58,7 @@ func randomName() [2]string {
 	}
 }
 
-func DwProceduralHiringProcessCandidates(client *ent.Client) error {
+func DwProceduralDimCandidates(client *ent.Client) error {
 	ctx := context.Background()
 
 	// select FactHiringProcess from the database (max 100)
@@ -72,7 +72,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 		return fmt.Errorf("failed to query FactHiringProcess: %v", err)
 	}
 
-	var candidatesToInsert []*ent.HiringProcessCandidateCreate
+	var candidatesToInsert []*ent.DimCandidateCreate
 
 	// loop through the FactHiringProcess and create 5 to 10 candidates for each
 	for _, factHiringProcess := range factHiringProcesses {
@@ -80,7 +80,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 
 		for i := 0; i < numberOfCandidates; i++ {
 			candidateName := randomName()
-			candidateStatus := property.HiringProcessCandidateStatus(rand.Intn(4))
+			candidateStatus := property.DimCandidateStatus(rand.Intn(4))
 			factHiringProcessVacancy, err := factHiringProcess.Edges.DimVacancyOrErr()
 			if err != nil {
 				return fmt.Errorf("failed to get vacandy of FactHiringProcess: %v", err)
@@ -101,7 +101,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 			}
 
 			updatedAtPgType := applyDatePgType
-			if candidateStatus == property.HiringProcessCandidateStatusHired {
+			if candidateStatus == property.DimCandidateStatusHired {
 				maxHiredDate := int(factHiringProcessVacancy.
 					ClosingDate.
 					Time.
@@ -117,7 +117,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 			}
 
 			candidatesToInsert = append(candidatesToInsert, client.
-				HiringProcessCandidate.
+				DimCandidate.
 				Create().
 				SetFactHiringProcessID(factHiringProcess.ID).
 				SetName(fmt.Sprintf(
@@ -144,7 +144,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 	}
 
 	if _, err = client.
-		HiringProcessCandidate.
+		DimCandidate.
 		CreateBulk(candidatesToInsert...).
 		Save(ctx); err != nil {
 		return fmt.Errorf("failed to create candidate: %v", err)

@@ -150,7 +150,7 @@ func GetMetrics(
 			Query().
 			WithDimVacancy().
 			WithDimProcess().
-			WithHiringProcessCandidates(),
+			WithDimCandidates(),
 		filter,
 	)
 	if err != nil {
@@ -234,7 +234,7 @@ func GetVacancyTable(
 			Query().
 			WithDimProcess().
 			WithDimVacancy().
-			WithHiringProcessCandidates(),
+			WithDimCandidates(),
 		filter,
 	)
 	if err != nil {

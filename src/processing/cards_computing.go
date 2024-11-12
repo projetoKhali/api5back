@@ -51,13 +51,13 @@ func ComputingCardsInfo(
 
 		candidates, err := factHiringProcess.
 			Edges.
-			HiringProcessCandidatesOrErr()
+			DimCandidatesOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `hiring_process_candidates` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf("error getting `dim_candidates` of factHiringProcess: %+v", err)
 		}
 
 		for _, candidate := range candidates {
-			if candidate.Status == property.HiringProcessCandidateStatusHired {
+			if candidate.Status == property.DimCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
 				totalHiringTime += intervalDays

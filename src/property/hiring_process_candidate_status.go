@@ -5,16 +5,16 @@ import (
 	"fmt"
 )
 
-type HiringProcessCandidateStatus int
+type DimCandidateStatus int
 
 const (
-	HiringProcessCandidateStatusInAnalysis HiringProcessCandidateStatus = iota
-	HiringProcessCandidateStatusInterview
-	HiringProcessCandidateStatusHired
-	HiringProcessCandidateStatusRejected
+	DimCandidateStatusInAnalysis DimCandidateStatus = iota
+	DimCandidateStatusInterview
+	DimCandidateStatusHired
+	DimCandidateStatusRejected
 )
 
-func (s HiringProcessCandidateStatus) String() string {
+func (s DimCandidateStatus) String() string {
 	return [...]string{
 		"In Analysis",
 		"Interview",
@@ -23,41 +23,41 @@ func (s HiringProcessCandidateStatus) String() string {
 	}[s]
 }
 
-func (HiringProcessCandidateStatus) Values() []string {
+func (DimCandidateStatus) Values() []string {
 	return []string{
-		HiringProcessCandidateStatusInAnalysis.String(),
-		HiringProcessCandidateStatusInterview.String(),
-		HiringProcessCandidateStatusHired.String(),
-		HiringProcessCandidateStatusRejected.String(),
+		DimCandidateStatusInAnalysis.String(),
+		DimCandidateStatusInterview.String(),
+		DimCandidateStatusHired.String(),
+		DimCandidateStatusRejected.String(),
 	}
 }
 
-func (s HiringProcessCandidateStatus) Value() (driver.Value, error) {
+func (s DimCandidateStatus) Value() (driver.Value, error) {
 	return s.String(), nil
 }
 
-func (s *HiringProcessCandidateStatus) Scan(value interface{}) error {
+func (s *DimCandidateStatus) Scan(value interface{}) error {
 	var valueStr string
 	switch v := value.(type) {
 	case nil:
 		return nil
 	case int:
-		*s = HiringProcessCandidateStatus(v)
+		*s = DimCandidateStatus(v)
 		return nil
 	case string:
 		valueStr = v
 	case []byte:
 		valueStr = string(v)
 	default:
-		return fmt.Errorf("invalid hiring_process_candidate status: %v", value)
+		return fmt.Errorf("invalid dim_candidate status: %v", value)
 	}
 
-	for i, statusStr := range HiringProcessCandidateStatus(0).Values() {
+	for i, statusStr := range DimCandidateStatus(0).Values() {
 		if statusStr == string(valueStr) {
-			*s = HiringProcessCandidateStatus(i)
+			*s = DimCandidateStatus(i)
 			return nil
 		}
 	}
 
-	return fmt.Errorf("invalid hiring_process_candidate status: %q", value)
+	return fmt.Errorf("invalid dim_candidate status: %q", value)
 }

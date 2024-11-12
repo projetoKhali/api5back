@@ -23,8 +23,8 @@ var SeedsPresets = []SeedsPreset{
 	},
 	{
 		Abbreviation: "phpc",
-		Name:         "ProceduralHiringProcessCandidates",
-		SeedsFunc:    seeds.DwProceduralHiringProcessCandidates,
+		Name:         "ProceduralDimCandidates",
+		SeedsFunc:    seeds.DwProceduralDimCandidates,
 	},
 }
 

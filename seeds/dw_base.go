@@ -470,7 +470,7 @@ func DataWarehouse(client *ent.Client) error {
 					t,
 				)
 
-				candidateBuilder := client.HiringProcessCandidate.Create().
+				candidateBuilder := client.DimCandidate.Create().
 					SetDbId(factCurrentCandidateDbId).
 					SetName(candidateName).
 					SetEmail(fmt.Sprintf("%s_%d@mail.com", candidateName, factCurrentCandidateDbId)).
@@ -478,9 +478,9 @@ func DataWarehouse(client *ent.Client) error {
 					SetScore(pseudoRandomScoreIdempotent(factCurrentCandidateDbId)).
 					SetFactHiringProcessID(factId + 1).
 					SetApplyDate(candidateApplyDate).
-					SetStatus(property.HiringProcessCandidateStatus(candidateStatus))
+					SetStatus(property.DimCandidateStatus(candidateStatus))
 
-				if property.HiringProcessCandidateStatus(candidateStatus) > property.HiringProcessCandidateStatusInAnalysis {
+				if property.DimCandidateStatus(candidateStatus) > property.DimCandidateStatusInAnalysis {
 					candidateBuilder.SetUpdatedAt(lerpDate(
 						*candidateApplyDate,
 						*vacancies[fact.DimVacancyId-1].ClosingDate,

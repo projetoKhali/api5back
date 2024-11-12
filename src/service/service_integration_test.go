@@ -30,13 +30,13 @@ func TestDatabaseOperations(t *testing.T) {
 		t.Fatalf("Setup test failed")
 	}
 
-	t.Run("Test hiring_process_candidate table operations", func(t *testing.T) {
+	t.Run("Test dim_candidate table operations", func(t *testing.T) {
 		var testFactHiringProcessId int
-		var hiringProcessCandidateId int
+		var dimCandidateId int
 
 		for _, TestCase := range []database.TestCase{
 			{
-				Name: "Insert a hiring_process_candidate into the table",
+				Name: "Insert a dim_candidate into the table",
 				Run: func(t *testing.T) {
 					factHiringProcess, err := intEnv.
 						Client.
@@ -53,7 +53,7 @@ func TestDatabaseOperations(t *testing.T) {
 						DimVacancyOrErr()
 					require.NoError(t, err)
 
-					hiringProcessCandidate, err := intEnv.Client.HiringProcessCandidate.
+					dimCandidate, err := intEnv.Client.DimCandidate.
 						Create().
 						SetFactHiringProcessID(testFactHiringProcessId).
 						SetDbId(1).
@@ -61,14 +61,14 @@ func TestDatabaseOperations(t *testing.T) {
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
 						SetApplyDate(dimVacancy.OpeningDate).
-						SetStatus(property.HiringProcessCandidateStatusInAnalysis).
+						SetStatus(property.DimCandidateStatusInAnalysis).
 						SetScore(0).
 						Save(ctx)
 					if err != nil {
-						t.Fatalf("failed to insert the hiring_process_candidate: %v", err)
+						t.Fatalf("failed to insert the dim_candidate: %v", err)
 					}
 
-					hiringProcessCandidateId = hiringProcessCandidate.ID
+					dimCandidateId = dimCandidate.ID
 				},
 			},
 			{
@@ -79,14 +79,14 @@ func TestDatabaseOperations(t *testing.T) {
 						FactHiringProcess.
 						Query().
 						WithDimVacancy().
-						WithHiringProcessCandidates().
+						WithDimCandidates().
 						Where(facthiringprocess.ID(testFactHiringProcessId)).
 						First(ctx)
 					require.NoError(t, err)
 
 					candidates, err := factHiringProcesses.
 						Edges.
-						HiringProcessCandidatesOrErr()
+						DimCandidatesOrErr()
 					require.NoError(t, err)
 					require.NotNil(t, candidates)
 					require.NotEmpty(t, candidates)
@@ -95,16 +95,16 @@ func TestDatabaseOperations(t *testing.T) {
 			{
 				Name: "Select a candidate by ID",
 				Run: func(t *testing.T) {
-					hiringProcessCandidate, err := intEnv.
+					dimCandidate, err := intEnv.
 						Client.
-						HiringProcessCandidate.
-						Get(ctx, hiringProcessCandidateId)
+						DimCandidate.
+						Get(ctx, dimCandidateId)
 					require.NoError(t, err)
-					require.NotNil(t, hiringProcessCandidate)
+					require.NotNil(t, dimCandidate)
 					require.Equal(
 						t,
-						property.HiringProcessCandidateStatusInAnalysis,
-						hiringProcessCandidate.Status,
+						property.DimCandidateStatusInAnalysis,
+						dimCandidate.Status,
 					)
 				},
 			},
