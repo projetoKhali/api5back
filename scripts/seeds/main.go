@@ -18,12 +18,12 @@ type SeedsPreset struct {
 var SeedsPresets = []SeedsPreset{
 	{
 		Abbreviation: "dw",
-		Name:         "DataWarehouse",
+		Name:         "data-warehouse",
 		SeedsFunc:    seeds.DataWarehouse,
 	},
 	{
-		Abbreviation: "phpc",
-		Name:         "ProceduralHiringProcessCandidates",
+		Abbreviation: "c",
+		Name:         "candidates",
 		SeedsFunc:    seeds.DwProceduralHiringProcessCandidates,
 	},
 }
