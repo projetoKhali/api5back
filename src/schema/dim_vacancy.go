@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"api5back/src/property"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
@@ -20,7 +22,9 @@ func (DimVacancy) Fields() []ent.Field {
 		field.String("title"),
 		field.Int("numPositions"),
 		field.Int("reqId").Optional(),
-		field.Int("status").Default(1),
+		field.Int("status").
+			GoType(property.DimVacancyStatus(1)).
+			Default(int(property.DimVacancyStatusOpen)),
 		field.String("location"),
 		field.Int("dimUsrId"),
 		field.Other("openingDate", &pgtype.Date{}).SchemaType(map[string]string{
