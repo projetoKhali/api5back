@@ -25,14 +25,14 @@ func DataWarehouse(client *ent.Client) error {
 		{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
 	}
 
-	for _, user := range users {
+	for i, user := range users {
 		_, err := client.DimUser.Create().
 			SetDbId(user.DbId).
 			SetName(user.Name).
 			SetOccupation(user.Occupation).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create user %s: %v", user.Name, err)
+			return fmt.Errorf("failed to create user [%d] %+v: %+v", i, user, err)
 		}
 	}
 
@@ -60,7 +60,7 @@ func DataWarehouse(client *ent.Client) error {
 		},
 	}
 
-	for _, date := range dates {
+	for i, date := range dates {
 		_, err := client.DimDatetime.Create().
 			SetDate(date.Date).
 			SetYear(date.Year).
@@ -72,7 +72,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetSecond(date.Second).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create date: %v", err)
+			return fmt.Errorf("failed to create date [%d]: %+v", i, err)
 		}
 	}
 
@@ -160,7 +160,7 @@ func DataWarehouse(client *ent.Client) error {
 		},
 	}
 
-	for _, vacancy := range vacancies {
+	for i, vacancy := range vacancies {
 		_, err := client.DimVacancy.Create().
 			SetDbId(vacancy.DbId).
 			SetTitle(vacancy.Title).
@@ -173,7 +173,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetStatus(vacancy.Status).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create vacancy %s: %v", vacancy.Title, err)
+			return fmt.Errorf("failed to create vacancy [%d] %s: %+v", i, vacancy.Title, err)
 		}
 	}
 
@@ -251,7 +251,7 @@ func DataWarehouse(client *ent.Client) error {
 		},
 	}
 
-	for _, process := range processes {
+	for i, process := range processes {
 		_, err := client.DimProcess.Create().
 			SetDbId(process.DbId).
 			SetTitle(process.Title).
@@ -261,7 +261,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetStatus(process.Status).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create process %s: %v", process.Title, err)
+			return fmt.Errorf("failed to create process [%d] %s: %+v", i, process.Title, err)
 		}
 	}
 
@@ -441,7 +441,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetDimDatetimeID(fact.DimDateId).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create fact hiring process: %v", err)
+			return fmt.Errorf("failed to create fact hiring process: [%d] %+v", factId, err)
 		}
 
 		factCurrentCandidateDbId := 1
@@ -490,7 +490,7 @@ func DataWarehouse(client *ent.Client) error {
 
 				_, err := candidateBuilder.Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to create fact candidate: %v", err)
+					return fmt.Errorf("failed to create dim_candidate [%d]: %+v", logCurrentCandidate, err)
 				}
 
 				factCurrentCandidateDbId++

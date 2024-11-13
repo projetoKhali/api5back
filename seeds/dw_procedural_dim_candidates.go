@@ -75,7 +75,7 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 	var candidatesToInsert []*ent.DimCandidateCreate
 
 	// loop through the FactHiringProcess and create 5 to 10 candidates for each
-	for _, factHiringProcess := range factHiringProcesses {
+	for i, factHiringProcess := range factHiringProcesses {
 		numberOfCandidates := rand.Intn(6) + 5
 
 		factHiringProcessVacancy, err := factHiringProcess.
@@ -85,7 +85,7 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 			return fmt.Errorf("failed to get vacancy of FactHiringProcess [%d]: %v", i, err)
 		}
 
-		for i := 0; i < numberOfCandidates; i++ {
+		for j := 0; j < numberOfCandidates; j++ {
 			candidateName := randomName()
 			candidateStatus := property.DimCandidateStatus(rand.Intn(4))
 
@@ -98,9 +98,10 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 					Sub(factHiringProcessVacancy.OpeningDate.Time).
 					Hours()/24)+1,
 				))
+
 			applyDatePgType := &pgtype.Date{}
 			if err := applyDatePgType.Scan(applyDate); err != nil {
-				return fmt.Errorf("failed to generate random applyDate for candidate: %v", err)
+				return fmt.Errorf("failed to generate random applyDate for candidate [%d]: %v", i, err)
 			}
 
 			updatedAtPgType := applyDatePgType
@@ -115,7 +116,7 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 				updatedAt := applyDate.AddDate(0, 0, rand.Intn(maxHiredDate+1)+1)
 				updatedAtPgType = &pgtype.Date{}
 				if err := updatedAtPgType.Scan(updatedAt); err != nil {
-					return fmt.Errorf("failed to generate random updatedAt for candidate: %v", err)
+					return fmt.Errorf("failed to generate random updatedAt for candidate [%d]: %v", i, err)
 				}
 			}
 
