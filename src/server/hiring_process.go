@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"api5back/ent"
@@ -50,7 +51,7 @@ func Dashboard(
 		// TODO: change to pointer
 		var dashboardMetricsFilter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -58,7 +59,7 @@ func Dashboard(
 			c, dwClient, dashboardMetricsFilter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -96,7 +97,7 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		users, err := service.GetUsers(c, dwClient)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -123,7 +124,7 @@ func HiringProcessList(
 
 		// Parse the body for user IDs
 		if err := c.ShouldBindJSON(&userIDs); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -132,7 +133,7 @@ func HiringProcessList(
 			userIDs,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -157,7 +158,7 @@ func VacancyList(
 		c.Header("Content-Type", "application/json")
 		var processesIds *[]int
 		if err := c.ShouldBindJSON(&processesIds); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error: Invalid request body")))
 			return
 		}
 
@@ -166,7 +167,7 @@ func VacancyList(
 			processesIds,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -191,7 +192,7 @@ func VacancyTable(
 		c.Header("Content-Type", "application/json")
 		var filter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&filter); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error Invalid request body")))
 			return
 		}
 
@@ -200,7 +201,7 @@ func VacancyTable(
 			filter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
