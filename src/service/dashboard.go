@@ -229,24 +229,24 @@ func GetVacancyTable(
 	offset := (*filter.Page - 1) * *filter.PageSize
 	query = query.Offset(offset).Limit(*filter.PageSize)
 
-	vacancies, err := query.All(ctx)
+	factHiringProcesses, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var tableDatas []model.DashboardTableRow
-	for _, vacancy := range vacancies {
+	for _, factHiringProcess := range factHiringProcesses {
 
-		numPositions := vacancy.Edges.DimVacancy.NumPositions
+		numPositions := factHiringProcess.Edges.DimVacancy.NumPositions
 		var competitionRate *float32
 		if numPositions > 0 {
-			rate := float32(vacancy.MetTotalCandidatesApplied) / float32(numPositions)
+			rate := float32(factHiringProcess.MetTotalCandidatesApplied) / float32(numPositions)
 			competitionRate = &rate
 		} else {
 			competitionRate = nil
 		}
 
-		hiringTime, err := processing.GenerateAverageHiringTimePerFactHiringProcess(vacancy)
+		hiringTime, err := processing.GenerateAverageHiringTimePerFactHiringProcess(factHiringProcess)
 		var averageHiringTime *float32
 		if err != nil {
 			averageHiringTime = nil
@@ -254,15 +254,15 @@ func GetVacancyTable(
 			averageHiringTime = &(hiringTime)
 		}
 
-		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
+		numFeedback := factHiringProcess.MetTotalFeedbackPositive + factHiringProcess.MetTotalNegative + factHiringProcess.MetTotalNeutral
 		tableDatas = append(tableDatas, model.DashboardTableRow{
-			ProcessTitle:      vacancy.Edges.DimProcess.Title,
-			VacancyTitle:      vacancy.Edges.DimVacancy.Title,
+			ProcessTitle:      factHiringProcess.Edges.DimProcess.Title,
+			VacancyTitle:      factHiringProcess.Edges.DimVacancy.Title,
 			NumPositions:      numPositions,
-			NumCandidates:     vacancy.MetTotalCandidatesApplied,
+			NumCandidates:     factHiringProcess.MetTotalCandidatesApplied,
 			CompetitionRate:   competitionRate,
-			NumInterviewed:    vacancy.MetTotalCandidatesInterviewed,
-			NumHired:          vacancy.MetTotalCandidatesHired,
+			NumInterviewed:    factHiringProcess.MetTotalCandidatesInterviewed,
+			NumHired:          factHiringProcess.MetTotalCandidatesHired,
 			AverageHiringTime: averageHiringTime,
 			NumFeedback:       numFeedback,
 		})
