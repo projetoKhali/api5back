@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"api5back/ent"
+	"api5back/src/model"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func HiringProcessDashboard(
 
 		suggestions := v1.Group("/suggestions")
 		{
-			suggestions.GET("/recruiter", UserList(dwClient))
+			suggestions.POST("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
 		}
@@ -37,7 +38,7 @@ func HiringProcessDashboard(
 // @Description show dashboard
 // @Tags hiring-process
 // @Accept json
-// @Param body body service.FactHiringProcessFilter true "Metrics filter"
+// @Param body body model.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {string} Dashboard
 // @Router /hiring-process/dashboard [post]
@@ -48,7 +49,7 @@ func Dashboard(
 		c.Header("Content-Type", "application/json")
 
 		// TODO: change to pointer
-		var dashboardMetricsFilter service.FactHiringProcessFilter
+		var dashboardMetricsFilter model.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
@@ -164,7 +165,7 @@ func VacancyList(
 // @Description Return a list of vacancies with summarized information
 // @Tags hiring-process
 // @Accept json
-// @Param body body service.FactHiringProcessFilter true "Metrics filter"
+// @Param body body model.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
 // @Success 200 {array} model.Suggestion
 // @Router /hiring-process/table [post]
@@ -173,7 +174,7 @@ func VacancyTable(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var filter service.FactHiringProcessFilter
+		var filter model.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&filter); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 			return

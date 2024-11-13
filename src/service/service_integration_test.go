@@ -10,6 +10,7 @@ import (
 	"api5back/ent/facthiringprocess"
 	"api5back/seeds"
 	"api5back/src/database"
+	"api5back/src/model"
 	"api5back/src/property"
 
 	"github.com/stretchr/testify/require"
@@ -118,7 +119,7 @@ func TestDatabaseOperations(t *testing.T) {
 	if testResult := t.Run("GetMetrics returns correct metrics", func(t *testing.T) {
 		metricsData, err := GetMetrics(
 			ctx, intEnv.Client,
-			FactHiringProcessFilter{
+			model.FactHiringProcessFilter{
 				Recruiters:    []int{},
 				Processes:     []int{},
 				Vacancies:     []int{},
@@ -158,7 +159,7 @@ func TestTableDashboard(t *testing.T) {
 	if testResult := t.Run("Vacancy Table returns all FactHiringProcess", func(t *testing.T) {
 		vacancies, err := GetVacancyTable(
 			ctx, intEnv.Client,
-			FactHiringProcessFilter{
+			model.FactHiringProcessFilter{
 				Recruiters:    []int{},
 				Processes:     []int{},
 				Vacancies:     []int{},
@@ -172,7 +173,7 @@ func TestTableDashboard(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, vacancies)
-		require.Equal(t, 10, len(vacancies.FactHiringProcess))
+		require.Equal(t, 10, len(vacancies.Items))
 	}); !testResult {
 		t.Fatalf("GetVacancyTable no filter test failed")
 	}
@@ -180,11 +181,11 @@ func TestTableDashboard(t *testing.T) {
 	if testResult := t.Run("Vacancy Table returns correct number of FactHiringProcess", func(t *testing.T) {
 		vacancies, err := GetVacancyTable(
 			ctx, intEnv.Client,
-			FactHiringProcessFilter{
+			model.FactHiringProcessFilter{
 				Recruiters: []int{},
 				Processes:  []int{},
 				Vacancies:  []int{},
-				DateRange: &DateRange{
+				DateRange: &model.DateRange{
 					StartDate: "2024-07-16",
 					EndDate:   "2024-08-12",
 				},
@@ -197,7 +198,7 @@ func TestTableDashboard(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, vacancies)
-		require.Equal(t, 1, len(vacancies.FactHiringProcess))
+		require.Equal(t, 1, len(vacancies.Items))
 	}); !testResult {
 		t.Fatalf("GetVacancyTable dateRange test failed")
 	}

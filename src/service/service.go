@@ -18,30 +18,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type DateRange struct {
-	StartDate string `json:"startDate" form:"startDate" time_format:"2024-10-01T00:00:00Z"`
-	EndDate   string `json:"endDate" form:"endDate" time_format:"2024-10-01T00:00:00Z"`
-}
-
-type FactHiringProcessFilter struct {
-	Recruiters    []int      `json:"recruiters"`
-	Processes     []int      `json:"processes"`
-	Vacancies     []int      `json:"vacancies"`
-	DateRange     *DateRange `json:"dateRange"`
-	ProcessStatus []int      `json:"processStatus"`
-	VacancyStatus []int      `json:"vacancyStatus"`
-	Page          *int       `json:"page"`
-	PageSize      *int       `json:"pageSize"`
-}
-
-type FactHiringProcessReturn struct {
-	FactHiringProcess []model.TableData `json:"factHiringProcess"`
-	NumMaxPages       int               `json:"numMaxPages"`
-}
-
 func applyQueryFilters(
 	query *ent.FactHiringProcessQuery,
-	filter FactHiringProcessFilter,
+	filter model.FactHiringProcessFilter,
 ) (*ent.FactHiringProcessQuery, error) {
 	if filter.Recruiters != nil && len(filter.Recruiters) > 0 {
 		query = query.Where(
@@ -142,8 +121,8 @@ func applyQueryFilters(
 func GetMetrics(
 	ctx context.Context,
 	client *ent.Client,
-	filter FactHiringProcessFilter,
-) (*model.MetricsData, error) {
+	filter model.FactHiringProcessFilter,
+) (*model.DashboardMetrics, error) {
 	query, err := applyQueryFilters(
 		client.
 			FactHiringProcess.
@@ -201,7 +180,7 @@ func GetMetrics(
 		)
 	}
 
-	return &model.MetricsData{
+	return &model.DashboardMetrics{
 		CardInfos:         cardInfo,
 		VacancySummary:    vacancyInfo,
 		AverageHiringTime: averageHiringTime,
@@ -226,8 +205,8 @@ func ParseStringToPgtypeDate(
 func GetVacancyTable(
 	ctx context.Context,
 	client *ent.Client,
-	filter FactHiringProcessFilter,
-) (*FactHiringProcessReturn, error) {
+	filter model.FactHiringProcessFilter,
+) (*model.DashboardTablePage, error) {
 	query, err := applyQueryFilters(
 		client.
 			FactHiringProcess.
@@ -273,7 +252,7 @@ func GetVacancyTable(
 		return nil, err
 	}
 
-	var tableDatas []model.TableData
+	var tableDatas []model.DashboardTableRow
 	for _, vacancy := range vacancies {
 
 		numPositions := vacancy.Edges.DimVacancy.NumPositions
@@ -294,7 +273,7 @@ func GetVacancyTable(
 		}
 
 		numFeedback := vacancy.MetTotalFeedbackPositive + vacancy.MetTotalNegative + vacancy.MetTotalNeutral
-		tableDatas = append(tableDatas, model.TableData{
+		tableDatas = append(tableDatas, model.DashboardTableRow{
 			ProcessTitle:      vacancy.Edges.DimProcess.Title,
 			VacancyTitle:      vacancy.Edges.DimVacancy.Title,
 			NumPositions:      numPositions,
@@ -307,8 +286,8 @@ func GetVacancyTable(
 		})
 	}
 
-	return &FactHiringProcessReturn{
-		FactHiringProcess: tableDatas,
-		NumMaxPages:       numMaxPages,
+	return &model.DashboardTablePage{
+		Items:       tableDatas,
+		NumMaxPages: numMaxPages,
 	}, nil
 }
