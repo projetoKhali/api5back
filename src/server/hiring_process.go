@@ -66,22 +66,6 @@ func Dashboard(
 	}
 }
 
-func TableData(
-	dbClient *ent.Client,
-	dwClient *ent.Client,
-) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		c.Header("Content-Type", "application/json")
-		var userIDs []int
-
-		// Parse the body for user IDs
-		if err := c.ShouldBindJSON(&userIDs); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-			return
-		}
-	}
-}
-
 // UserList godoc
 // @Summary List users
 // @Schemes
