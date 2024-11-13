@@ -78,13 +78,16 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 	for _, factHiringProcess := range factHiringProcesses {
 		numberOfCandidates := rand.Intn(6) + 5
 
+		factHiringProcessVacancy, err := factHiringProcess.
+			Edges.
+			DimVacancyOrErr()
+		if err != nil {
+			return fmt.Errorf("failed to get vacancy of FactHiringProcess [%d]: %v", i, err)
+		}
+
 		for i := 0; i < numberOfCandidates; i++ {
 			candidateName := randomName()
 			candidateStatus := property.DimCandidateStatus(rand.Intn(4))
-			factHiringProcessVacancy, err := factHiringProcess.Edges.DimVacancyOrErr()
-			if err != nil {
-				return fmt.Errorf("failed to get vacandy of FactHiringProcess: %v", err)
-			}
 
 			applyDate := factHiringProcessVacancy.
 				OpeningDate.
