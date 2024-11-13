@@ -206,7 +206,7 @@ func GetVacancyTable(
 	ctx context.Context,
 	client *ent.Client,
 	filter model.FactHiringProcessFilter,
-) (*model.DashboardTablePage, error) {
+) (*model.Page[model.DashboardTableRow], error) {
 	query, err := applyQueryFilters(
 		client.
 			FactHiringProcess.
@@ -286,7 +286,7 @@ func GetVacancyTable(
 		})
 	}
 
-	return &model.DashboardTablePage{
+	return &model.Page[model.DashboardTableRow]{
 		Items:       tableDatas,
 		NumMaxPages: numMaxPages,
 	}, nil

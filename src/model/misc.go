@@ -16,4 +16,7 @@ type FactHiringProcessFilter struct {
 	PageSize      *int       `json:"pageSize"`
 }
 
-
+type Page[T any] struct {
+	Items       []T `json:"items"`
+	NumMaxPages int `json:"numMaxPages"`
+}

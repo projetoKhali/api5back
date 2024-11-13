@@ -19,8 +19,3 @@ type DashboardTableRow struct {
 	AverageHiringTime *float32 `json:"averageHiringTime"`
 	NumFeedback       int      `json:"numFeedback"`
 }
-
-type DashboardTablePage struct {
-	FactHiringProcess []model.TableData `json:"factHiringProcess"`
-	NumMaxPages int                     `json:"numMaxPages"`
-}
