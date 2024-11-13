@@ -28,6 +28,9 @@ func (DimProcess) Fields() []ent.Field {
 		}).Optional(),
 		field.Int("status").
 			GoType(property.DimProcessStatus(1)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
 			Default(int(property.DimProcessStatusOpen)),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),

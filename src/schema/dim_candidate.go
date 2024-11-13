@@ -30,6 +30,9 @@ func (DimCandidate) Fields() []ent.Field {
 		}),
 		field.Enum("status").
 			GoType(property.DimCandidateStatus(0)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
 			Immutable(),
 		field.Other("updatedAt", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",

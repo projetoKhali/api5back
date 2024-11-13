@@ -24,6 +24,9 @@ func (DimVacancy) Fields() []ent.Field {
 		field.Int("reqId").Optional(),
 		field.Int("status").
 			GoType(property.DimVacancyStatus(1)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
 			Default(int(property.DimVacancyStatusOpen)),
 		field.String("location"),
 		field.Int("dimUsrId"),
