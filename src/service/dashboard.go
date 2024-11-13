@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"api5back/ent"
 	"api5back/ent/dimprocess"
@@ -14,8 +13,6 @@ import (
 	"api5back/src/model"
 	"api5back/src/processing"
 	"api5back/src/property"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func applyQueryFilters(
@@ -47,7 +44,7 @@ func applyQueryFilters(
 
 	if filter.DateRange != nil {
 		if filter.DateRange.StartDate != "" {
-			hiringProcessStartDate, err := ParseStringToPgtypeDate(
+			hiringProcessStartDate, err := processing.ParseStringToPgtypeDate(
 				"2006-01-02",
 				filter.DateRange.StartDate,
 			)
@@ -68,7 +65,7 @@ func applyQueryFilters(
 		}
 
 		if filter.DateRange.EndDate != "" {
-			hiringProcessEndDate, err := ParseStringToPgtypeDate(
+			hiringProcessEndDate, err := processing.ParseStringToPgtypeDate(
 				"2006-01-02",
 				filter.DateRange.EndDate,
 			)
@@ -184,21 +181,6 @@ func GetMetrics(
 		CardInfos:         cardInfo,
 		VacancySummary:    vacancyInfo,
 		AverageHiringTime: averageHiringTime,
-	}, nil
-}
-
-func ParseStringToPgtypeDate(
-	layout string,
-	dateString string,
-) (pgDate pgtype.Date, err error) {
-	t, err := time.Parse(layout, dateString)
-	if err != nil {
-		return pgDate, fmt.Errorf("failed to parse date: %v", err)
-	}
-
-	return pgtype.Date{
-		Time:  t,
-		Valid: true,
 	}, nil
 }
 
