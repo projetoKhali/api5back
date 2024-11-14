@@ -79,8 +79,10 @@ func TestTableDashboard(t *testing.T) {
 				DateRange:     nil,
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
-				Page:          nil,
-				PageSize:      nil,
+				PageRequest: model.PageRequest{
+					Page:     nil,
+					PageSize: nil,
+				},
 			},
 		)
 
@@ -104,8 +106,10 @@ func TestTableDashboard(t *testing.T) {
 				},
 				ProcessStatus: []int{},
 				VacancyStatus: []int{},
-				Page:          nil,
-				PageSize:      nil,
+				PageRequest: model.PageRequest{
+					Page:     nil,
+					PageSize: nil,
+				},
 			},
 		)
 
