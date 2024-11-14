@@ -73,13 +73,23 @@ func Dashboard(
 // @Description Return a list of users with id and name
 // @Tags suggestions
 // @Accept json
+// @Param body body model.PageRequest true "Page request"
 // @Produce json
-// @Success 200 {array} model.Suggestion
-// @Router /suggestions/recruiter/ [get]
+// @Success 200 {array} model.Page[model.Suggestion]
+// @Router /suggestions/recruiter/ [post]
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		users, err := service.GetUsers(c, dwClient)
+		var pageRequest model.PageRequest
+		if err := c.ShouldBindJSON(&pageRequest); err != nil {
+			c.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		users, err := service.GetUsers(
+			c, dwClient,
+			pageRequest,
+		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 			return
@@ -95,26 +105,24 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 // @Description Return a list of hiring processes with id and title
 // @Tags suggestions
 // @Accept json
-// @Param body body []int true "User IDs"
+// @Param body body model.SuggestionsFilter true "Filter"
 // @Produce json
-// @Success 200 {array} model.Suggestion
+// @Success 200 {array} model.Page[model.Suggestion]
 // @Router /suggestions/process [post]
 func HiringProcessList(
 	dbClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var userIDs *[]int
-
-		// Parse the body for user IDs
-		if err := c.ShouldBindJSON(&userIDs); err != nil {
+		var pageRequest model.SuggestionsFilter
+		if err := c.ShouldBindJSON(&pageRequest); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
 		processes, err := service.ListHiringProcesses(
 			c, dbClient,
-			userIDs,
+			pageRequest,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
@@ -131,24 +139,24 @@ func HiringProcessList(
 // @Description Return a list of hiring processes with id and title
 // @Tags suggestions
 // @Accept json
-// @Param body body []int false "User IDs"
+// @Param body body model.SuggestionsFilter true "Filter"
 // @Produce json
-// @Success 200 {array} model.Suggestion
+// @Success 200 {array} model.Page[model.Suggestion]
 // @Router /suggestions/vacancy [post]
 func VacancyList(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var processesIds *[]int
-		if err := c.ShouldBindJSON(&processesIds); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		var pageRequest model.SuggestionsFilter
+		if err := c.ShouldBindJSON(&pageRequest); err != nil {
+			c.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
 		vacancies, err := service.GetVacancySuggestions(
 			c, dwClient,
-			processesIds,
+			pageRequest,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -167,7 +175,7 @@ func VacancyList(
 // @Accept json
 // @Param body body model.FactHiringProcessFilter true "Metrics filter"
 // @Produce json
-// @Success 200 {array} model.Suggestion
+// @Success 200 {array} model.Page[model.DashboardTableRow]
 // @Router /hiring-process/table [post]
 func VacancyTable(
 	dwClient *ent.Client,

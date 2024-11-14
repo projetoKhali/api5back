@@ -6,34 +6,61 @@ import (
 	"api5back/ent"
 	"api5back/ent/dimprocess"
 	"api5back/src/model"
+	"api5back/src/processing"
 )
 
 func ListHiringProcesses(
 	ctx context.Context,
 	client *ent.Client,
-	userIDs *[]int,
-) ([]model.Suggestion, error) {
+	pageRequest model.SuggestionsFilter,
+) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimProcess.
 		Query()
 
-	// Verificar se o array de userIDs não é nil e se tem elementos
-	if userIDs != nil && len(*userIDs) > 0 {
-		query = query.Where(dimprocess.DimUsrIdIn(*userIDs...))
+	if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+		query = query.
+			Where(dimprocess.
+				DimUsrIdIn(*pageRequest.IDs...))
 	}
 
-	processes, err := query.All(ctx)
+	page, pageSize, err := processing.ParsePageAndPageSize(
+		pageRequest.Page,
+		pageRequest.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	var response []model.Suggestion
+	totalRecords, err := query.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	offset, numMaxPages := processing.ParseOffsetAndTotalPages(
+		page,
+		pageSize,
+		totalRecords,
+	)
+
+	processes, err := query.
+		Offset(offset).
+		Limit(pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var suggestions []model.Suggestion
 	for _, process := range processes {
-		response = append(response, model.Suggestion{
+		suggestions = append(suggestions, model.Suggestion{
 			Id:    process.DbId,
 			Title: process.Title,
 		})
 	}
 
-	return response, nil
+	return &model.Page[model.Suggestion]{
+		Items:       suggestions,
+		NumMaxPages: numMaxPages,
+	}, nil
 }
