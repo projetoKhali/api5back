@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"api5back/ent"
@@ -205,31 +204,29 @@ func GetVacancyTable(
 		)
 	}
 
-	if filter.Page == nil {
-		defaultPage := 1
-		filter.Page = &defaultPage
-	}
-	if filter.PageSize == nil {
-		defaultPageSize := 10
-		filter.PageSize = &defaultPageSize
-	}
-	if *filter.Page <= 0 || *filter.PageSize <= 0 {
-		return nil, errors.New(
-			"invalid page number or size",
-		)
+	page, pageSize, err := processing.ParsePageAndPageSize(
+		filter.Page,
+		filter.PageSize,
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	totalRecords, err := query.Count(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("could not get total records: %w", err)
+		return nil, err
 	}
 
-	numMaxPages := (totalRecords + *filter.PageSize - 1) / *filter.PageSize
+	offset, numMaxPages := processing.ParseOffsetAndTotalPages(
+		page,
+		pageSize,
+		totalRecords,
+	)
 
-	offset := (*filter.Page - 1) * *filter.PageSize
-	query = query.Offset(offset).Limit(*filter.PageSize)
-
-	factHiringProcesses, err := query.All(ctx)
+	factHiringProcesses, err := query.
+		Offset(offset).
+		Limit(pageSize).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}

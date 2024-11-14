@@ -1,6 +1,7 @@
 package processing
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -20,4 +21,39 @@ func ParseStringToPgtypeDate(
 		Time:  t,
 		Valid: true,
 	}, nil
+}
+
+func ParsePageAndPageSize(
+	page, pageSize *int,
+) (int, int, error) {
+	if page == nil {
+		defaultPage := 1
+		page = &defaultPage
+	}
+	if pageSize == nil {
+		defaultPageSize := 10
+		pageSize = &defaultPageSize
+	}
+
+	if *page <= 0 {
+		return 0, 0, errors.New(
+			"invalid page number",
+		)
+	}
+
+	if *pageSize <= 0 {
+		return 0, 0, errors.New(
+			"invalid page size",
+		)
+	}
+
+	return *page, *pageSize, nil
+}
+
+func ParseOffsetAndTotalPages(
+	page, pageSize, totalRecords int,
+) (int, int) {
+	offset := (page - 1) * pageSize
+	numMaxPages := (totalRecords + pageSize - 1) / pageSize
+	return offset, numMaxPages
 }
