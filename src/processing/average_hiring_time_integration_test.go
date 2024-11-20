@@ -25,19 +25,19 @@ func CreateTestData(
 	client *ent.Client,
 	ids []int,
 ) []*ent.HiringProcessCandidateCreate {
-	datesString := [24]string{
-		"2022-01-19", "2022-01-21",
-		"2022-02-14", "2022-02-21",
-		"2022-02-28", "2022-03-08",
-		"2022-03-24", "2022-03-31",
-		"2022-03-22", "2022-03-30",
-		"2022-03-27", "2022-03-28",
-		"2022-03-14", "2022-03-21",
-		"2022-04-20", "2022-04-24",
-		"2022-08-19", "2022-08-22",
-		"2022-09-15", "2022-09-23",
-		"2022-10-17", "2022-10-18",
-		"2022-12-08", "2022-12-09",
+	datesString := [12][2]string{
+		{"2022-01-19", "2022-01-21"},
+		{"2022-02-14", "2022-02-21"},
+		{"2022-02-28", "2022-03-08"},
+		{"2022-03-24", "2022-03-31"},
+		{"2022-03-22", "2022-03-30"},
+		{"2022-03-27", "2022-03-28"},
+		{"2022-03-14", "2022-03-21"},
+		{"2022-04-20", "2022-04-24"},
+		{"2022-08-19", "2022-08-22"},
+		{"2022-09-15", "2022-09-23"},
+		{"2022-10-17", "2022-10-18"},
+		{"2022-12-08", "2022-12-09"},
 	}
 	candidates := []*ent.HiringProcessCandidateCreate{}
 
@@ -45,14 +45,14 @@ func CreateTestData(
 		factIndex := i * 8
 
 		for j := 0; j < 4; j++ {
-			dateIndex := factIndex + (j * 2)
+			dateIndex := factIndex + j
 
-			stringApplyDate := datesString[dateIndex%24]
+			stringApplyDate := datesString[dateIndex%12][0]
 			timeApplyDate, _ := time.Parse(time.DateOnly, stringApplyDate)
 			pgtypeApplyDate := &pgtype.Date{}
 			pgtypeApplyDate.Scan(timeApplyDate)
 
-			stringUpdatedAt := datesString[(dateIndex+1)%24]
+			stringUpdatedAt := datesString[dateIndex%12][1]
 			timeUpdatedAt, _ := time.Parse(time.DateOnly, stringUpdatedAt)
 			pgtypeUpdatedAt := &pgtype.Date{}
 			pgtypeUpdatedAt.Scan(timeUpdatedAt)
@@ -60,6 +60,7 @@ func CreateTestData(
 			candidates = append(candidates, client.
 				HiringProcessCandidate.
 				Create().
+				SetDbId(j).
 				SetName(fmt.Sprintf("Candidate[%d][%d]", i, j)).
 				SetEmail("can@didate.com").
 				SetPhone("123456789").
@@ -155,13 +156,13 @@ func TestAverageHiringTime(t *testing.T) {
 
 		assert.Equal(t, float32(0), months.January)
 		assert.Equal(t, float32(0), months.February)
-		assert.Equal(t, float32(7.5), months.March)
+		assert.Equal(t, float32(8.5), months.March)
 		assert.Equal(t, float32(0), months.April)
 		assert.Equal(t, float32(0), months.May)
-		assert.Equal(t, float32(0), months.June)
-		assert.Equal(t, float32(0), months.July)
+		assert.Equal(t, float32(15), months.June)
+		assert.Equal(t, float32(12.333333), months.July)
 		assert.Equal(t, float32(0), months.August)
-		assert.Equal(t, float32(0), months.September)
+		assert.Equal(t, float32(12.666667), months.September)
 		assert.Equal(t, float32(1), months.October)
 		assert.Equal(t, float32(0), months.November)
 		assert.Equal(t, float32(0), months.December)

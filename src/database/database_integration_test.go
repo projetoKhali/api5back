@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"api5back/ent"
+	"api5back/ent/facthiringprocess"
 	"api5back/ent/migrate"
+	"api5back/src/property"
 
 	"github.com/stretchr/testify/require"
 )
@@ -55,6 +57,7 @@ func TestBaseDatabaseOperations(t *testing.T) {
 				Run: func(t *testing.T) {
 					testDimUser, err = intEnv.Client.DimUser.
 						Create().
+						SetDbId(1).
 						SetName("John Doe").
 						SetOccupation("Software Engineer").
 						Save(ctx)
@@ -86,6 +89,95 @@ func TestBaseDatabaseOperations(t *testing.T) {
 				Run: func(t *testing.T) {
 					_, err = intEnv.Client.DimUser.Get(ctx, testDimUser.ID)
 					require.Error(t, err)
+				},
+			},
+		} {
+			if testResult := t.Run(TestCase.Name, TestCase.Run); !testResult {
+				t.Fatalf("Test case failed")
+			}
+		}
+	})
+
+	t.Run("Test hiring_process_candidate table operations", func(t *testing.T) {
+		var testFactHiringProcessId int
+		var hiringProcessCandidateId int
+
+		for _, TestCase := range []TestCase{
+			{
+				Name: "Insert a hiring_process_candidate into the table",
+				Run: func(t *testing.T) {
+					factHiringProcess, err := intEnv.
+						Client.
+						FactHiringProcess.
+						Query().
+						WithDimVacancy().
+						First(ctx)
+					require.NoError(t, err)
+
+					dimVacancy, err := factHiringProcess.
+						Edges.
+						DimVacancyOrErr()
+					require.NoError(t, err)
+
+					dimCandidate, err := intEnv.
+						Client.
+						HiringProcessCandidate.
+						Create().
+						SetDimVacancyDbId(factHiringProcess.DimVacancyId).
+						SetDbId(1).
+						SetName("John Doe").
+						SetEmail("John@Doe.com").
+						SetPhone("+1234567890").
+						SetApplyDate(dimVacancy.OpeningDate).
+						SetStatus(property.HiringProcessCandidateStatusInAnalysis).
+						SetScore(0).
+						Save(ctx)
+					if err != nil {
+						t.Fatalf("failed to insert the hiring_process_candidate: %v", err)
+					}
+
+					hiringProcessCandidateId = dimCandidate.ID
+				},
+			},
+			{
+				Name: "Select candidate list from the edges of a DimVacancy",
+				Run: func(t *testing.T) {
+					factHiringProcesses, err := intEnv.
+						Client.
+						FactHiringProcess.
+						Query().
+						WithDimVacancy().
+						Where(facthiringprocess.ID(testFactHiringProcessId)).
+						First(ctx)
+					require.NoError(t, err)
+
+					dimVacancy, err := factHiringProcesses.
+						Edges.
+						DimVacancyOrErr()
+					require.NoError(t, err)
+
+					candidates, err := dimVacancy.
+						Edges.
+						HiringProcessCandidatesOrErr()
+					require.NoError(t, err)
+					require.NotNil(t, candidates)
+					require.NotEmpty(t, candidates)
+				},
+			},
+			{
+				Name: "Select a candidate by ID",
+				Run: func(t *testing.T) {
+					hiringProcessCandidate, err := intEnv.
+						Client.
+						HiringProcessCandidate.
+						Get(ctx, hiringProcessCandidateId)
+					require.NoError(t, err)
+					require.NotNil(t, hiringProcessCandidate)
+					require.Equal(
+						t,
+						property.HiringProcessCandidateStatusInAnalysis,
+						hiringProcessCandidate.Status,
+					)
 				},
 			},
 		} {

@@ -6,6 +6,7 @@ import (
 	"api5back/ent"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
+	"api5back/src/processing"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -13,8 +14,8 @@ import (
 func GetVacancySuggestions(
 	ctx context.Context,
 	client *ent.Client,
-	processesIds *[]int,
-) ([]model.Suggestion, error) {
+	pageRequest model.SuggestionsFilter,
+) (*model.Page[model.Suggestion], error) {
 	query := client.
 		FactHiringProcess.
 		Query().
@@ -25,35 +26,54 @@ func GetVacancySuggestions(
 			)
 		}).
 		Order(ent.Desc(facthiringprocess.FieldID)).
-		WithDimVacancy() // Com WithDimVacancy sempre incluído
+		WithDimVacancy()
 
-	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
-	if processesIds != nil && len(*processesIds) > 0 {
-		query = query.Where(facthiringprocess.DimProcessIdIn(*processesIds...))
+	if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+		query = query.
+			Where(facthiringprocess.
+				DimProcessIdIn(*pageRequest.IDs...))
 	}
 
-	vacancies, err := query.All(ctx)
+	page, pageSize, err := processing.ParsePageAndPageSize(
+		pageRequest.Page,
+		pageRequest.PageSize,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	uniqueVacancies := make(map[int]model.Suggestion)
+	totalRecords, err := query.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, fact := range vacancies {
+	offset, numMaxPages := processing.ParseOffsetAndTotalPages(
+		page,
+		pageSize,
+		totalRecords,
+	)
+
+	factHiringProcesses, err := query.
+		Offset(offset).
+		Limit(pageSize).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var suggestions []model.Suggestion
+	for _, fact := range factHiringProcesses {
 		if fact.Edges.DimVacancy != nil {
 			vacancy := fact.Edges.DimVacancy
-			uniqueVacancies[vacancy.ID] = model.Suggestion{
-				Id:    vacancy.ID,
+			suggestions = append(suggestions, model.Suggestion{
+				Id:    vacancy.DbId,
 				Title: vacancy.Title,
-			}
+			})
 		}
 	}
 
-	// Convertendo o map para slice
-	result := make([]model.Suggestion, 0, len(uniqueVacancies))
-	for _, v := range uniqueVacancies {
-		result = append(result, v)
-	}
-
-	return result, nil
+	return &model.Page[model.Suggestion]{
+		Items:       suggestions,
+		NumMaxPages: numMaxPages,
+	}, nil
 }

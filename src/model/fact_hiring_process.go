@@ -2,13 +2,13 @@ package model
 
 import "api5back/src/processing"
 
-type MetricsData struct {
+type DashboardMetrics struct {
 	VacancySummary    processing.VacancyStatusSummary      `json:"vacancyStatus"`
 	CardInfos         processing.CardInfos                 `json:"cards"`
 	AverageHiringTime processing.AverageHiringTimePerMonth `json:"averageHiringTime"`
 }
 
-type TableData struct {
+type DashboardTableRow struct {
 	ProcessTitle      string   `json:"processTitle"`
 	VacancyTitle      string   `json:"vacancyTitle"`
 	NumPositions      int      `json:"numPositions"`
