@@ -10,6 +10,6 @@ COPY . .
 # RUN go build -v -o /usr/local/bin/app ./...
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-RUN go run scripts/generate/main.go && swag init && go build -o ./bin/main .
+RUN go run scripts/generate/main.go && swag init && go build -o /usr/local/bin/main .
 
 CMD ["main"]
