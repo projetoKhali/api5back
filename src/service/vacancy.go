@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
 	"api5back/src/pagination"
@@ -20,13 +21,18 @@ func GetVacancySuggestions(
 	query := client.
 		FactHiringProcess.
 		Query().
+		Order(
+			facthiringprocess.ByDimVacancyField(
+				dimvacancy.FieldDbId,
+			),
+			ent.Desc(facthiringprocess.FieldID),
+		).
 		Modify(func(s *sql.Selector) {
 			s.Select("DISTINCT ON (t1.db_id) *")
-			s.Join(sql.Table("dim_vacancy t1")).On(
+			s.Join(sql.Table("dim_vacancy")).On(
 				s.C("dim_vacancy_id"), sql.Table("t1").C("id"),
 			)
 		}).
-		Order(ent.Desc(facthiringprocess.FieldID)).
 		WithDimVacancy()
 
 	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {

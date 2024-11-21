@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimuser"
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
+
+	"entgo.io/ent/dialect/sql"
 )
 
 func GetUserSuggestions(
@@ -16,7 +19,14 @@ func GetUserSuggestions(
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimUser.
-		Query()
+		Query().
+		Order(
+			ent.Desc(dimuser.FieldDbId),
+			ent.Desc(dimuser.FieldID),
+		).
+		Modify(func(s *sql.Selector) {
+			s.Select("DISTINCT ON (db_id) *")
+		})
 
 	page, pageSize, err := pagination.ParsePageRequest(pageRequest)
 	if err != nil {
