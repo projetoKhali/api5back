@@ -19,6 +19,7 @@ var DwDimUser = []ent.DimUser{
 	{DbId: 3, Name: "Carla Mendes", Occupation: "Software Engineer"},
 	{DbId: 4, Name: "David Costa", Occupation: "Data Analyst"},
 	{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
+	{DbId: 5, Name: "Eva Lima", Occupation: "Chief Product Officer"},
 }
 
 var DwDimDatetime = []ent.DimDatetime{
@@ -115,6 +116,14 @@ var DwDimVacancy = []ent.DimVacancy{
 		Location:    "São Paulo",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
 		ClosingDate: &pgtype.Date{Time: time.Date(2024, 4, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 9, Title: "HR Specialist",
+		DimUsrId: 3, NumPositions: 2, ReqId: 4,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 4, 25, 0, 0, 0, 0, time.UTC), Valid: true},
 		Status:      property.DimVacancyStatusInAnalysis,
 	},
 	{
@@ -182,6 +191,13 @@ var DwDimProcess = []ent.DimProcess{
 		InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
 		DimUsrId:    3,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    4,
 		Status:      property.DimProcessStatusOpen,
 	},
 	{
