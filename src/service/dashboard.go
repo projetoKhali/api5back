@@ -213,10 +213,7 @@ func GetVacancyTable(
 		)
 	}
 
-	page, pageSize, err := processing.ParsePageAndPageSize(
-		filter.Page,
-		filter.PageSize,
-	)
+	page, pageSize, err := model.ParsePageRequest(filter)
 	if err != nil {
 		return nil, err
 	}

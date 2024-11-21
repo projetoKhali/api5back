@@ -12,7 +12,7 @@ import (
 func ListHiringProcesses(
 	ctx context.Context,
 	client *ent.Client,
-	pageRequest model.SuggestionsFilter,
+	pageRequest *model.SuggestionsFilter,
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimProcess.
@@ -24,10 +24,7 @@ func ListHiringProcesses(
 				DimUsrIdIn(*pageRequest.IDs...))
 	}
 
-	page, pageSize, err := processing.ParsePageAndPageSize(
-		pageRequest.Page,
-		pageRequest.PageSize,
-	)
+	page, pageSize, err := model.ParsePageRequest(pageRequest)
 	if err != nil {
 		return nil, err
 	}

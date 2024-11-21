@@ -88,7 +88,7 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 
 		users, err := service.GetUsers(
 			c, dwClient,
-			pageRequest,
+			&pageRequest,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
@@ -114,7 +114,7 @@ func HiringProcessList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var pageRequest model.SuggestionsFilter
+		var pageRequest *model.SuggestionsFilter
 		if err := c.ShouldBindJSON(&pageRequest); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
@@ -148,7 +148,7 @@ func VacancyList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var pageRequest model.SuggestionsFilter
+		var pageRequest *model.SuggestionsFilter
 		if err := c.ShouldBindJSON(&pageRequest); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return

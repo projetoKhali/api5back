@@ -11,16 +11,13 @@ import (
 func GetUsers(
 	ctx context.Context,
 	client *ent.Client,
-	pageRequest model.PageRequest,
+	pageRequest *model.PageRequest,
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimUser.
 		Query()
 
-	page, pageSize, err := processing.ParsePageAndPageSize(
-		pageRequest.Page,
-		pageRequest.PageSize,
-	)
+	page, pageSize, err := model.ParsePageRequest(pageRequest)
 	if err != nil {
 		return nil, err
 	}

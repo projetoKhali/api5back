@@ -14,7 +14,7 @@ import (
 func GetVacancySuggestions(
 	ctx context.Context,
 	client *ent.Client,
-	pageRequest model.SuggestionsFilter,
+	pageRequest *model.SuggestionsFilter,
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		FactHiringProcess.
@@ -28,16 +28,13 @@ func GetVacancySuggestions(
 		Order(ent.Desc(facthiringprocess.FieldID)).
 		WithDimVacancy()
 
-	if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
 		query = query.
 			Where(facthiringprocess.
 				DimProcessIdIn(*pageRequest.IDs...))
 	}
 
-	page, pageSize, err := processing.ParsePageAndPageSize(
-		pageRequest.Page,
-		pageRequest.PageSize,
-	)
+	page, pageSize, err := model.ParsePageRequest(pageRequest)
 	if err != nil {
 		return nil, err
 	}
