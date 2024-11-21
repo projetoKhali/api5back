@@ -21,6 +21,7 @@ func GetVacancySuggestions(
 	query := client.
 		FactHiringProcess.
 		Query().
+		WithDimVacancy().
 		Order(
 			facthiringprocess.ByDimVacancyField(
 				dimvacancy.FieldDbId,
@@ -29,11 +30,8 @@ func GetVacancySuggestions(
 		).
 		Modify(func(s *sql.Selector) {
 			s.Select("DISTINCT ON (t1.db_id) *")
-			s.Join(sql.Table("dim_vacancy")).On(
-				s.C("dim_vacancy_id"), sql.Table("t1").C("id"),
-			)
 		}).
-		WithDimVacancy()
+		Clone()
 
 	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
 		query = query.
