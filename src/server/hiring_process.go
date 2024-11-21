@@ -51,7 +51,7 @@ func Dashboard(
 		// TODO: change to pointer
 		var dashboardMetricsFilter model.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -59,7 +59,7 @@ func Dashboard(
 			c, dwClient, dashboardMetricsFilter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -80,7 +80,9 @@ func Dashboard(
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
+
 		var pageRequest model.PageRequest
+
 		if err := c.ShouldBindJSON(&pageRequest); err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
@@ -91,7 +93,7 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 			&pageRequest,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -114,9 +116,11 @@ func HiringProcessList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
+
 		var pageRequest *model.SuggestionsFilter
+
 		if err := c.ShouldBindJSON(&pageRequest); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -125,7 +129,7 @@ func HiringProcessList(
 			pageRequest,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -148,9 +152,11 @@ func VacancyList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
+
 		var pageRequest *model.SuggestionsFilter
+
 		if err := c.ShouldBindJSON(&pageRequest); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -159,7 +165,7 @@ func VacancyList(
 			pageRequest,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -182,9 +188,11 @@ func VacancyTable(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
+
 		var filter model.FactHiringProcessFilter
+
 		if err := c.ShouldBindJSON(&filter); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -193,7 +201,7 @@ func VacancyTable(
 			filter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
