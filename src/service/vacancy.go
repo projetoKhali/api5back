@@ -6,6 +6,7 @@ import (
 	"api5back/ent"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
+	"api5back/src/pagination"
 	"api5back/src/processing"
 
 	"entgo.io/ent/dialect/sql"
@@ -34,7 +35,7 @@ func GetVacancySuggestions(
 				DimProcessIdIn(*pageRequest.IDs...))
 	}
 
-	page, pageSize, err := model.ParsePageRequest(pageRequest)
+	page, pageSize, err := pagination.ParsePageRequest(pageRequest)
 	if err != nil {
 		return nil, err
 	}

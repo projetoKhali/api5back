@@ -10,6 +10,7 @@ import (
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
+	"api5back/src/pagination"
 	"api5back/src/processing"
 	"api5back/src/property"
 )
@@ -213,7 +214,7 @@ func GetVacancyTable(
 		)
 	}
 
-	page, pageSize, err := model.ParsePageRequest(filter)
+	page, pageSize, err := pagination.ParsePageRequest(filter)
 	if err != nil {
 		return nil, err
 	}

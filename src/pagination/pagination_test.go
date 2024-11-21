@@ -1,9 +1,10 @@
-package model
+package pagination
 
 import (
 	"testing"
 
 	"api5back/src/database"
+	"api5back/src/model"
 
 	"github.com/stretchr/testify/require"
 )
@@ -13,7 +14,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "valid page and pageSize",
 			Run: func(t *testing.T) {
-				pageRequest := &PageRequest{
+				pageRequest := &model.PageRequest{
 					Page:     &[]int{3}[0],
 					PageSize: &[]int{20}[0],
 				}
@@ -27,7 +28,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "nil Page and PageSize should fallback to defaults",
 			Run: func(t *testing.T) {
-				pageRequest := &PageRequest{
+				pageRequest := &model.PageRequest{
 					Page:     nil,
 					PageSize: nil,
 				}
@@ -41,7 +42,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "nil PageRequest should fallback to defaults",
 			Run: func(t *testing.T) {
-				pageRequest := (*PageRequest)(nil)
+				pageRequest := (*model.PageRequest)(nil)
 
 				page, pageSize, err := ParsePageRequest(pageRequest)
 				require.NoError(t, err)
@@ -52,7 +53,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "valid page and default pageSize",
 			Run: func(t *testing.T) {
-				pageRequest := &PageRequest{
+				pageRequest := &model.PageRequest{
 					Page:     &[]int{3}[0],
 					PageSize: nil,
 				}
@@ -66,7 +67,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "default page and valid pageSize",
 			Run: func(t *testing.T) {
-				pageRequest := &PageRequest{
+				pageRequest := &model.PageRequest{
 					Page:     nil,
 					PageSize: &[]int{20}[0],
 				}
@@ -80,7 +81,7 @@ func TestParsePageRequest(t *testing.T) {
 		{
 			Name: "negative page",
 			Run: func(t *testing.T) {
-				pageRequest := &PageRequest{
+				pageRequest := &model.PageRequest{
 					Page:     &[]int{-1}[0],
 					PageSize: nil,
 				}

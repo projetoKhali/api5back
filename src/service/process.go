@@ -6,6 +6,7 @@ import (
 	"api5back/ent"
 	"api5back/ent/dimprocess"
 	"api5back/src/model"
+	"api5back/src/pagination"
 	"api5back/src/processing"
 )
 
@@ -24,7 +25,7 @@ func ListHiringProcesses(
 				DimUsrIdIn(*pageRequest.IDs...))
 	}
 
-	page, pageSize, err := model.ParsePageRequest(pageRequest)
+	page, pageSize, err := pagination.ParsePageRequest(pageRequest)
 	if err != nil {
 		return nil, err
 	}
