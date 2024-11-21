@@ -3,110 +3,110 @@ package pagination
 import (
 	"testing"
 
-	"api5back/src/database"
 	"api5back/src/model"
+	"api5back/src/processing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestParsePageRequest(t *testing.T) {
-	for _, testCase := range []database.TestCase{
+	for i, testCase := range []struct {
+		Name             string
+		PageRequest      *model.PageRequest
+		ExpectedError    bool
+		ExpectedPage     int
+		ExpectedPageSize int
+	}{
 		{
 			Name: "valid page and pageSize",
-			Run: func(t *testing.T) {
-				pageRequest := &model.PageRequest{
-					Page:     &[]int{3}[0],
-					PageSize: &[]int{20}[0],
-				}
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.NoError(t, err)
-				require.Equal(t, 3, page)
-				require.Equal(t, 20, pageSize)
+			PageRequest: &model.PageRequest{
+				Page:     &[]int{3}[0],
+				PageSize: &[]int{20}[0],
 			},
+			ExpectedError:    false,
+			ExpectedPage:     3,
+			ExpectedPageSize: 20,
 		},
 		{
 			Name: "nil Page and PageSize should fallback to defaults",
-			Run: func(t *testing.T) {
-				pageRequest := &model.PageRequest{
-					Page:     nil,
-					PageSize: nil,
-				}
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.NoError(t, err)
-				require.Equal(t, DefaultPage, page)
-				require.Equal(t, DefaultPageSize, pageSize)
+			PageRequest: &model.PageRequest{
+				Page:     nil,
+				PageSize: nil,
 			},
+			ExpectedError:    false,
+			ExpectedPage:     DefaultPage,
+			ExpectedPageSize: DefaultPageSize,
 		},
 		{
-			Name: "nil PageRequest should fallback to defaults",
-			Run: func(t *testing.T) {
-				pageRequest := (*model.PageRequest)(nil)
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.NoError(t, err)
-				require.Equal(t, DefaultPage, page)
-				require.Equal(t, DefaultPageSize, pageSize)
-			},
+			Name:             "nil PageRequest should fallback to defaults",
+			PageRequest:      (*model.PageRequest)(nil),
+			ExpectedError:    false,
+			ExpectedPage:     DefaultPage,
+			ExpectedPageSize: DefaultPageSize,
 		},
 		{
 			Name: "valid page and default pageSize",
-			Run: func(t *testing.T) {
-				pageRequest := &model.PageRequest{
-					Page:     &[]int{3}[0],
-					PageSize: nil,
-				}
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.NoError(t, err)
-				require.Equal(t, 3, page)
-				require.Equal(t, DefaultPageSize, pageSize)
+			PageRequest: &model.PageRequest{
+				Page:     &[]int{3}[0],
+				PageSize: nil,
 			},
+			ExpectedError:    false,
+			ExpectedPage:     3,
+			ExpectedPageSize: DefaultPageSize,
 		},
 		{
 			Name: "default page and valid pageSize",
-			Run: func(t *testing.T) {
-				pageRequest := &model.PageRequest{
-					Page:     nil,
-					PageSize: &[]int{20}[0],
-				}
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.NoError(t, err)
-				require.Equal(t, DefaultPage, page)
-				require.Equal(t, 20, pageSize)
+			PageRequest: &model.PageRequest{
+				Page:     nil,
+				PageSize: &[]int{20}[0],
 			},
+			ExpectedError:    false,
+			ExpectedPage:     DefaultPage,
+			ExpectedPageSize: 20,
 		},
 		{
 			Name: "negative page",
-			Run: func(t *testing.T) {
-				pageRequest := &model.PageRequest{
-					Page:     &[]int{-1}[0],
-					PageSize: nil,
-				}
-
-				page, pageSize, err := ParsePageRequest(pageRequest)
-				require.Error(t, err)
-				require.Equal(t, 0, page)
-				require.Equal(t, 0, pageSize)
+			PageRequest: &model.PageRequest{
+				Page:     &[]int{-1}[0],
+				PageSize: nil,
 			},
+			ExpectedError:    true,
+			ExpectedPage:     0,
+			ExpectedPageSize: 0,
 		},
 	} {
-		if testResult := t.Run(testCase.Name, testCase.Run); !testResult {
-			t.Fatalf("Test case failed")
+		if testResult := t.Run(testCase.Name, func(t *testing.T) {
+			page, pageSize, err := ParsePageRequest(testCase.PageRequest)
+			if testCase.ExpectedError {
+				require.Error(t, err, "Expected error, got nil")
+			} else {
+				require.NoError(t, err, "Expected no error, got %v")
+				require.Equalf(t,
+					testCase.ExpectedPage, page,
+					"Expected page %d, got %d",
+					testCase.ExpectedPage, page,
+				)
+				require.Equalf(t,
+					testCase.ExpectedPageSize, pageSize,
+					"Expected pageSize %d, got %d",
+					testCase.ExpectedPageSize, pageSize,
+				)
+			}
+		}); !testResult {
+			t.Errorf("Test case %d failed", i)
+		}
+	}
+}
 
 func TestParseOffsetAndTotalPages(t *testing.T) {
-	type TestCase struct {
+	for i, testCase := range []struct {
 		Name               string
 		Page               int
 		PageSize           int
 		TotalItems         int
 		ExpectedOffset     int
 		ExpectedTotalPages int
-	}
-
-	for i, testCase := range []TestCase{
+	}{
 		{
 			Name: "valid page and pageSize",
 			Page: 3, PageSize: 20, TotalItems: 100,
