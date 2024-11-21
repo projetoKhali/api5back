@@ -270,8 +270,17 @@ func GetVacancyTable(
 
 	var tableDatas []model.DashboardTableRow
 	for _, factHiringProcess := range factHiringProcesses {
+		dimVacancy, err := factHiringProcess.
+			Edges.
+			DimVacancyOrErr()
+		if err != nil {
+			return nil, fmt.Errorf(
+				"nil `DimVacancy` for `FactHiringProcess` with ID %d: %w",
+				factHiringProcess.ID, err,
+			)
+		}
 
-		numPositions := factHiringProcess.Edges.DimVacancy.NumPositions
+		numPositions := dimVacancy.NumPositions
 		var competitionRate *float32
 		if numPositions > 0 {
 			rate := float32(factHiringProcess.MetTotalCandidatesApplied) / float32(numPositions)
