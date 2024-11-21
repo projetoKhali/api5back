@@ -9,11 +9,53 @@ import (
 	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
+	"api5back/ent/hiringprocesscandidate"
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
 	"api5back/src/property"
+
+	"entgo.io/ent/dialect/sql"
 )
+
+func createBaseQueryWithUniqueDbIds(
+	client *ent.Client,
+) *ent.FactHiringProcessQuery {
+	return client.
+		FactHiringProcess.
+		Query().
+		Order(ent.Desc(facthiringprocess.FieldID)).
+		WithDimProcess(func(query *ent.DimProcessQuery) {
+			query.
+				Order(
+					ent.Desc(dimprocess.FieldDbId),
+					ent.Desc(dimprocess.FieldID),
+				).
+				Modify(func(s *sql.Selector) {
+					s.Select("DISTINCT ON (db_id) *")
+				})
+		}).
+		WithDimVacancy(func(query *ent.DimVacancyQuery) {
+			query.
+				Order(
+					ent.Desc(dimvacancy.FieldDbId),
+					ent.Desc(dimvacancy.FieldID),
+				).
+				Modify(func(s *sql.Selector) {
+					s.Select("DISTINCT ON (db_id) *")
+				})
+			query.WithHiringProcessCandidates(func(query *ent.HiringProcessCandidateQuery) {
+				query.
+					Order(
+						ent.Desc(hiringprocesscandidate.FieldDbId),
+						ent.Desc(hiringprocesscandidate.FieldID),
+					).
+					Modify(func(s *sql.Selector) {
+						s.Select("DISTINCT ON (db_id) *")
+					})
+			})
+		})
+}
 
 func applyQueryFilters(
 	query *ent.FactHiringProcessQuery,
@@ -121,13 +163,7 @@ func GetMetrics(
 	filter model.FactHiringProcessFilter,
 ) (*model.DashboardMetrics, error) {
 	query, err := applyQueryFilters(
-		client.
-			FactHiringProcess.
-			Query().
-			WithDimProcess().
-			WithDimVacancy(func(query *ent.DimVacancyQuery) {
-				query.WithHiringProcessCandidates()
-			}),
+		createBaseQueryWithUniqueDbIds(client),
 		filter,
 	)
 	if err != nil {
@@ -198,13 +234,7 @@ func GetVacancyTable(
 	filter model.FactHiringProcessFilter,
 ) (*model.Page[model.DashboardTableRow], error) {
 	query, err := applyQueryFilters(
-		client.
-			FactHiringProcess.
-			Query().
-			WithDimProcess().
-			WithDimVacancy(func(query *ent.DimVacancyQuery) {
-				query.WithHiringProcessCandidates()
-			}),
+		createBaseQueryWithUniqueDbIds(client),
 		filter,
 	)
 	if err != nil {
