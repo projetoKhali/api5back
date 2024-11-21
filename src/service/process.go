@@ -19,7 +19,7 @@ func GetProcessSuggestions(
 		DimProcess.
 		Query()
 
-	if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
 		query = query.
 			Where(dimprocess.
 				DimUsrIdIn(*pageRequest.IDs...))
