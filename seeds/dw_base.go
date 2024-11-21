@@ -13,19 +13,341 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+var DwDimUser = []ent.DimUser{
+	{DbId: 1, Name: "Alice Santos", Occupation: "Recruiter"},
+	{DbId: 2, Name: "Bob Ferreira", Occupation: "HR Manager"},
+	{DbId: 3, Name: "Carla Mendes", Occupation: "Software Engineer"},
+	{DbId: 4, Name: "David Costa", Occupation: "Data Analyst"},
+	{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
+}
+
+var DwDimDatetime = []ent.DimDatetime{
+	{
+		Date: &pgtype.Date{Time: time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		Year: 2024, Month: 7, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+	},
+	{
+		Date: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		Year: 2024, Month: 8, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+	},
+	{
+		Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		Year: 2024, Month: 9, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
+	},
+	{
+		Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		Year: 2024, Month: 9, Weekday: 2, Day: 0, Hour: 0, Minute: 0, Second: 0,
+	},
+	{
+		Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		Year: 2024, Month: 9, Weekday: 3, Day: 0, Hour: 0, Minute: 0, Second: 0,
+	},
+}
+
+var DwDimVacancy = []ent.DimVacancy{
+	{
+		DbId: 1, Title: "Software Engineer",
+		DimUsrId: 1, NumPositions: 1, ReqId: 1,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 12, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 2, Title: "Data Scientist",
+		DimUsrId: 1, NumPositions: 2, ReqId: 1,
+		Location:    "Rio de Janeiro",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 3, Title: "HR Specialist",
+		DimUsrId: 2, NumPositions: 1, ReqId: 1,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 3, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 3, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 4, Title: "UX Designer",
+		DimUsrId: 3, NumPositions: 2, ReqId: 1,
+		Location:    "Curitiba",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 5, Title: "Software Engineer",
+		DimUsrId: 1, NumPositions: 1, ReqId: 2,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 2, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 6, Title: "UX Designer",
+		DimUsrId: 5, NumPositions: 1, ReqId: 2,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 11, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 7, Title: "Data Scientist",
+		DimUsrId: 4, NumPositions: 1, ReqId: 3,
+		Location:    "Rio de Janeiro",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 10, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 8, Title: "Product Manager",
+		DimUsrId: 5, NumPositions: 1, ReqId: 3,
+		Location:    "Belo Horizonte",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 5, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusOpen,
+	},
+	{
+		DbId: 9, Title: "HR Specialist",
+		DimUsrId: 3, NumPositions: 2, ReqId: 4,
+		Location:    "São Paulo",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 4, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusInAnalysis,
+	},
+	{
+		DbId: 10, Title: "Data Engineer",
+		DimUsrId: 1, NumPositions: 3, ReqId: 5,
+		Location:    "Sergipe",
+		OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		Status:      property.DimVacancyStatusClosed,
+	},
+}
+
+var DwDimProcess = []ent.DimProcess{
+	{
+		DbId: 1, Title: "Desenvolvimento Ágil - Software Engineer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    1,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 2, Title: "Recrutamento e Seleção - HR Specialist",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    2,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 3, Title: "Gestão de Produto - Product Manager",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    3,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 4, Title: "Experiência do Usuário - UX Designer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    4,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 5, Title: "Análise de Dados - Data Scientist",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    5,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 6, Title: "Desenvolvimento de Software - Software Engineer e UX Designer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    1,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 7, Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    2,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 8, Title: "Processo de Recrutamento - HR Specialist e Software Engineer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    3,
+		Status:      property.DimProcessStatusOpen,
+	},
+	{
+		DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    4,
+		Status:      property.DimProcessStatusInProgress,
+	},
+	{
+		DbId: 10, Title: "Inovação em Dados - Data Scientist e HR Specialist",
+		InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+		DimUsrId:    5,
+		Status:      property.DimProcessStatusClosed,
+	},
+}
+
+var DwFactHiringProcess = []ent.FactHiringProcess{
+	{
+		DimUserId:                     1,
+		DimProcessId:                  1,
+		DimVacancyId:                  1,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     10,
+		MetTotalCandidatesInterviewed: 5,
+		MetTotalCandidatesHired:       3,
+		MetSumDurationHiringProces:    30,
+		MetSumSalaryInitial:           5000,
+		MetTotalFeedbackPositive:      4,
+		MetTotalNeutral:               2,
+		MetTotalNegative:              1,
+	},
+	{
+		DimUserId:                     2,
+		DimProcessId:                  2,
+		DimVacancyId:                  2,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     12,
+		MetTotalCandidatesInterviewed: 6,
+		MetTotalCandidatesHired:       4,
+		MetSumDurationHiringProces:    25,
+		MetSumSalaryInitial:           5500,
+		MetTotalFeedbackPositive:      5,
+		MetTotalNeutral:               3,
+		MetTotalNegative:              2,
+	},
+	{
+		DimUserId:                     3,
+		DimProcessId:                  3,
+		DimVacancyId:                  3,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     8,
+		MetTotalCandidatesInterviewed: 4,
+		MetTotalCandidatesHired:       2,
+		MetSumDurationHiringProces:    20,
+		MetSumSalaryInitial:           4500,
+		MetTotalFeedbackPositive:      3,
+		MetTotalNeutral:               2,
+		MetTotalNegative:              1,
+	},
+	{
+		DimUserId:                     4,
+		DimProcessId:                  4,
+		DimVacancyId:                  4,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     15,
+		MetTotalCandidatesInterviewed: 8,
+		MetTotalCandidatesHired:       5,
+		MetSumDurationHiringProces:    35,
+		MetSumSalaryInitial:           6000,
+		MetTotalFeedbackPositive:      6,
+		MetTotalNeutral:               4,
+		MetTotalNegative:              2,
+	},
+	{
+		DimUserId:                     5,
+		DimProcessId:                  5,
+		DimVacancyId:                  5,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     20,
+		MetTotalCandidatesInterviewed: 10,
+		MetTotalCandidatesHired:       6,
+		MetSumDurationHiringProces:    40,
+		MetSumSalaryInitial:           7000,
+		MetTotalFeedbackPositive:      7,
+		MetTotalNeutral:               5,
+		MetTotalNegative:              3,
+	},
+	{
+		DimUserId:                     2,
+		DimProcessId:                  6,
+		DimVacancyId:                  6,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     10,
+		MetTotalCandidatesInterviewed: 5,
+		MetTotalCandidatesHired:       3,
+		MetSumDurationHiringProces:    30,
+		MetSumSalaryInitial:           5000,
+		MetTotalFeedbackPositive:      4,
+		MetTotalNeutral:               2,
+		MetTotalNegative:              1,
+	},
+	{
+		DimUserId:                     3,
+		DimProcessId:                  7,
+		DimVacancyId:                  7,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     12,
+		MetTotalCandidatesInterviewed: 6,
+		MetTotalCandidatesHired:       4,
+		MetSumDurationHiringProces:    25,
+		MetSumSalaryInitial:           5500,
+		MetTotalFeedbackPositive:      5,
+		MetTotalNeutral:               3,
+		MetTotalNegative:              2,
+	},
+	{
+		DimUserId:                     4,
+		DimProcessId:                  8,
+		DimVacancyId:                  8,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     8,
+		MetTotalCandidatesInterviewed: 4,
+		MetTotalCandidatesHired:       2,
+		MetSumDurationHiringProces:    20,
+		MetSumSalaryInitial:           4500,
+		MetTotalFeedbackPositive:      3,
+		MetTotalNeutral:               2,
+		MetTotalNegative:              1,
+	},
+	{
+		DimUserId:                     5,
+		DimProcessId:                  9,
+		DimVacancyId:                  9,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     15,
+		MetTotalCandidatesInterviewed: 8,
+		MetTotalCandidatesHired:       5,
+		MetSumDurationHiringProces:    35,
+		MetSumSalaryInitial:           6000,
+		MetTotalFeedbackPositive:      6,
+		MetTotalNeutral:               4,
+		MetTotalNegative:              2,
+	},
+	{
+		DimUserId:                     1,
+		DimProcessId:                  10,
+		DimVacancyId:                  10,
+		DimDateId:                     1,
+		MetTotalCandidatesApplied:     20,
+		MetTotalCandidatesInterviewed: 10,
+		MetTotalCandidatesHired:       6,
+		MetSumDurationHiringProces:    40,
+		MetSumSalaryInitial:           7000,
+		MetTotalFeedbackPositive:      7,
+		MetTotalNeutral:               5,
+		MetTotalNegative:              3,
+	},
+}
+
 // Função para popular os dados no banco
 func DataWarehouse(client *ent.Client) error {
 	ctx := context.Background()
 
-	users := []ent.DimUser{
-		{DbId: 1, Name: "Alice Santos", Occupation: "Recruiter"},
-		{DbId: 2, Name: "Bob Ferreira", Occupation: "HR Manager"},
-		{DbId: 3, Name: "Carla Mendes", Occupation: "Software Engineer"},
-		{DbId: 4, Name: "David Costa", Occupation: "Data Analyst"},
-		{DbId: 5, Name: "Eva Lima", Occupation: "Product Manager"},
-	}
-
-	for _, user := range users {
+	for _, user := range DwDimUser {
 		_, err := client.DimUser.Create().
 			SetDbId(user.DbId).
 			SetName(user.Name).
@@ -36,31 +358,7 @@ func DataWarehouse(client *ent.Client) error {
 		}
 	}
 
-	// Inserindo datas na tabela dim_datetime
-	dates := []ent.DimDatetime{
-		{
-			Date: &pgtype.Date{Time: time.Date(2024, 7, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			Year: 2024, Month: 7, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
-		},
-		{
-			Date: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			Year: 2024, Month: 8, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
-		},
-		{
-			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			Year: 2024, Month: 9, Weekday: 1, Day: 0, Hour: 0, Minute: 0, Second: 0,
-		},
-		{
-			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			Year: 2024, Month: 9, Weekday: 2, Day: 0, Hour: 0, Minute: 0, Second: 0,
-		},
-		{
-			Date: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			Year: 2024, Month: 9, Weekday: 3, Day: 0, Hour: 0, Minute: 0, Second: 0,
-		},
-	}
-
-	for _, date := range dates {
+	for _, date := range DwDimDatetime {
 		_, err := client.DimDatetime.Create().
 			SetDate(date.Date).
 			SetYear(date.Year).
@@ -76,91 +374,7 @@ func DataWarehouse(client *ent.Client) error {
 		}
 	}
 
-	// Inserindo vagas
-	vacancies := []ent.DimVacancy{
-		{
-			DbId: 1, Title: "Software Engineer",
-			DimUsrId: 1, NumPositions: 1, ReqId: 1,
-			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 12, 30, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 2, Title: "Data Scientist",
-			DimUsrId: 1, NumPositions: 2, ReqId: 1,
-			Location:    "Rio de Janeiro",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 3, Title: "HR Specialist",
-			DimUsrId: 2, NumPositions: 1, ReqId: 1,
-			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 3, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 3, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 4, Title: "UX Designer",
-			DimUsrId: 3, NumPositions: 2, ReqId: 1,
-			Location:    "Curitiba",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 5, Title: "Software Engineer",
-			DimUsrId: 1, NumPositions: 1, ReqId: 2,
-			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 2, 30, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 6, Title: "UX Designer",
-			DimUsrId: 5, NumPositions: 1, ReqId: 2,
-			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 11, 30, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 7, Title: "Data Scientist",
-			DimUsrId: 4, NumPositions: 1, ReqId: 3,
-			Location:    "Rio de Janeiro",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 10, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 8, Title: "Product Manager",
-			DimUsrId: 5, NumPositions: 1, ReqId: 3,
-			Location:    "Belo Horizonte",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 5, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusOpen,
-		},
-		{
-			DbId: 9, Title: "HR Specialist",
-			DimUsrId: 3, NumPositions: 2, ReqId: 4,
-			Location:    "São Paulo",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 4, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusInAnalysis,
-		},
-		{
-			DbId: 10, Title: "Data Engineer",
-			DimUsrId: 1, NumPositions: 3, ReqId: 5,
-			Location:    "Sergipe",
-			OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			ClosingDate: &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			Status:      property.DimVacancyStatusClosed,
-		},
-	}
-
-	for _, vacancy := range vacancies {
+	for _, vacancy := range DwDimVacancy {
 		_, err := client.DimVacancy.Create().
 			SetDbId(vacancy.DbId).
 			SetTitle(vacancy.Title).
@@ -177,81 +391,7 @@ func DataWarehouse(client *ent.Client) error {
 		}
 	}
 
-	// Inserindo processos
-	processes := []ent.DimProcess{
-		{
-			DbId: 1, Title: "Desenvolvimento Ágil - Software Engineer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    1,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 2, Title: "Recrutamento e Seleção - HR Specialist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    2,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 3, Title: "Gestão de Produto - Product Manager",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    3,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 4, Title: "Experiência do Usuário - UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    4,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 5, Title: "Análise de Dados - Data Scientist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    5,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 6, Title: "Desenvolvimento de Software - Software Engineer e UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    1,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 7, Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    2,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 8, Title: "Processo de Recrutamento - HR Specialist e Software Engineer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    3,
-			Status:      property.DimProcessStatusOpen,
-		},
-		{
-			DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    4,
-			Status:      property.DimProcessStatusInProgress,
-		},
-		{
-			DbId: 10, Title: "Inovação em Dados - Data Scientist e HR Specialist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    5,
-			Status:      property.DimProcessStatusClosed,
-		},
-	}
-
-	for _, process := range processes {
+	for _, process := range DwDimProcess {
 		_, err := client.DimProcess.Create().
 			SetDbId(process.DbId).
 			SetTitle(process.Title).
@@ -265,163 +405,19 @@ func DataWarehouse(client *ent.Client) error {
 		}
 	}
 
-	// Inserindo dados na tabela fact_hiring_process
-	facts := []ent.FactHiringProcess{
-		{
-			DimUserId:                     1,
-			DimProcessId:                  1,
-			DimVacancyId:                  1,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     10,
-			MetTotalCandidatesInterviewed: 5,
-			MetTotalCandidatesHired:       3,
-			MetSumDurationHiringProces:    30,
-			MetSumSalaryInitial:           5000,
-			MetTotalFeedbackPositive:      4,
-			MetTotalNeutral:               2,
-			MetTotalNegative:              1,
-		},
-		{
-			DimUserId:                     2,
-			DimProcessId:                  2,
-			DimVacancyId:                  2,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     12,
-			MetTotalCandidatesInterviewed: 6,
-			MetTotalCandidatesHired:       4,
-			MetSumDurationHiringProces:    25,
-			MetSumSalaryInitial:           5500,
-			MetTotalFeedbackPositive:      5,
-			MetTotalNeutral:               3,
-			MetTotalNegative:              2,
-		},
-		{
-			DimUserId:                     3,
-			DimProcessId:                  3,
-			DimVacancyId:                  3,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     8,
-			MetTotalCandidatesInterviewed: 4,
-			MetTotalCandidatesHired:       2,
-			MetSumDurationHiringProces:    20,
-			MetSumSalaryInitial:           4500,
-			MetTotalFeedbackPositive:      3,
-			MetTotalNeutral:               2,
-			MetTotalNegative:              1,
-		},
-		{
-			DimUserId:                     4,
-			DimProcessId:                  4,
-			DimVacancyId:                  4,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     15,
-			MetTotalCandidatesInterviewed: 8,
-			MetTotalCandidatesHired:       5,
-			MetSumDurationHiringProces:    35,
-			MetSumSalaryInitial:           6000,
-			MetTotalFeedbackPositive:      6,
-			MetTotalNeutral:               4,
-			MetTotalNegative:              2,
-		},
-		{
-			DimUserId:                     5,
-			DimProcessId:                  5,
-			DimVacancyId:                  5,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     20,
-			MetTotalCandidatesInterviewed: 10,
-			MetTotalCandidatesHired:       6,
-			MetSumDurationHiringProces:    40,
-			MetSumSalaryInitial:           7000,
-			MetTotalFeedbackPositive:      7,
-			MetTotalNeutral:               5,
-			MetTotalNegative:              3,
-		},
-		{
-			DimUserId:                     2,
-			DimProcessId:                  6,
-			DimVacancyId:                  6,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     10,
-			MetTotalCandidatesInterviewed: 5,
-			MetTotalCandidatesHired:       3,
-			MetSumDurationHiringProces:    30,
-			MetSumSalaryInitial:           5000,
-			MetTotalFeedbackPositive:      4,
-			MetTotalNeutral:               2,
-			MetTotalNegative:              1,
-		},
-		{
-			DimUserId:                     3,
-			DimProcessId:                  7,
-			DimVacancyId:                  7,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     12,
-			MetTotalCandidatesInterviewed: 6,
-			MetTotalCandidatesHired:       4,
-			MetSumDurationHiringProces:    25,
-			MetSumSalaryInitial:           5500,
-			MetTotalFeedbackPositive:      5,
-			MetTotalNeutral:               3,
-			MetTotalNegative:              2,
-		},
-		{
-			DimUserId:                     4,
-			DimProcessId:                  8,
-			DimVacancyId:                  8,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     8,
-			MetTotalCandidatesInterviewed: 4,
-			MetTotalCandidatesHired:       2,
-			MetSumDurationHiringProces:    20,
-			MetSumSalaryInitial:           4500,
-			MetTotalFeedbackPositive:      3,
-			MetTotalNeutral:               2,
-			MetTotalNegative:              1,
-		},
-		{
-			DimUserId:                     5,
-			DimProcessId:                  9,
-			DimVacancyId:                  9,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     15,
-			MetTotalCandidatesInterviewed: 8,
-			MetTotalCandidatesHired:       5,
-			MetSumDurationHiringProces:    35,
-			MetSumSalaryInitial:           6000,
-			MetTotalFeedbackPositive:      6,
-			MetTotalNeutral:               4,
-			MetTotalNegative:              2,
-		},
-		{
-			DimUserId:                     1,
-			DimProcessId:                  10,
-			DimVacancyId:                  10,
-			DimDateId:                     1,
-			MetTotalCandidatesApplied:     20,
-			MetTotalCandidatesInterviewed: 10,
-			MetTotalCandidatesHired:       6,
-			MetSumDurationHiringProces:    40,
-			MetSumSalaryInitial:           7000,
-			MetTotalFeedbackPositive:      7,
-			MetTotalNeutral:               5,
-			MetTotalNegative:              3,
-		},
-	}
-
 	logCurrentCandidate := 1
 	var logTotalCandidates int
 
-	for _, fact := range facts {
+	for _, fact := range DwFactHiringProcess {
 		logTotalCandidates += fact.MetTotalCandidatesApplied
 	}
 
-	for factId, fact := range facts {
+	for factId, fact := range DwFactHiringProcess {
 		factProgressString := fmt.Sprintf(
 			"Creating fact hiring process %d/%d (%d%%)",
 			factId+1,
-			len(facts),
-			int(float64(factId+1)/float64(len(facts))*100),
+			len(DwFactHiringProcess),
+			int(float64(factId+1)/float64(len(DwFactHiringProcess))*100),
 		)
 
 		fmt.Printf("%s\n", factProgressString)
@@ -465,8 +461,8 @@ func DataWarehouse(client *ent.Client) error {
 				t := float64(j) / float64(fact.MetTotalCandidatesApplied-1)
 				candidateName := generateName(factCurrentCandidateDbId)
 				candidateApplyDate := lerpDate(
-					*vacancies[fact.DimVacancyId-1].OpeningDate,
-					*vacancies[fact.DimVacancyId-1].ClosingDate,
+					*DwDimVacancy[fact.DimVacancyId-1].OpeningDate,
+					*DwDimVacancy[fact.DimVacancyId-1].ClosingDate,
 					t,
 				)
 
@@ -483,7 +479,7 @@ func DataWarehouse(client *ent.Client) error {
 				if property.HiringProcessCandidateStatus(candidateStatus) > property.HiringProcessCandidateStatusInAnalysis {
 					candidateBuilder.SetUpdatedAt(lerpDate(
 						*candidateApplyDate,
-						*vacancies[fact.DimVacancyId-1].ClosingDate,
+						*DwDimVacancy[fact.DimVacancyId-1].ClosingDate,
 						0.5,
 					))
 				}
