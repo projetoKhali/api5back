@@ -86,7 +86,7 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 			return
 		}
 
-		users, err := service.GetUsers(
+		users, err := service.GetUserSuggestions(
 			c, dwClient,
 			&pageRequest,
 		)
@@ -120,7 +120,7 @@ func HiringProcessList(
 			return
 		}
 
-		processes, err := service.ListHiringProcesses(
+		processes, err := service.GetProcessSuggestions(
 			c, dbClient,
 			pageRequest,
 		)

@@ -9,7 +9,7 @@ import (
 	"api5back/src/processing"
 )
 
-func GetUsers(
+func GetUserSuggestions(
 	ctx context.Context,
 	client *ent.Client,
 	pageRequest *model.PageRequest,

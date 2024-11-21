@@ -10,7 +10,7 @@ import (
 	"api5back/src/processing"
 )
 
-func ListHiringProcesses(
+func GetProcessSuggestions(
 	ctx context.Context,
 	client *ent.Client,
 	pageRequest *model.SuggestionsFilter,
