@@ -18,6 +18,7 @@ type HiringProcessCandidate struct {
 
 func (HiringProcessCandidate) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("dbId"),
 		field.String("name"),
 		field.String("email"),
 		field.String("phone"),
