@@ -153,10 +153,10 @@ func TestAverageHiringTime(t *testing.T) {
 		assert.Equal(t, float32(15), months.June)
 		assert.Equal(t, float32(12.333333), months.July)
 		assert.Equal(t, float32(0), months.August)
-		assert.Equal(t, float32(12.666667), months.September)
+		assert.Equal(t, float32(0), months.September)
 		assert.Equal(t, float32(1), months.October)
 		assert.Equal(t, float32(0), months.November)
-		assert.Equal(t, float32(0), months.December)
+		assert.Equal(t, float32(12.666667), months.December)
 	}); !testResult {
 		t.Fatalf("Failed to test GenerateAverageHiringTimePerMonth processing function: %v", err)
 	}

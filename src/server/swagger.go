@@ -1,3 +1,6 @@
+//go:build !production && !integration
+// +build !production,!integration
+
 package server
 
 import (

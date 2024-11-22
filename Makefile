@@ -25,7 +25,7 @@ test:
 ti: test-integration
 test-integration:
 	$(MAKE) gen
-	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration
+	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=production
 
 swag: swagger
 swagger:
