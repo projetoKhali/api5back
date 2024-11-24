@@ -26,25 +26,8 @@ func createBaseQueryWithUniqueDbIds(
 		FactHiringProcess.
 		Query().
 		Order(ent.Desc(facthiringprocess.FieldID)).
-		WithDimProcess(func(query *ent.DimProcessQuery) {
-			query.
-				Order(
-					ent.Desc(dimprocess.FieldDbId),
-					ent.Desc(dimprocess.FieldID),
-				).
-				Modify(func(s *sql.Selector) {
-					s.Select("DISTINCT ON (db_id) *")
-				})
-		}).
+		WithDimProcess().
 		WithDimVacancy(func(query *ent.DimVacancyQuery) {
-			query.
-				Order(
-					ent.Desc(dimvacancy.FieldDbId),
-					ent.Desc(dimvacancy.FieldID),
-				).
-				Modify(func(s *sql.Selector) {
-					s.Select("DISTINCT ON (db_id) *")
-				})
 			query.WithHiringProcessCandidates(func(query *ent.HiringProcessCandidateQuery) {
 				query.
 					Order(
