@@ -19,7 +19,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-func createBaseQueryWithUniqueDbIds(
+func createFactHiringProcessBaseQuery(
 	client *ent.Client,
 ) *ent.FactHiringProcessQuery {
 	return client.
@@ -41,7 +41,7 @@ func createBaseQueryWithUniqueDbIds(
 		})
 }
 
-func applyQueryFilters(
+func applyFactHiringProcessQueryFilters(
 	query *ent.FactHiringProcessQuery,
 	filter model.FactHiringProcessFilter,
 ) (*ent.FactHiringProcessQuery, error) {
@@ -146,8 +146,8 @@ func GetMetrics(
 	client *ent.Client,
 	filter model.FactHiringProcessFilter,
 ) (*model.DashboardMetrics, error) {
-	query, err := applyQueryFilters(
-		createBaseQueryWithUniqueDbIds(client),
+	query, err := applyFactHiringProcessQueryFilters(
+		createFactHiringProcessBaseQuery(client),
 		filter,
 	)
 	if err != nil {
@@ -221,8 +221,8 @@ func GetVacancyTable(
 	client *ent.Client,
 	filter model.FactHiringProcessFilter,
 ) (*model.Page[model.DashboardTableRow], error) {
-	query, err := applyQueryFilters(
-		createBaseQueryWithUniqueDbIds(client),
+	query, err := applyFactHiringProcessQueryFilters(
+		createFactHiringProcessBaseQuery(client),
 		filter,
 	)
 	if err != nil {
