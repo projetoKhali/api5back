@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"api5back/ent"
 	"api5back/ent/dimprocess"
@@ -215,10 +216,14 @@ func GetMetrics(
 	}
 
 	if len(errors) > 0 {
-		return nil, fmt.Errorf(
-			"failed to get metrics: %v",
-			errors,
-		)
+		var sb strings.Builder
+		sb.WriteString("failed to get metrics due to the following errors:\n")
+
+		for i, err := range errors {
+			sb.WriteString(fmt.Sprintf("\t[%d] %s\n", i+1, err))
+		}
+
+		return nil, fmt.Errorf(sb.String())
 	}
 
 	return &model.DashboardMetrics{

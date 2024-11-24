@@ -33,7 +33,12 @@ func ComputingCardsInfo(
 			Edges.
 			DimProcessOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `dim_process` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf(
+				"error getting `dim_process` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimProcessId,
+				factHiringProcess.ID,
+				err,
+			)
 		}
 
 		countByStatus[property.DimProcessStatus(process.Status+1)]++
@@ -53,14 +58,24 @@ func ComputingCardsInfo(
 			Edges.
 			DimVacancyOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `dim_vacancy` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf(
+				"error getting `dim_vacancy` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimVacancyId,
+				factHiringProcess.ID,
+				err,
+			)
 		}
 
 		candidates, err := vacancy.
 			Edges.
 			HiringProcessCandidatesOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `hiring_process_candidates` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf(
+				"error getting `hiring_process_candidates` of `dim_vacancy` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimVacancyId,
+				factHiringProcess.ID,
+				err,
+			)
 		}
 
 		for _, candidate := range candidates {

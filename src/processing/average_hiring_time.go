@@ -39,7 +39,8 @@ func GenerateAverageHiringTimePerMonth(
 			HiringProcessCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
-				"`HiringProcessCandidates` of `DimVacancy` not found: %w",
+				"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+				dimVacancy.ID,
 				err,
 			)
 		}
@@ -79,14 +80,16 @@ func GenerateAverageHiringTimePerMonth(
 }
 
 func GenerateAverageHiringTimePerFactHiringProcess(
-	fact_hiring_process *ent.FactHiringProcess,
+	factHiringProcess *ent.FactHiringProcess,
 ) (float32, error) {
-	vacancy, err := fact_hiring_process.
+	vacancy, err := factHiringProcess.
 		Edges.
 		DimVacancyOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
-			"`DimVacancy` of `FactHiringProcess` not found: %w",
+			"`DimVacancy` with ID %d of `FactHiringProcess` with ID %d not found: %w",
+			factHiringProcess.DimVacancyId,
+			factHiringProcess.ID,
 			err,
 		)
 	}
@@ -96,7 +99,8 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 		HiringProcessCandidatesOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
-			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+			"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+			vacancy.ID,
 			err,
 		)
 	}
@@ -116,7 +120,9 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 
 	if hiredCandidates == 0 {
 		return 0, fmt.Errorf(
-			"`No hired candidates found: %w",
+			"no hired candidates found for `FactHiringProcess` ID %d and `DimVacancy` ID %d: %w",
+			factHiringProcess.ID,
+			vacancy.ID,
 			err,
 		)
 	}
