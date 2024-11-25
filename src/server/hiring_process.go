@@ -228,7 +228,7 @@ func VacancyTable(
 // @Tags departments
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /departments [get]
+// @Router /suggestions/departments [get]
 func ListDepartments(
 	client *ent.Client,
 ) func(c *gin.Context) {
@@ -254,7 +254,7 @@ func ListDepartments(
 // @Produce json
 // @Param body body service.CreateGroupAcessRequest true "Group Access Info"
 // @Success 201 {object} ent.GroupAcess
-// @Router /group_acess [post]
+// @Router /group-access [post]
 func CreateGroupAcess(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var request service.CreateGroupAcessRequest
@@ -281,7 +281,7 @@ func CreateGroupAcess(client *ent.Client) func(c *gin.Context) {
 // @Tags group_acess
 // @Produce json
 // @Success 200 {array} service.GroupAcessReturn
-// @Router /group_acess [get]
+// @Router /group-access [get]
 func ListGroupAcess(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		groups, err := service.GetGroupAcessWithDepartments(c, client)

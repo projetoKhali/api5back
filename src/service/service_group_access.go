@@ -36,7 +36,12 @@ func GetGroupAcessWithDepartments(
 	var response []GroupAcessReturn
 	for _, group := range groups {
 		var departments []model.Suggestion
-		for _, dept := range group.Edges.Department {
+		groupAccessDepartments, err := group.Edges.DepartmentOrErr()
+		if err != nil {
+		    return nil, fmt.Errorf("failed to retrieve `Department` of `GroupAccess: %w`, err)
+		}
+		
+		for _, dept := range groupAccessDepartments {
 			departments = append(departments, model.Suggestion{
 				Id:    dept.ID,
 				Title: dept.Name,
