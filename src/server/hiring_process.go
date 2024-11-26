@@ -36,10 +36,10 @@ func HiringProcessDashboard(
 			authentication.POST("/login")  // Login de usuário
 			authentication.POST("/create") // Criar um novo usuário
 		}
-		groupAccess := v1.Group("/groupAccess")
+		groupAccess := v1.Group("/group-access")
 		{
-			groupAccess.GET("/List", ListGroupAcess(dbClient))
-			groupAccess.POST("/groupAccess", CreateGroupAcess(dbClient))
+			groupAccess.GET("", ListGroupAcess(dbClient))
+			groupAccess.POST("", CreateGroupAcess(dbClient))
 		}
 	}
 }

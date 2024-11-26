@@ -6,6 +6,7 @@ import (
 	"api5back/src/model"
 	"context"
 	"errors"
+	"fmt"
 )
 
 type GroupAcessReturn struct {
@@ -19,29 +20,26 @@ type CreateGroupAcessRequest struct {
 	DepartmentIDs []int  `json:"departments" binding:"required"`
 }
 
-// GetGroupAcessWithDepartments retorna grupos de acesso com seus departamentos
+type CreateGroupAcessResponse struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 func GetGroupAcessWithDepartments(
 	ctx context.Context,
 	client *ent.Client,
 ) ([]GroupAcessReturn, error) {
-	// Consulta todos os grupos de acesso e os departamentos relacionados
 	groups, err := client.GroupAcess.Query().
-		WithDepartment(). // Inclui os departamentos relacionados
+		WithDepartment().
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Mapeia o resultado para o formato esperado
 	var response []GroupAcessReturn
 	for _, group := range groups {
 		var departments []model.Suggestion
-		groupAccessDepartments, err := group.Edges.DepartmentOrErr()
-		if err != nil {
-		    return nil, fmt.Errorf("failed to retrieve `Department` of `GroupAccess: %w`, err)
-		}
-		
-		for _, dept := range groupAccessDepartments {
+		for _, dept := range group.Edges.Department {
 			departments = append(departments, model.Suggestion{
 				Id:    dept.ID,
 				Title: dept.Name,
@@ -62,28 +60,34 @@ func CreateGroupAcess(
 	ctx context.Context,
 	client *ent.Client,
 	request CreateGroupAcessRequest,
-) (*ent.GroupAcess, error) {
-	// Verifica se o nome foi fornecido
+) (*CreateGroupAcessResponse, error) {
 	if request.Name == "" {
 		return nil, errors.New("group name cannot be empty")
 	}
 
-	// Verifica se os departamentos existem
 	departments, err := client.Department.Query().
 		Where(department.IDIn(request.DepartmentIDs...)).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query departments: %w", err)
 	}
 
-	// Cria o grupo de acesso e associa os departamentos
+	if len(departments) != len(request.DepartmentIDs) {
+		return nil, errors.New("one or more department IDs do not exist")
+	}
+
 	group, err := client.GroupAcess.Create().
 		SetName(request.Name).
 		AddDepartment(departments...).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create group access: %w", err)
 	}
 
-	return group, nil
+	response := &CreateGroupAcessResponse{
+		ID:   group.ID,
+		Name: group.Name,
+	}
+
+	return response, nil
 }
