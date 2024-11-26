@@ -14,11 +14,15 @@ type Authentication struct {
 
 func (Authentication) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("groupId").Immutable(),
-		field.Int("id"),
+		// Define o campo id como chave primária
+		field.Int("id").
+			Unique(),
 		field.String("name"),
-		field.String("email"),
+		field.String("email").
+			Unique(), // Email deve ser único para a criação do filtro AuthenticationEmailEQ
 		field.String("password"),
+		field.Int("groupId").
+			Immutable(),
 	}
 }
 
@@ -35,7 +39,7 @@ func (Authentication) Edges() []ent.Edge {
 func (Authentication) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "autentication",
+			Table: "authentication", // Corrige o nome da tabela
 		},
 	}
 }
