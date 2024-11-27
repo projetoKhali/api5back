@@ -294,24 +294,26 @@ func ListGroupAcess(client *ent.Client) func(c *gin.Context) {
 	}
 }
 
-// ListUsers godoc
-// @Summary List all users
-// @Description Retrieve a list of all users with ID, name, and email
-// @Tags authentication
-// @Accept json
-// @Produce json
-// @Success 200 {array} ent.Authentication
-// @Failure 500 {object} gin.H{"error": "description of the error"}
-// @Router /authentication/users [get]
 func ListUsers(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		users, err := client.Authentication.Query().All(c)
+		users, err := client.Authentication.Query().
+			WithGroupAcess().
+			All(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, users)
+		var response []service.UserResponse
+		for _, user := range users {
+			response = append(response, service.UserResponse{
+				Name:  user.Name,
+				Email: user.Email,
+				Group: user.Edges.GroupAcess.Name,
+			})
+		}
+
+		c.JSON(http.StatusOK, response)
 	}
 }
 
@@ -327,14 +329,11 @@ func ListUsers(client *ent.Client) func(c *gin.Context) {
 // @Router /authentication/login [post]
 func LoginUser(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		// Parse the request body
 		var creds map[string]string
 		if err := c.ShouldBindJSON(&creds); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 			return
 		}
-
-		// Validate required fields
 		email, emailOk := creds["email"]
 		password, passOk := creds["password"]
 		if !emailOk || !passOk {
@@ -342,7 +341,6 @@ func LoginUser(client *ent.Client) func(c *gin.Context) {
 			return
 		}
 
-		// Call the Login function from the service
 		loginResponse, err := service.Login(c.Request.Context(), client, service.LoginRequest{
 			Email:    email,
 			Password: password,
@@ -352,14 +350,9 @@ func LoginUser(client *ent.Client) func(c *gin.Context) {
 			return
 		}
 
-		// Generate a JWT or session token (placeholder)
-		token := "jwt_token_placeholder"
-
-		// Return the login response
 		c.JSON(http.StatusOK, gin.H{
 			"message": "login successful",
 			"user":    loginResponse,
-			"token":   token,
 		})
 	}
 }
