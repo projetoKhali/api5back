@@ -1,0 +1,59 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DW_HOST: ${{ secrets.DW_HOST }}
+      DW_PORT: ${{ secrets.DW_PORT }}
+      DW_USER: ${{ secrets.DW_USER }}
+      DW_PASS: ${{ secrets.DW_PASS }}
+      DW_NAME: ${{ secrets.DW_NAME }}
+      SSLMODE: ${{ secrets.SSLMODE }}
+      LOCALHOST: ${{ secrets.LOCALHOST }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Env
+      shell: bash
+      run: echo -e "
+        DB_HOST=${DB_HOST}\r
+        DB_PORT=${DB_PORT}\r
+        DB_USER=${DB_USER}\r
+        DB_PASS=${DB_PASS}\r
+        DB_NAME=${DB_NAME}\r
+        DW_HOST=${DW_HOST}\r
+        DW_PORT=${DW_PORT}\r
+        DW_USER=${DW_USER}\r
+        DW_PASS=${DW_PASS}\r
+        DW_NAME=${DW_NAME}\r
+        SSLMODE=${SSLMODE}\r
+        LOCALHOST=${LOCALHOST}" > .env.production
+
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build . -t api5backend
+        docker tag api5backend ${{ secrets.REGISTRY_LOGIN_SERVER }}/api5backend
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/api5backend

@@ -29,6 +29,7 @@ services:
       - warehouse_data:/var/lib/postgresql/data  # Volume para persistência dos dados
     networks:
       - postgres_network
+    command: postgres -c 'max_connections=1000'
 
 volumes:
   entity_data:
