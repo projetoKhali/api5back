@@ -20,7 +20,7 @@ serve:
 
 t: test
 test:
-	go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go')
+	go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go') -tags=production
 
 ti: test-integration
 test-integration:
