@@ -1,5 +1,6 @@
 # Credentials
-.env
+*.env*
+!.env.example
 
 # Temporary and generated files
 bin/

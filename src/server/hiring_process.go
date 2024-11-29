@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"api5back/ent"
@@ -27,6 +28,18 @@ func HiringProcessDashboard(
 			suggestions.GET("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
+			suggestions.GET("/department", ListDepartments(dbClient))
+		}
+		authentication := v1.Group("/authentication")
+		{
+			authentication.GET("/users")   // Listar todos os usuários
+			authentication.POST("/login")  // Login de usuário
+			authentication.POST("/create") // Criar um novo usuário
+		}
+		groupAccess := v1.Group("/group-access")
+		{
+			groupAccess.GET("", ListGroupAcess(dbClient))
+			groupAccess.POST("", CreateGroupAcess(dbClient))
 		}
 	}
 }
@@ -50,7 +63,7 @@ func Dashboard(
 		// TODO: change to pointer
 		var dashboardMetricsFilter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&dashboardMetricsFilter); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -58,7 +71,7 @@ func Dashboard(
 			c, dwClient, dashboardMetricsFilter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -96,7 +109,7 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
 		users, err := service.GetUsers(c, dwClient)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -123,7 +136,7 @@ func HiringProcessList(
 
 		// Parse the body for user IDs
 		if err := c.ShouldBindJSON(&userIDs); err != nil {
-			c.JSON(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
@@ -132,7 +145,7 @@ func HiringProcessList(
 			userIDs,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -157,7 +170,7 @@ func VacancyList(
 		c.Header("Content-Type", "application/json")
 		var processesIds *[]int
 		if err := c.ShouldBindJSON(&processesIds); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error: Invalid request body")))
 			return
 		}
 
@@ -166,7 +179,7 @@ func VacancyList(
 			processesIds,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
@@ -191,7 +204,7 @@ func VacancyTable(
 		c.Header("Content-Type", "application/json")
 		var filter service.FactHiringProcessFilter
 		if err := c.ShouldBindJSON(&filter); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error Invalid request body")))
 			return
 		}
 
@@ -200,10 +213,83 @@ func VacancyTable(
 			filter,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
 		}
 
 		c.JSON(http.StatusOK, vacancies)
+	}
+}
+
+// ListDepartments godoc
+// @Summary List departments
+// @Schemes
+// @Description Return a list of departments with id and title
+// @Tags departments
+// @Produce json
+// @Success 200 {array} model.Suggestion
+// @Router /suggestions/departments [get]
+func ListDepartments(
+	client *ent.Client,
+) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		departments, err := service.ListDepartments(c, client)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to list departments",
+				"details": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusOK, departments)
+	}
+}
+
+// CreateGroupAcess godoc
+// @Summary Create a new group access
+// @Schemes
+// @Description Create a new group access with name and related departments
+// @Tags group_acess
+// @Accept json
+// @Produce json
+// @Param body body service.CreateGroupAcessRequest true "Group Access Info"
+// @Success 201 {object} ent.GroupAcess
+// @Router /group-access [post]
+func CreateGroupAcess(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var request service.CreateGroupAcessRequest
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		group, err := service.CreateGroupAcess(c, client, request)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, group)
+	}
+}
+
+// ListGroupAcess godoc
+// @Summary List group access with departments
+// @Schemes
+// @Description Return a list of group access with id, name, and departments
+// @Tags group_acess
+// @Produce json
+// @Success 200 {array} service.GroupAcessReturn
+// @Router /group-access [get]
+func ListGroupAcess(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		groups, err := service.GetGroupAcessWithDepartments(c, client)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, groups)
 	}
 }
