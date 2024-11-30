@@ -47,7 +47,7 @@ var DwDimDatetime = []ent.DimDatetime{
 
 var DwDimVacancy = []ent.DimVacancy{
 	{
-		DbId: 1, Title: "Software Engineer",
+		DbId: 1, Title: "Senior Software Engineer",
 		DimUsrId: 1, NumPositions: 1, ReqId: 1,
 		Location:    "São Paulo",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -55,7 +55,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 2, Title: "Data Scientist",
+		DbId: 2, Title: "Mid-Level Data Scientist",
 		DimUsrId: 1, NumPositions: 2, ReqId: 1,
 		Location:    "Rio de Janeiro",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -71,7 +71,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 4, Title: "UX Designer",
+		DbId: 4, Title: "Junior UX Designer",
 		DimUsrId: 3, NumPositions: 2, ReqId: 1,
 		Location:    "Curitiba",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -79,7 +79,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 5, Title: "Software Engineer",
+		DbId: 5, Title: "Go Software Engineer",
 		DimUsrId: 1, NumPositions: 1, ReqId: 2,
 		Location:    "São Paulo",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -95,7 +95,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 7, Title: "Data Scientist",
+		DbId: 7, Title: "Senior Data Scientist",
 		DimUsrId: 4, NumPositions: 1, ReqId: 3,
 		Location:    "Rio de Janeiro",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -111,7 +111,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 9, Title: "HR Specialist",
+		DbId: 9, Title: "Chief Product Officer",
 		DimUsrId: 3, NumPositions: 2, ReqId: 4,
 		Location:    "São Paulo",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -119,7 +119,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusOpen,
 	},
 	{
-		DbId: 9, Title: "HR Specialist",
+		DbId: 9, Title: "HR Business Partner",
 		DimUsrId: 3, NumPositions: 2, ReqId: 4,
 		Location:    "São Paulo",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 4, 5, 0, 0, 0, 0, time.UTC), Valid: true},
@@ -127,7 +127,7 @@ var DwDimVacancy = []ent.DimVacancy{
 		Status:      property.DimVacancyStatusInAnalysis,
 	},
 	{
-		DbId: 10, Title: "Data Engineer",
+		DbId: 10, Title: "Data Analyst",
 		DimUsrId: 1, NumPositions: 3, ReqId: 5,
 		Location:    "Sergipe",
 		OpeningDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
