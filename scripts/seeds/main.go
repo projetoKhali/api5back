@@ -22,6 +22,11 @@ var SeedsPresets = []SeedsPreset{
 		SeedsFunc:    seeds.DataWarehouse,
 	},
 	{
+		Abbreviation: "db",
+		Name:         "DataRelational",
+		SeedsFunc:    seeds.DataRelational,
+	},
+	{
 		Abbreviation: "phpc",
 		Name:         "ProceduralHiringProcessCandidates",
 		SeedsFunc:    seeds.DwProceduralHiringProcessCandidates,
