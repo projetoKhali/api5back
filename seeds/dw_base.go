@@ -17,6 +17,25 @@ import (
 func DataWarehouse(client *ent.Client) error {
 	ctx := context.Background()
 
+	departments := []ent.DimDepartment{
+		{DbId: 1, Name: "Marketing", Description: "MKT"},
+		{DbId: 2, Name: "RH", Description: "RH"},
+		{DbId: 3, Name: "CX", Description: "CX"},
+		{DbId: 4, Name: "ADM", Description: "Admin"},
+		{DbId: 5, Name: "Vendas", Description: "Vendas"},
+	}
+
+	for _, department := range departments {
+		_, err := client.DimDepartment.Create().
+			SetDbId(department.DbId).
+			SetName(department.Name).
+			SetDescription(department.Description).
+			Save(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to create department %s: %v", department.Name, err)
+		}
+	}
+
 	users := []ent.DimUser{
 		{DbId: 1, Name: "Alice Santos", Occupation: "Recruiter"},
 		{DbId: 2, Name: "Bob Ferreira", Occupation: "HR Manager"},
@@ -181,73 +200,83 @@ func DataWarehouse(client *ent.Client) error {
 	processes := []ent.DimProcess{
 		{
 			DbId: 1, Title: "Desenvolvimento Ágil - Software Engineer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    1,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        1,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 2,
 		},
 		{
 			DbId: 2, Title: "Recrutamento e Seleção - HR Specialist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    2,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        2,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 2,
 		},
 		{
 			DbId: 3, Title: "Gestão de Produto - Product Manager",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    3,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 7, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        3,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 4,
 		},
 		{
 			DbId: 4, Title: "Experiência do Usuário - UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    4,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 10, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        4,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 3,
 		},
 		{
 			DbId: 5, Title: "Análise de Dados - Data Scientist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    5,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 7, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        5,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 1,
 		},
 		{
 			DbId: 6, Title: "Desenvolvimento de Software - Software Engineer e UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    1,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 15, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        1,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 2,
 		},
 		{
 			DbId: 7, Title: "Análise de Dados e Relatórios - Data Scientist e Product Manager",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    2,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 20, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        2,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 4,
 		},
 		{
 			DbId: 8, Title: "Processo de Recrutamento - HR Specialist e Software Engineer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    3,
-			Status:      property.DimProcessStatusOpen,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 9, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 30, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        3,
+			Status:          property.DimProcessStatusOpen,
+			DimDepartmentId: 2,
 		},
 		{
 			DbId: 9, Title: "Estratégia de Produto - Product Manager e UX Designer",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    4,
-			Status:      property.DimProcessStatusInProgress,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 9, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 10, 5, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        4,
+			Status:          property.DimProcessStatusInProgress,
+			DimDepartmentId: 2,
 		},
 		{
 			DbId: 10, Title: "Inovação em Dados - Data Scientist e HR Specialist",
-			InitialDate: &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			FinishDate:  &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
-			DimUsrId:    5,
-			Status:      property.DimProcessStatusClosed,
+			InitialDate:     &pgtype.Date{Time: time.Date(2024, 8, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			FinishDate:      &pgtype.Date{Time: time.Date(2024, 9, 25, 0, 0, 0, 0, time.UTC), Valid: true},
+			DimUsrId:        5,
+			Status:          property.DimProcessStatusClosed,
+			DimDepartmentId: 2,
 		},
 	}
 
@@ -259,6 +288,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetFinishDate(process.FinishDate).
 			SetDimUsrId(int(process.DimUsrId)).
 			SetStatus(process.Status).
+			SetDimDepartmentId(process.DimDepartmentId).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create process %s: %v", process.Title, err)

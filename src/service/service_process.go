@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
 	"api5back/ent/dimprocess"
 	"api5back/src/model"
 )
@@ -11,15 +12,24 @@ import (
 func ListHiringProcesses(
 	ctx context.Context,
 	client *ent.Client,
-	userIDs *[]int,
+	body model.BodySuggestion,
 ) ([]model.Suggestion, error) {
 	query := client.
 		DimProcess.
 		Query()
 
-	// Verificar se o array de userIDs não é nil e se tem elementos
-	if userIDs != nil && len(*userIDs) > 0 {
-		query = query.Where(dimprocess.DimUsrIdIn(*userIDs...))
+	if body.DepartmentIds != nil && len(*body.DepartmentIds) > 0 {
+		query =
+			query.
+				Where(
+					dimprocess.HasDimDepartmentWith(
+						dimdepartment.IDIn(*body.DepartmentIds...),
+					),
+				)
+	}
+
+	if body.FilterIds != nil && len(*body.FilterIds) > 0 {
+		query = query.Where(dimprocess.DimUsrIdIn(*body.FilterIds...))
 	}
 
 	processes, err := query.All(ctx)

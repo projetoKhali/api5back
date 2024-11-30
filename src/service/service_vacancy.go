@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
+	"api5back/ent/dimprocess"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
 )
@@ -11,18 +13,30 @@ import (
 func GetVacancySuggestions(
 	ctx context.Context,
 	client *ent.Client,
-	processesIds *[]int,
+	body model.BodySuggestion,
 ) ([]model.Suggestion, error) {
 	query := client.
 		FactHiringProcess.
 		Query().
-		WithDimVacancy() // Com WithDimVacancy sempre incluído
+		WithDimVacancy()
+
+	if body.DepartmentIds != nil && len(*body.DepartmentIds) > 0 {
+		query =
+			query.
+				Where(
+					facthiringprocess.HasDimProcessWith( // Note que o escopo do predicado agora é "facthiringprocess"
+						dimprocess.HasDimDepartmentWith(
+							dimdepartment.IDIn(*body.DepartmentIds...),
+						),
+					),
+				)
+	}
 
 	// Se processesIds não for nil e não estiver vazio, aplicamos o filtro
-	if processesIds != nil && len(*processesIds) > 0 {
+	if body.FilterIds != nil && len(*body.FilterIds) > 0 {
 		query = query.
 			Where(facthiringprocess.
-				DimProcessIdIn(*processesIds...))
+				DimProcessIdIn(*body.FilterIds...))
 	}
 
 	vacancies, err := query.All(ctx)

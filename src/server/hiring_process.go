@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"api5back/ent"
+	"api5back/src/model"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,7 @@ func HiringProcessDashboard(
 
 		suggestions := v1.Group("/suggestions")
 		{
-			suggestions.GET("/recruiter", UserList(dwClient))
+			suggestions.POST("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
 			suggestions.GET("/department", ListDepartments(dbClient))
@@ -107,7 +108,14 @@ func TableData(
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		users, err := service.GetUsers(c, dwClient)
+		var departmentIds *[]int
+
+		if err := c.ShouldBindJSON(&departmentIds); err != nil {
+			c.JSON(http.StatusBadRequest, DisplayError(err))
+			return
+		}
+
+		users, err := service.GetUsers(c, dwClient, departmentIds)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
@@ -132,17 +140,16 @@ func HiringProcessList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var userIDs *[]int
+		var body model.BodySuggestion
 
-		// Parse the body for user IDs
-		if err := c.ShouldBindJSON(&userIDs); err != nil {
+		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
 		processes, err := service.ListHiringProcesses(
 			c, dbClient,
-			userIDs,
+			body,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
@@ -168,15 +175,15 @@ func VacancyList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var processesIds *[]int
-		if err := c.ShouldBindJSON(&processesIds); err != nil {
+		var body model.BodySuggestion
+		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error: Invalid request body")))
 			return
 		}
 
 		vacancies, err := service.GetVacancySuggestions(
 			c, dwClient,
-			processesIds,
+			body,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
