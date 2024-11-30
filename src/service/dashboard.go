@@ -10,13 +10,10 @@ import (
 	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
-	"api5back/ent/hiringprocesscandidate"
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
 	"api5back/src/property"
-
-	"entgo.io/ent/dialect/sql"
 )
 
 func createFactHiringProcessBaseQuery(
@@ -29,14 +26,14 @@ func createFactHiringProcessBaseQuery(
 		WithDimProcess().
 		WithDimVacancy(func(query *ent.DimVacancyQuery) {
 			query.WithHiringProcessCandidates(func(query *ent.HiringProcessCandidateQuery) {
-				query.
-					Order(
-						ent.Desc(hiringprocesscandidate.FieldDbId),
-						ent.Desc(hiringprocesscandidate.FieldID),
-					).
-					Modify(func(s *sql.Selector) {
-						s.Select("DISTINCT ON (db_id) *")
-					})
+				// query.
+				// 	Order(
+				// 		ent.Desc(hiringprocesscandidate.FieldDbId),
+				// 		ent.Desc(hiringprocesscandidate.FieldID),
+				// 	).
+				// 	Modify(func(s *sql.Selector) {
+				// 		s.Select("DISTINCT ON (db_id) *")
+				// 	})
 			})
 		})
 }
