@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"api5back/src/property"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
@@ -23,8 +25,9 @@ func (DimProcess) Fields() []ent.Field {
 		}),
 		field.Other("finishDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
-		}).Optional(),
-		field.Int("status").Default(1),
+		}),
+		field.Enum("status").
+			GoType(property.DimProcessStatus(1)),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),
 	}
