@@ -1,0 +1,4 @@
+scrape_configs:
+    - job_name: "azure-api-monitoring"
+      static_configs:
+          - targets: ["http://host.docker.internal:8080/metrics"] # Substitua pela URL da API
