@@ -32,9 +32,9 @@ func HiringProcessDashboard(
 		}
 		authentication := v1.Group("/authentication")
 		{
-			authentication.GET("/users")   // Listar todos os usuários
-			authentication.POST("/login")  // Login de usuário
-			authentication.POST("/create") // Criar um novo usuário
+			authentication.GET("/users", ListUsers(dbClient))
+			authentication.POST("/login", LoginUser(dbClient))
+			authentication.POST("/create", CreateUser(dbClient))
 		}
 		groupAccess := v1.Group("/group-access")
 		{
@@ -291,5 +291,104 @@ func ListGroupAcess(client *ent.Client) func(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, groups)
+	}
+}
+
+// ListUsers godoc
+// @Summary List all users
+// @Description Retrieve a list of all users with ID, name, and email
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Success 200 {array} ent.Authentication
+// @Failure 500 {object} gin.H{"error": "description of the error"}
+// @Router /authentication/users [get]
+func ListUsers(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		users, err := client.Authentication.Query().All(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, users)
+	}
+}
+
+// LoginUser godoc
+// @Summary User login
+// @Description Authenticate a user with email and password
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param body body map[string]string true "User credentials: {email, password}"
+// @Success 200 {object} gin.H{"message": "login successful", "token": "jwt_token"}
+// @Failure 400 {object} gin.H{"error": "Invalid email or password"}
+// @Router /authentication/login [post]
+func LoginUser(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		// Parse the request body
+		var creds map[string]string
+		if err := c.ShouldBindJSON(&creds); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		// Validate required fields
+		email, emailOk := creds["email"]
+		password, passOk := creds["password"]
+		if !emailOk || !passOk {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing email or password"})
+			return
+		}
+
+		// Call the Login function from the service
+		loginResponse, err := service.Login(c.Request.Context(), client, service.LoginRequest{
+			Email:    email,
+			Password: password,
+		})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Generate a JWT or session token (placeholder)
+		token := "jwt_token_placeholder"
+
+		// Return the login response
+		c.JSON(http.StatusOK, gin.H{
+			"message": "login successful",
+			"user":    loginResponse,
+			"token":   token,
+		})
+	}
+}
+
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with name, email, password, and group ID
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param body body service.CreateUserRequest true "User info: {name, email, password, groupID}"
+// @Success 201 {object} ent.Authentication
+// @Failure 400 {object} gin.H{"error": "Invalid request body"}
+// @Failure 500 {object} gin.H{"error": "Error message"}
+// @Router /authentication/create [post]
+func CreateUser(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var request service.CreateUserRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		user, err := service.CreateUser(c, client, request)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, user)
 	}
 }
