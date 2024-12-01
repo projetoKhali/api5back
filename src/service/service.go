@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
 	"api5back/ent/dimprocess"
 	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
@@ -32,6 +33,7 @@ type FactHiringProcessFilter struct {
 	VacancyStatus []int      `json:"vacancyStatus"`
 	Page          *int       `json:"page"`
 	PageSize      *int       `json:"pageSize"`
+	Group         []int      `json:"groupAccess"`
 }
 
 type FactHiringProcessReturn struct {
@@ -43,6 +45,13 @@ func applyQueryFilters(
 	query *ent.FactHiringProcessQuery,
 	filter FactHiringProcessFilter,
 ) (*ent.FactHiringProcessQuery, error) {
+	query = query.Where(
+		facthiringprocess.HasDimProcessWith(
+			dimprocess.HasDimDepartmentWith(
+				dimdepartment.IDIn(filter.Group...),
+			),
+		),
+	)
 	if filter.Recruiters != nil && len(filter.Recruiters) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimUserWith(
