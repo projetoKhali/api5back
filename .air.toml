@@ -5,7 +5,7 @@ tmp_dir = "./bin"
 [build]
   args_bin = []
   bin = "./bin/main"
-  cmd = "go run scripts/generate/main.go && swag init && go build -o ./bin/main.exe ."
+  cmd = "go run scripts/generate/main.go && swag init && go build -o ./bin/main ."
   delay = 1000
   exclude_dir = [
     "assets",
