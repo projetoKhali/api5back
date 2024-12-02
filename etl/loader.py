@@ -35,21 +35,6 @@ class PostgreSQLLoader:
             self.logger.error(f"Erro ao conectar com o banco de dados: {str(e)}")
             return False
 
-    def get_dim_datetime_id(self):
-        """Obtém o id do registro de dim_datetime mais recente."""
-        query = """
-            SELECT id
-            FROM dim_datetime
-            ORDER BY id DESC
-            LIMIT 1;
-        """
-        with self.engine.connect() as conn:
-            result = conn.execute(text(query))
-            dim_datetime_id = result.scalar()
-            self.logger.info(f"Obteve id de dim_datetime: {dim_datetime_id}")
-            return dim_datetime_id
-        
-
     def get_last_dim_datetime_date(self):
         """Obtém a data do registro mais recente de dim_datetime."""
         query = """
@@ -79,31 +64,41 @@ class PostgreSQLLoader:
         
     def check_updates(self, df, update_column, table_name):
         """
-        Verifica atualizações em qualquer tabela.
+        Verifica atualizações em qualquer tabela comparando a data da coluna de atualização 
+        com a última data registrada na tabela dim_datetime.
         
         Args:
-            df: DataFrame com os dados
-            update_column: Nome da coluna que contém a data de atualização
-            table_name: Nome da tabela (para logging)
+            df: DataFrame com os dados.
+            update_column: Nome da coluna que contém a data de atualização.
+            table_name: Nome da tabela (para logging).
+        
+        Returns:
+            DataFrame contendo apenas os registros atualizados.
         """
-        # Obtém a data e hora atual para comparação
-        current_datetime = datetime.now()
+        try:
+            # Obtém a última data registrada em dim_datetime
+            last_dim_datetime_date = self.get_last_dim_datetime_date()
 
-        # Log da data atual
-        self.logger.info(f"Data atual do ETL: {current_datetime}")
+            if update_column and update_column in df.columns:
+                if last_dim_datetime_date is not None:
+                    # Filtra registros com data maior que a última data registrada
+                    updated_records = df[df[update_column] > last_dim_datetime_date]
+                    self.logger.info(f"Registros no DataFrame original ({table_name}): {len(df)}")
+                    self.logger.info(f"Registros atualizados encontrados ({table_name}): {len(updated_records)}")
 
-        if update_column and update_column in df.columns:
-            # Verificando os registros com data maior que a data atual
-            updated_records = df[df[update_column] > current_datetime]
-            self.logger.info(f"Registros no DataFrame original ({table_name}): {len(df)}")
-            self.logger.info(f"Registros atualizados encontrados ({table_name}): {len(updated_records)}")
+                    if updated_records.empty:
+                        self.logger.info(f"Nenhum novo registro encontrado para a tabela {table_name}.")
+                    return updated_records
+                else:
+                    self.logger.warning(f"Nenhuma data em dim_datetime. Carregando todos os registros para {table_name}.")
+                    return df  # Carrega todos os registros caso seja a primeira execução do ETL
+            else:
+                self.logger.warning(f"Coluna de atualização '{update_column}' não encontrada em {table_name}. Carregando todos os registros.")
+                return df  # Carrega todos os registros caso a coluna não exista ou seja inválida
+        except Exception as e:
+            self.logger.error(f"Erro ao verificar atualizações para {table_name}: {str(e)}")
+            raise
 
-            if updated_records.empty:
-                self.logger.info(f"Nenhum novo registro encontrado para a tabela {table_name}")
-            return updated_records
-        else:
-            self.logger.warning(f"Coluna de atualização '{update_column}' não encontrada em {table_name}. Carregando todos os registros.")
-            return df  # Carrega todos os registros caso não haja coluna de atualização ou a coluna não exista.
 
     UPDATE_COLUMNS = {
     'dim_user': 'usr_last_update',
@@ -206,7 +201,7 @@ class PostgreSQLLoader:
                     print("Nenhuma atualização detectada, nenhuma carga necessária.")
 
             else:
-                print("Não foi possível estabelecer conexão com o banco de dados.")
+                print("--")
         except Exception as e:
             logging.error(f"Erro no processo de teste: {str(e)}")
             raise

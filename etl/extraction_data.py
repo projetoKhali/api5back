@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Ler todas as sheets da planilha Excel em DataFrames
-sheet = './etl/dados_dw.xlsx'
+sheet = './etl/dados_dw_nova.xlsx'
 
 dfs = pd.read_excel(sheet, sheet_name=None)  # Carrega todas as abas como dicionário de DataFrames
 
