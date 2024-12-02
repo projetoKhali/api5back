@@ -29,6 +29,12 @@ def create_dim_datetime():
 
 dim_datetime = create_dim_datetime()
 
+dim_department = df_department.rename(columns={
+    'dp_id': 'db_id',
+    'dp_name': 'name',
+    'dp_description': 'description'
+})[['db_id', 'name', 'description']]
+
 dim_user = df_user.rename(columns={
     'usr_id': 'db_id',
     'usr_name': 'name',
@@ -43,9 +49,10 @@ dim_process = df_process.rename(columns={
     'pc_finish_date': 'finish_date',
     'pc_status': 'status',
     'usr_id': 'dim_usr_id',
-    'pc_description': 'description'
+    'pc_description': 'description',
+    'dp_id' : 'dim_department_id'
 })[['db_id', 'title', 'initial_date', 
-    'finish_date', 'status', 'dim_usr_id', 'description']]
+    'finish_date', 'status', 'dim_usr_id', 'description', 'dim_department_id']]
 
 dim_vacancy = df_vacancy.rename(columns={
     'vc_id': 'db_id',
@@ -164,20 +171,23 @@ if __name__ == "__main__":
         df_hiring
     )
     
-    print("Dimensão DateTime:")
-    print(dim_datetime.head())
+    # print("Dimensão DateTime:")
+    # print(dim_datetime.head())
 
-    print("Dimensão User:")
-    print(dim_user.head())
+    # print("Dimensão User:")
+    # print(dim_user.head())
 
-    print("\nDimensão Process:")
-    print(dim_process.head())
+    print("\nDimensão Department:")
+    print(dim_department.head())
 
-    print("\nDimensão Vacancy:")
-    print(dim_vacancy.head())
+    # print("\nDimensão Process:")
+    # print(dim_process.head())
 
-    print("\nDimensão Candidate:")
-    print(hiring_process_candidate.head())
+    # print("\nDimensão Vacancy:")
+    # print(dim_vacancy.head())
+
+    # print("\nDimensão Candidate:")
+    # print(hiring_process_candidate.head())
     
-    print("\nFact Hiring Process:")
-    print(fact_hiring_process.head())
+    # print("\nFact Hiring Process:")
+    # print(fact_hiring_process.head())

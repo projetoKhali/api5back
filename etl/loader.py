@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import logging
 from datetime import datetime
-from transformation import *
+from transformation_data import *
 
 class PostgreSQLLoader:
     def __init__(self):
@@ -131,6 +131,9 @@ class PostgreSQLLoader:
                 # Variável para rastrear se alguma tabela foi atualizada
                 tables_updated = False
 
+                if dim_department is not None:
+                    if loader.load_table(dim_department, 'dim_department', update_column=None):
+                        tables_updated = True
                 if dim_user is not None:
                     if loader.load_table(dim_user, 'dim_user', 'usr_last_update'):
                         tables_updated = True
