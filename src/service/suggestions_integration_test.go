@@ -70,7 +70,7 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 				suggestions, err := GetProcessSuggestions(
 					ctx,
 					intEnv.Client,
-					&model.SuggestionsFilter{
+					&model.SuggestionsPageRequest{
 						PageRequest: &maxPageSizeRequest,
 					},
 				)
@@ -92,7 +92,7 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 				suggestions, err := GetVacancySuggestions(
 					ctx,
 					intEnv.Client,
-					&model.SuggestionsFilter{
+					&model.SuggestionsPageRequest{
 						PageRequest: &maxPageSizeRequest,
 					},
 				)

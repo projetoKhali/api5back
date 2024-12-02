@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
 	"api5back/ent/dimprocess"
 	"api5back/src/model"
 	"api5back/src/pagination"
@@ -29,10 +30,21 @@ func GetProcessSuggestions(
 		}).
 		Clone()
 
-	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
-		query = query.
-			Where(dimprocess.
-				DimUsrIdIn(*pageRequest.IDs...))
+	if pageRequest != nil {
+		if pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
+			query = query.
+				Where(
+					dimprocess.HasDimDepartmentWith(
+						dimdepartment.IDIn(*pageRequest.DepartmentIds...),
+					),
+				)
+		}
+
+		if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+			query = query.
+				Where(dimprocess.
+					DimUsrIdIn(*pageRequest.IDs...))
+		}
 	}
 
 	page, pageSize, err := pagination.ParsePageRequest(pageRequest)

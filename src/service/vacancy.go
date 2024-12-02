@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
+	"api5back/ent/dimprocess"
 	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
@@ -33,10 +35,23 @@ func GetVacancySuggestions(
 		}).
 		Clone()
 
-	if pageRequest != nil && pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
-		query = query.
-			Where(facthiringprocess.
-				DimProcessIdIn(*pageRequest.IDs...))
+	if pageRequest != nil {
+		if pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
+			query = query.
+				Where(
+					facthiringprocess.HasDimProcessWith(
+						dimprocess.HasDimDepartmentWith(
+							dimdepartment.IDIn(*pageRequest.DepartmentIds...),
+						),
+					),
+				)
+		}
+
+		if pageRequest.IDs != nil && len(*pageRequest.IDs) > 0 {
+			query = query.
+				Where(facthiringprocess.
+					DimProcessIdIn(*pageRequest.IDs...))
+		}
 	}
 
 	page, pageSize, err := pagination.ParsePageRequest(pageRequest)

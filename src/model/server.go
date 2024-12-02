@@ -36,13 +36,30 @@ type FactHiringProcessFilter struct {
 	DateRange     *DateRange `json:"dateRange"`
 	ProcessStatus []int      `json:"processStatus"`
 	VacancyStatus []int      `json:"vacancyStatus"`
+	AccessGroups  []int      `json:"accessGroup"`
 	*PageRequest
 }
 
-// Suggestion represents a paginated query for suggestions.
+// SuggestionsPageRequest represents a paginated query for suggestions.
+// It includes a list of department IDs for filtering.
+type SuggestionsPageRequest struct {
+	DepartmentIds *[]int `json:"departments"`
+	*PageRequest
+}
+
+func (s *SuggestionsPageRequest) GetPageRequest() *PageRequest {
+	if s == nil {
+		return nil
+	}
+	return s.PageRequest
+}
+
+// SuggestionsFilter represents a filter for querying suggestions.
+// It includes a list of IDs for filtering, in addition to the
+// department IDs and base page request.
 type SuggestionsFilter struct {
 	IDs *[]int `json:"ids"`
-	*PageRequest
+	SuggestionsPageRequest
 }
 
 func (s *SuggestionsFilter) GetPageRequest() *PageRequest {

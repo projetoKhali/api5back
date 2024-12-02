@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
+	"api5back/ent/dimprocess"
 	"api5back/ent/dimuser"
+	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
@@ -15,7 +18,7 @@ import (
 func GetUserSuggestions(
 	ctx context.Context,
 	client *ent.Client,
-	pageRequest *model.PageRequest,
+	pageRequest *model.SuggestionsPageRequest,
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimUser.
@@ -26,7 +29,21 @@ func GetUserSuggestions(
 		).
 		Modify(func(s *sql.Selector) {
 			s.Select("DISTINCT ON (db_id) *")
-		})
+		}).
+		Clone()
+
+	if pageRequest != nil && pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
+		query = query.
+			Where(
+				dimuser.HasFactHiringProcessWith(
+					facthiringprocess.HasDimProcessWith(
+						dimprocess.HasDimDepartmentWith(
+							dimdepartment.IDIn(*pageRequest.DepartmentIds...),
+						),
+					),
+				),
+			)
+	}
 
 	page, pageSize, err := pagination.ParsePageRequest(pageRequest)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"api5back/ent"
+	"api5back/ent/dimdepartment"
 	"api5back/ent/dimprocess"
 	"api5back/ent/dimuser"
 	"api5back/ent/dimvacancy"
@@ -42,6 +43,13 @@ func applyFactHiringProcessQueryFilters(
 	query *ent.FactHiringProcessQuery,
 	filter model.FactHiringProcessFilter,
 ) (*ent.FactHiringProcessQuery, error) {
+	query = query.Where(
+		facthiringprocess.HasDimProcessWith(
+			dimprocess.HasDimDepartmentWith(
+				dimdepartment.IDIn(filter.AccessGroups...),
+			),
+		),
+	)
 	if filter.Recruiters != nil && len(filter.Recruiters) > 0 {
 		query = query.Where(
 			facthiringprocess.HasDimUserWith(
