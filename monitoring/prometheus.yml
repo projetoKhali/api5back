@@ -1,4 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s 
+
 scrape_configs:
-    - job_name: "azure-api-monitoring"
-      static_configs:
-          - targets: ["http://host.docker.internal:8080/metrics"] # Substitua pela URL da API
+  # Configuração do back-end
+  - job_name: "backend-monitoring"
+    static_configs:
+      - targets: ["${BACKEND_HOST}/metrics"]
+
+  # Configuração do front-end
+  - job_name: "frontend-monitoring"
+    static_configs:
+      - targets: ["${FRONTEND_HOST}/metrics"]
+
+  # Configuração do banco de dados
+  - job_name: "database-monitoring"
+    static_configs:
+      - targets: ["${DB_HOST}/metrics"]
