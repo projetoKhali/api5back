@@ -46,7 +46,6 @@ func HiringProcessDashboard(
 
 // Dashboard godoc
 // @Summary dashboard
-// @Schemes
 // @Description show dashboard
 // @Tags hiring-process
 // @Accept json
@@ -81,7 +80,6 @@ func Dashboard(
 
 // UserList godoc
 // @Summary List users
-// @Schemes
 // @Description Return a list of users with id and name
 // @Tags suggestions
 // @Accept json
@@ -115,7 +113,6 @@ func UserList(dwClient *ent.Client) func(c *gin.Context) {
 
 // HiringProcessList godoc
 // @Summary List hiring processes
-// @Schemes
 // @Description Return a list of hiring processes with id and title
 // @Tags suggestions
 // @Accept json
@@ -151,7 +148,6 @@ func HiringProcessList(
 
 // HiringProcessList godoc
 // @Summary List hiring processes
-// @Schemes
 // @Description Return a list of hiring processes with id and title
 // @Tags suggestions
 // @Accept json
@@ -187,7 +183,6 @@ func VacancyList(
 
 // HiringProcessList godoc
 // @Summary List hiring processes
-// @Schemes
 // @Description Return a list of vacancies with summarized information
 // @Tags hiring-process
 // @Accept json
@@ -223,7 +218,6 @@ func VacancyTable(
 
 // ListDepartments godoc
 // @Summary List departments
-// @Schemes
 // @Description Return a list of departments with id and title
 // @Tags departments
 // @Produce json
@@ -247,12 +241,11 @@ func ListDepartments(
 
 // CreateAccessGroup godoc
 // @Summary Create a new group access
-// @Schemes
 // @Description Create a new group access with name and related departments
 // @Tags access_group
 // @Accept json
 // @Produce json
-// @Param body body service.CreateAccessGroupRequest true "Group Access Info"
+// @Param body body model.CreateAccessGroupRequest true "Group Access Info"
 // @Success 201 {object} ent.AccessGroup
 // @Router /access-group [post]
 func CreateAccessGroup(client *ent.Client) func(c *gin.Context) {
@@ -276,11 +269,10 @@ func CreateAccessGroup(client *ent.Client) func(c *gin.Context) {
 
 // ListAccessGroup godoc
 // @Summary List group access with departments
-// @Schemes
 // @Description Return a list of group access with id, name, and departments
 // @Tags access_group
 // @Produce json
-// @Success 200 {array} service.AccessGroupReturn
+// @Success 200 {array} model.AccessGroup
 // @Router /access-group [get]
 func ListAccessGroup(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -294,6 +286,13 @@ func ListAccessGroup(client *ent.Client) func(c *gin.Context) {
 	}
 }
 
+// ListUsers godoc
+// @Summary List users
+// @Description Return a list of users with name, email, and group
+// @Tags authentication
+// @Produce json
+// @Success 200 {array} service.UserResponse
+// @Router /authentication/users [get]
 func ListUsers(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		users, err := client.Authentication.Query().
