@@ -7,13 +7,7 @@ import (
 )
 
 func TestParseDimCandidateStatus(t *testing.T) {
-	for _, testCase := range []struct {
-		Name           string
-		IntValue       interface{}
-		ExpectedPanic  bool
-		ExpectedError  bool
-		ExpectedStatus string
-	}{
+	for _, testCase := range []PropertyStatusTestCase{
 		{
 			Name:           "In Analysis",
 			IntValue:       0,
@@ -80,7 +74,7 @@ func TestParseDimCandidateStatus(t *testing.T) {
 	} {
 		t.Run(testCase.Name, func(t *testing.T) {
 			testFunction := func() {
-				status := DimCandidateStatus(0)
+				status := HiringProcessCandidateStatus(0)
 				err := status.Scan(testCase.IntValue)
 				if err != nil {
 					require.Equal(t, testCase.ExpectedStatus, "")
