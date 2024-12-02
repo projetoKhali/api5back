@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"api5back/ent"
+	"api5back/src/model"
 	"api5back/src/service"
 
 	"github.com/gin-gonic/gin"
@@ -25,16 +26,16 @@ func HiringProcessDashboard(
 
 		suggestions := v1.Group("/suggestions")
 		{
-			suggestions.GET("/recruiter", UserList(dwClient))
+			suggestions.POST("/recruiter", UserList(dwClient))
 			suggestions.POST("/process", HiringProcessList((dwClient)))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
 			suggestions.GET("/department", ListDepartments(dbClient))
 		}
 		authentication := v1.Group("/authentication")
 		{
-			authentication.GET("/users")   // Listar todos os usuários
-			authentication.POST("/login")  // Login de usuário
-			authentication.POST("/create") // Criar um novo usuário
+			authentication.GET("/users", ListUsers(dbClient))
+			authentication.POST("/login", LoginUser(dbClient))
+			authentication.POST("/create", CreateUser(dbClient))
 		}
 		groupAccess := v1.Group("/group-access")
 		{
@@ -107,7 +108,14 @@ func TableData(
 func UserList(dwClient *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		users, err := service.GetUsers(c, dwClient)
+		var departmentIds *[]int
+
+		if err := c.ShouldBindJSON(&departmentIds); err != nil {
+			c.JSON(http.StatusBadRequest, DisplayError(err))
+			return
+		}
+
+		users, err := service.GetUsers(c, dwClient, departmentIds)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
 			return
@@ -132,17 +140,16 @@ func HiringProcessList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var userIDs *[]int
+		var body model.BodySuggestion
 
-		// Parse the body for user IDs
-		if err := c.ShouldBindJSON(&userIDs); err != nil {
+		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, DisplayError(err))
 			return
 		}
 
 		processes, err := service.ListHiringProcesses(
 			c, dbClient,
-			userIDs,
+			body,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
@@ -168,15 +175,15 @@ func VacancyList(
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
-		var processesIds *[]int
-		if err := c.ShouldBindJSON(&processesIds); err != nil {
+		var body model.BodySuggestion
+		if err := c.ShouldBindJSON(&body); err != nil {
 			c.JSON(http.StatusBadRequest, DisplayError(fmt.Errorf("error: Invalid request body")))
 			return
 		}
 
 		vacancies, err := service.GetVacancySuggestions(
 			c, dwClient,
-			processesIds,
+			body,
 		)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, DisplayError(err))
@@ -291,5 +298,97 @@ func ListGroupAcess(client *ent.Client) func(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, groups)
+	}
+}
+
+func ListUsers(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		users, err := client.Authentication.Query().
+			WithGroupAcess().
+			All(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var response []service.UserResponse
+		for _, user := range users {
+			response = append(response, service.UserResponse{
+				Name:  user.Name,
+				Email: user.Email,
+				Group: user.Edges.GroupAcess.Name,
+			})
+		}
+
+		c.JSON(http.StatusOK, response)
+	}
+}
+
+// LoginUser godoc
+// @Summary User login
+// @Description Authenticate a user with email and password
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param body body map[string]string true "User credentials: {email, password}"
+// @Success 200 {object} gin.H{"message": "login successful", "token": "jwt_token"}
+// @Failure 400 {object} gin.H{"error": "Invalid email or password"}
+// @Router /authentication/login [post]
+func LoginUser(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var creds map[string]string
+		if err := c.ShouldBindJSON(&creds); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+		email, emailOk := creds["email"]
+		password, passOk := creds["password"]
+		if !emailOk || !passOk {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing email or password"})
+			return
+		}
+
+		loginResponse, err := service.Login(c.Request.Context(), client, service.LoginRequest{
+			Email:    email,
+			Password: password,
+		})
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "login successful",
+			"user":    loginResponse,
+		})
+	}
+}
+
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with name, email, password, and group ID
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param body body service.CreateUserRequest true "User info: {name, email, password, groupID}"
+// @Success 201 {object} ent.Authentication
+// @Failure 400 {object} gin.H{"error": "Invalid request body"}
+// @Failure 500 {object} gin.H{"error": "Error message"}
+// @Router /authentication/create [post]
+func CreateUser(client *ent.Client) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var request service.CreateUserRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		user, err := service.CreateUser(c, client, request)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, user)
 	}
 }

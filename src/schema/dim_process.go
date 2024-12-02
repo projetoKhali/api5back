@@ -30,11 +30,17 @@ func (DimProcess) Fields() []ent.Field {
 			GoType(property.DimProcessStatus(1)),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),
+		field.Int("dimDepartmentId").Immutable(),
 	}
 }
 
 func (DimProcess) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("dimDepartment", DimDepartment.Type).
+			Unique().
+			Immutable().
+			Required().
+			Field("dimDepartmentId"),
 		edge.From("fact_hiring_process", FactHiringProcess.Type).
 			Ref("dimProcess"),
 	}
