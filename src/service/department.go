@@ -7,22 +7,24 @@ import (
 	"api5back/src/model"
 )
 
-func GetUsers(
+func ListDepartments(
 	ctx context.Context,
 	client *ent.Client,
 ) ([]model.Suggestion, error) {
-	users, err := client.DimUser.
-		Query().
-		All(ctx)
+	query := client.
+		Department.
+		Query()
+
+	departments, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var response []model.Suggestion
-	for _, user := range users {
+	for _, dept := range departments {
 		response = append(response, model.Suggestion{
-			Id:    user.DbId,
-			Title: user.Name,
+			Id:    dept.ID,
+			Title: dept.Name,
 		})
 	}
 

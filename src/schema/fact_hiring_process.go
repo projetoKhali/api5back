@@ -51,8 +51,6 @@ func (FactHiringProcess) Edges() []ent.Edge {
 			Immutable().
 			Required().
 			Field("dimDateId"),
-		edge.From("hiringProcessCandidates", HiringProcessCandidate.Type).
-			Ref("factHiringProcess"),
 	}
 }
 

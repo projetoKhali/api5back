@@ -35,13 +35,6 @@ func startTestingDatabaseContainer(
 	ctx context.Context,
 	credentials *Credentials,
 ) (testcontainers.Container, error) {
-	var databaseName string
-	if credentials.Name != nil {
-		databaseName = fmt.Sprintf("%s", *credentials.Name)
-	} else {
-		databaseName = ""
-	}
-
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres:latest",
 		Name:         "khali-api5-TI-postgres",
@@ -50,7 +43,7 @@ func startTestingDatabaseContainer(
 			hc.PortBindings = nat.PortMap{
 				"5432/tcp": []nat.PortBinding{{
 					HostIP:   "localhost",
-					HostPort: fmt.Sprintf("%d/tcp", *credentials.Port),
+					HostPort: fmt.Sprintf("%d/tcp", credentials.Port.Value),
 				}},
 			}
 		},
@@ -61,9 +54,9 @@ func startTestingDatabaseContainer(
 		//		WaitingFor: wait.ForListeningPort("5432/tcp"),
 		WaitingFor: wait.ForLog("listening on IPv6 address"),
 		Env: map[string]string{
-			"POSTGRES_USER":     credentials.User,
-			"POSTGRES_PASSWORD": credentials.Pass,
-			"POSTGRES_DB":       databaseName,
+			"POSTGRES_USER":     credentials.User.Value,
+			"POSTGRES_PASSWORD": credentials.Pass.Value,
+			"POSTGRES_DB":       credentials.Name.Value,
 		},
 	}
 

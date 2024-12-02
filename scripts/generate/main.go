@@ -14,6 +14,7 @@ func entConfig() *gen.Config {
 		Target:  "ent",
 		Package: "api5back/ent",
 		Features: []gen.Feature{
+			gen.FeatureModifier,
 			gen.FeatureExecQuery,
 		},
 	}
@@ -35,7 +36,7 @@ func Generate() {
 		panic(fmt.Errorf("scripts/generate • failed to generate ent files: %w", err))
 	}
 
-	fmt.Println("scripts/generate • Successfully genereted ent files.")
+	fmt.Println("scripts/generate • Successfully generated ent files.")
 }
 
 // manual entry point for codegen on command
