@@ -10,11 +10,12 @@ import (
 	"time"
 
 	"api5back/ent"
-	"api5back/ent/facthiringprocess"
+	"api5back/ent/dimvacancy"
 	"api5back/seeds"
 	"api5back/src/database"
 	"api5back/src/property"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,7 +41,7 @@ func CreateTestData(
 	}
 	candidates := []*ent.HiringProcessCandidateCreate{}
 
-	for i, factID := range ids {
+	for i, dimVacancyDbId := range ids {
 		factIndex := i * 8
 
 		for j := 0; j < 4; j++ {
@@ -67,7 +68,7 @@ func CreateTestData(
 				SetApplyDate(pgtypeApplyDate).
 				SetUpdatedAt(pgtypeUpdatedAt).
 				SetStatus(property.HiringProcessCandidateStatus(j)).
-				SetFactHiringProcessID(factID),
+				SetDimVacancyDbId(dimVacancyDbId),
 			)
 		}
 	}
@@ -91,24 +92,28 @@ func TestAverageHiringTime(t *testing.T) {
 		t.Fatalf("Setup test failed")
 	}
 
-	var factHiringProcesses []*ent.FactHiringProcess
-	if testResult := t.Run("Query FactHiringProcess", func(t *testing.T) {
-		factHiringProcesses, err = intEnv.
+	var dimVacancies []*ent.DimVacancy
+	if testResult := t.Run("Query DimVacancies", func(t *testing.T) {
+		dimVacancies, err = intEnv.
 			Client.
-			FactHiringProcess.
+			DimVacancy.
 			Query().
+			Modify(func(s *sql.Selector) {
+				s.Select("ON db_id *")
+			}).
+			Order(ent.Desc(dimvacancy.FieldID)).
 			Limit(3).
 			All(ctx)
 
 		require.NoError(t, err)
-		require.NotEmpty(t, factHiringProcesses)
+		require.NotEmpty(t, dimVacancies)
 	}); !testResult {
 		t.Fatalf("Failed to query FactHiringProcess: %v", err)
 	}
 
 	var ids []int
-	for _, factHiringProcess := range factHiringProcesses {
-		ids = append(ids, factHiringProcess.ID)
+	for _, dimVacancy := range dimVacancies {
+		ids = append(ids, dimVacancy.DbId)
 	}
 
 	candidates := CreateTestData(intEnv.Client, ids)
@@ -128,12 +133,16 @@ func TestAverageHiringTime(t *testing.T) {
 	}
 
 	if testResult := t.Run("Select FactHiringProcess with HiringProcessCandidates", func(t *testing.T) {
-		factHiringProcesses, err = intEnv.
+		dimVacancies, err = intEnv.
 			Client.
-			FactHiringProcess.
+			DimVacancy.
 			Query().
+			Modify(func(s *sql.Selector) {
+				s.Select("ON db_id *")
+			}).
+			Order(ent.Desc(dimvacancy.FieldID)).
 			WithHiringProcessCandidates().
-			Where(facthiringprocess.IDIn(ids...)).
+			Where(dimvacancy.DbIdIn(ids...)).
 			All(ctx)
 
 		require.NoError(t, err)
@@ -142,7 +151,7 @@ func TestAverageHiringTime(t *testing.T) {
 	}
 
 	if testResult := t.Run("Test GenerateAverageHiringTimePerMonth processing function", func(t *testing.T) {
-		months, err := GenerateAverageHiringTimePerMonth(factHiringProcesses)
+		months, err := GenerateAverageHiringTimePerMonth(dimVacancies)
 		require.NoError(t, err)
 
 		assert.Equal(t, float32(0), months.January)

@@ -1,10 +1,11 @@
 package processing
 
 import (
-	"api5back/ent"
-	"api5back/src/property"
 	"fmt"
 	"reflect"
+
+	"api5back/ent"
+	"api5back/src/property"
 )
 
 type AverageHiringTimePerMonth struct {
@@ -28,17 +29,18 @@ type Month struct {
 }
 
 func GenerateAverageHiringTimePerMonth(
-	data []*ent.FactHiringProcess,
+	dimVacancies []*ent.DimVacancy,
 ) (AverageHiringTimePerMonth, error) {
 	monthsValues := [12]Month{}
 
-	for _, process := range data {
-		candidates, err := process.
+	for _, dimVacancy := range dimVacancies {
+		candidates, err := dimVacancy.
 			Edges.
 			HiringProcessCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
-				"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+				"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+				dimVacancy.ID,
 				err,
 			)
 		}
@@ -78,12 +80,27 @@ func GenerateAverageHiringTimePerMonth(
 }
 
 func GenerateAverageHiringTimePerFactHiringProcess(
-	fact_hiring_process *ent.FactHiringProcess,
+	factHiringProcess *ent.FactHiringProcess,
 ) (float32, error) {
-	candidates, err := fact_hiring_process.Edges.HiringProcessCandidatesOrErr()
+	vacancy, err := factHiringProcess.
+		Edges.
+		DimVacancyOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
-			"`HiringProcessCandidates` of `FactHiringProcess` not found: %w",
+			"`DimVacancy` with ID %d of `FactHiringProcess` with ID %d not found: %w",
+			factHiringProcess.DimVacancyId,
+			factHiringProcess.ID,
+			err,
+		)
+	}
+
+	candidates, err := vacancy.
+		Edges.
+		HiringProcessCandidatesOrErr()
+	if err != nil {
+		return 0, fmt.Errorf(
+			"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+			vacancy.ID,
 			err,
 		)
 	}
@@ -103,7 +120,9 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 
 	if hiredCandidates == 0 {
 		return 0, fmt.Errorf(
-			"`No hired candidates found: %w",
+			"no hired candidates found for `FactHiringProcess` ID %d and `DimVacancy` ID %d: %w",
+			factHiringProcess.ID,
+			vacancy.ID,
 			err,
 		)
 	}

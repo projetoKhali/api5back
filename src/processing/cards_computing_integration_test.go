@@ -51,7 +51,7 @@ func createTestData(
 			FactHiringProcess.
 			Create().
 			SetDimProcessID(datePairIndex).
-			SetDimVacancyID(1).
+			SetDimVacancyID(datePairIndex).
 			SetDimUserID(1).
 			SetDimDatetimeID(1),
 		)
@@ -66,7 +66,7 @@ func createTestData(
 			SetDbId(datePairIndex).
 			SetApplyDate(&pgtype.Date{Time: initialDate, Valid: true}).
 			SetUpdatedAt(&pgtype.Date{Time: finishDate, Valid: true}).
-			SetFactHiringProcessID(datePairIndex).
+			SetDimVacancyDbId(datePairIndex).
 			SetStatus(1))
 
 	}
@@ -117,7 +117,9 @@ func TestComputingCardInfo(t *testing.T) {
 			FactHiringProcess.
 			Query().
 			WithDimProcess().
-			WithHiringProcessCandidates().
+			WithDimVacancy(func(q *ent.DimVacancyQuery) {
+				q.WithHiringProcessCandidates()
+			}).
 			All(ctx)
 
 		require.NoError(t, err)
