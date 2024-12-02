@@ -18,7 +18,7 @@ type SeedsPreset struct {
 var SeedsPresets = []SeedsPreset{
 	{
 		Abbreviation: "dw",
-		Name:         "DataWarehouse",
+		Name:         "data-warehouse",
 		SeedsFunc:    seeds.DataWarehouse,
 	},
 	{
