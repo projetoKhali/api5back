@@ -8,28 +8,27 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-type GroupAcess struct {
+type AccessGroup struct {
 	ent.Schema
 }
 
-func (GroupAcess) Fields() []ent.Field {
+func (AccessGroup) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),
 		field.String("name").NotEmpty(),
 	}
 }
 
-func (GroupAcess) Edges() []ent.Edge {
+func (AccessGroup) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("department", Department.Type).
-			Ref("group_acess"),
+			Ref("access_group"),
 	}
 }
 
-func (GroupAcess) Annotations() []schema.Annotation {
+func (AccessGroup) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "group_acess",
+			Table: "access_group",
 		},
 	}
 }

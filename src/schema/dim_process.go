@@ -26,8 +26,12 @@ func (DimProcess) Fields() []ent.Field {
 		field.Other("finishDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
 		}).Optional(),
-		field.Enum("status").
-			GoType(property.DimProcessStatus(1)),
+		field.Int("status").
+			GoType(property.DimProcessStatus(1)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
+			Default(int(property.DimProcessStatusOpen)),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),
 		field.Int("dimDepartmentId").Immutable(),

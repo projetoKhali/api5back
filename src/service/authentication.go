@@ -45,8 +45,10 @@ func GetAllUsers(
 	ctx context.Context,
 	client *ent.Client,
 ) ([]UserResponse, error) {
-	users, err := client.Authentication.Query().
-		WithGroupAcess().
+	users, err := client.
+		Authentication.
+		Query().
+		WithAccessGroup().
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query users: %w", err)
@@ -57,7 +59,7 @@ func GetAllUsers(
 		response = append(response, UserResponse{
 			Name:  user.Name,
 			Email: user.Email,
-			Group: user.Edges.GroupAcess.Name,
+			Group: user.Edges.AccessGroup.Name,
 		})
 	}
 
@@ -69,12 +71,14 @@ func Login(
 	client *ent.Client,
 	request LoginRequest,
 ) (*LoginResponse, error) {
-	user, err := client.Authentication.Query().
+	user, err := client.
+		Authentication.
+		Query().
 		Where(
 			authentication.Email(request.Email),
 			authentication.Password(request.Password),
 		).
-		WithGroupAcess(func(gaq *ent.GroupAcessQuery) {
+		WithAccessGroup(func(gaq *ent.AccessGroupQuery) {
 			gaq.WithDepartment()
 		}).
 		Only(ctx)
@@ -83,7 +87,7 @@ func Login(
 	}
 
 	var departments []model.Suggestion
-	for _, dept := range user.Edges.GroupAcess.Edges.Department {
+	for _, dept := range user.Edges.AccessGroup.Edges.Department {
 		departments = append(departments, model.Suggestion{
 			Id:    dept.ID,
 			Title: dept.Name,
@@ -93,7 +97,7 @@ func Login(
 	response := &LoginResponse{
 		Name:        user.Name,
 		Email:       user.Email,
-		Group:       user.Edges.GroupAcess.Name,
+		Group:       user.Edges.AccessGroup.Name,
 		Departments: departments,
 	}
 
@@ -109,12 +113,16 @@ func CreateUser(
 		return nil, errors.New("name, email, and password cannot be empty")
 	}
 
-	group, err := client.GroupAcess.Get(ctx, request.GroupID)
+	group, err := client.
+		AccessGroup.
+		Get(ctx, request.GroupID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid group ID: %w", err)
 	}
 
-	user, err := client.Authentication.Create().
+	user, err := client.
+		Authentication.
+		Create().
 		SetName(request.Name).
 		SetEmail(request.Email).
 		SetPassword(request.Password).

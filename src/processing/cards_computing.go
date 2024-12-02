@@ -33,7 +33,12 @@ func ComputingCardsInfo(
 			Edges.
 			DimProcessOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `dim_process` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf(
+				"error getting `dim_process` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimProcessId,
+				factHiringProcess.ID,
+				err,
+			)
 		}
 
 		countByStatus[property.DimProcessStatus(process.Status+1)]++
@@ -49,15 +54,32 @@ func ComputingCardsInfo(
 			approachingDeadline++
 		}
 
-		candidates, err := factHiringProcess.
+		vacancy, err := factHiringProcess.
 			Edges.
-			HiringProcessCandidatesOrErr()
+			DimVacancyOrErr()
 		if err != nil {
-			return CardInfos{}, fmt.Errorf("error getting `hiring_process_candidates` of factHiringProcess: %+v", err)
+			return CardInfos{}, fmt.Errorf(
+				"error getting `dim_vacancy` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimVacancyId,
+				factHiringProcess.ID,
+				err,
+			)
+		}
+
+		candidates, err := vacancy.
+			Edges.
+			DimCandidatesOrErr()
+		if err != nil {
+			return CardInfos{}, fmt.Errorf(
+				"error getting `dim_candidates` of `dim_vacancy` with ID %d of factHiringProcess with ID %d: %+v",
+				factHiringProcess.DimVacancyId,
+				factHiringProcess.ID,
+				err,
+			)
 		}
 
 		for _, candidate := range candidates {
-			if candidate.Status == property.HiringProcessCandidateStatusHired {
+			if candidate.Status == property.DimCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
 				totalHiringTime += intervalDays

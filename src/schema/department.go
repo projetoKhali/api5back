@@ -14,7 +14,6 @@ type Department struct {
 
 func (Department) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
 		field.String("name"),
 		field.String("description"),
 	}
@@ -22,7 +21,7 @@ func (Department) Fields() []ent.Field {
 
 func (Department) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("group_acess", GroupAcess.Type),
+		edge.To("access_group", AccessGroup.Type),
 	}
 }
 
