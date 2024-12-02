@@ -323,8 +323,6 @@ func ListUsers(client *ent.Client) func(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param body body map[string]string true "User credentials: {email, password}"
-// @Success 200 {object} gin.H{"message": "login successful", "token": "jwt_token"}
-// @Failure 400 {object} gin.H{"error": "Invalid email or password"}
 // @Router /authentication/login [post]
 func LoginUser(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -364,8 +362,6 @@ func LoginUser(client *ent.Client) func(c *gin.Context) {
 // @Produce json
 // @Param body body service.CreateUserRequest true "User info: {name, email, password, groupID}"
 // @Success 201 {object} ent.Authentication
-// @Failure 400 {object} gin.H{"error": "Invalid request body"}
-// @Failure 500 {object} gin.H{"error": "Error message"}
 // @Router /authentication/create [post]
 func CreateUser(client *ent.Client) func(c *gin.Context) {
 	return func(c *gin.Context) {
