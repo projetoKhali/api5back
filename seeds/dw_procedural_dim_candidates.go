@@ -61,11 +61,10 @@ func randomName() [2]string {
 func DwProceduralDimCandidates(client *ent.Client) error {
 	ctx := context.Background()
 
-	// select FactHiringProcess from the database (max 100)
-	factHiringProcesses, err := client.
-		FactHiringProcess.
+	// select DimVacancy from the database (max 100)
+	dimVacancies, err := client.
+		DimVacancy.
 		Query().
-		WithDimVacancy().
 		Limit(100).
 		All(ctx)
 	if err != nil {
@@ -75,27 +74,20 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 	var candidatesToInsert []*ent.DimCandidateCreate
 
 	// loop through the FactHiringProcess and create 5 to 10 candidates for each
-	for i, factHiringProcess := range factHiringProcesses {
+	for i, dimVacancy := range dimVacancies {
 		numberOfCandidates := rand.Intn(6) + 5
-
-		factHiringProcessVacancy, err := factHiringProcess.
-			Edges.
-			DimVacancyOrErr()
-		if err != nil {
-			return fmt.Errorf("failed to get vacancy of FactHiringProcess [%d]: %v", i, err)
-		}
 
 		for j := 0; j < numberOfCandidates; j++ {
 			candidateName := randomName()
 			candidateStatus := property.DimCandidateStatus(rand.Intn(4))
 
-			applyDate := factHiringProcessVacancy.
+			applyDate := dimVacancy.
 				OpeningDate.
 				Time.
-				AddDate(0, 0, rand.Intn(int(factHiringProcessVacancy.
+				AddDate(0, 0, rand.Intn(int(dimVacancy.
 					ClosingDate.
 					Time.
-					Sub(factHiringProcessVacancy.OpeningDate.Time).
+					Sub(dimVacancy.OpeningDate.Time).
 					Hours()/24)+1,
 				))
 
@@ -106,7 +98,7 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 
 			updatedAtPgType := applyDatePgType
 			if candidateStatus == property.DimCandidateStatusHired {
-				maxHiredDate := int(factHiringProcessVacancy.
+				maxHiredDate := int(dimVacancy.
 					ClosingDate.
 					Time.
 					Sub(applyDate).
@@ -123,7 +115,7 @@ func DwProceduralDimCandidates(client *ent.Client) error {
 			candidatesToInsert = append(candidatesToInsert, client.
 				DimCandidate.
 				Create().
-				SetFactHiringProcessID(factHiringProcess.ID).
+				SetDimVacancyDbId(dimVacancy.DbId).
 				SetName(fmt.Sprintf(
 					"%s %s",
 					candidateName[0],

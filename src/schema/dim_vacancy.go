@@ -43,6 +43,8 @@ func (DimVacancy) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("fact_hiring_process", FactHiringProcess.Type).
 			Ref("dimVacancy"),
+		edge.From("dimCandidates", DimCandidate.Type).
+			Ref("dimVacancy"),
 	}
 }
 

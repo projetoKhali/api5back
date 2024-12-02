@@ -51,7 +51,7 @@ func createTestData(
 			FactHiringProcess.
 			Create().
 			SetDimProcessID(datePairIndex).
-			SetDimVacancyID(1).
+			SetDimVacancyID(datePairIndex).
 			SetDimUserID(1).
 			SetDimDatetimeID(1),
 		)
@@ -66,7 +66,7 @@ func createTestData(
 			SetDbId(datePairIndex).
 			SetApplyDate(&pgtype.Date{Time: initialDate, Valid: true}).
 			SetUpdatedAt(&pgtype.Date{Time: finishDate, Valid: true}).
-			SetFactHiringProcessID(datePairIndex).
+			SetDimVacancyDbId(datePairIndex).
 			SetStatus(1))
 
 	}
@@ -90,34 +90,15 @@ func TestComputingCardInfo(t *testing.T) {
 		t.Fatalf("Setup test failed")
 	}
 
-	// if testResult := t.Run("Create test data", func(t *testing.T) {
-	// 	processes, factHiringProcesses, candidates := createTestData(intEnv.Client)
-
-	// 	for _, process := range processes {
-	// 		_, err = process.Save(ctx)
-	// 		require.NoError(t, err)
-	// 	}
-
-	// 	for _, factHiringProcess := range factHiringProcesses {
-	// 		_, err = factHiringProcess.Save(ctx)
-	// 		require.NoError(t, err)
-	// 	}
-
-	// 	for _, candidate := range candidates {
-	// 		_, err = candidate.Save(ctx)
-	// 		require.NoError(t, err)
-	// 	}
-	// }); !testResult {
-	// 	t.Fatalf("Create test data failed")
-	// }
-
 	if testResult := t.Run("Test ComputingCardsInfo", func(t *testing.T) {
 		factHiringProcesses, err := intEnv.
 			Client.
 			FactHiringProcess.
 			Query().
 			WithDimProcess().
-			WithDimCandidates().
+			WithDimVacancy(func(q *ent.DimVacancyQuery) {
+				q.WithDimCandidates()
+			}).
 			All(ctx)
 
 		require.NoError(t, err)
