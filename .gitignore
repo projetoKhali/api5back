@@ -9,3 +9,4 @@ docs/
 # Generated files except `generate.go`
 ent/*
 !ent/generate.go
+src/service/service_export_csv.go
