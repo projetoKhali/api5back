@@ -18,6 +18,3 @@ df_hiring = dfs['Contratações']
 
 # print("Dados extraídos com sucesso!")
 print(df_department.head())  # Exibe as primeiras linhas de um DataFrame para confirmar
-
-print(df_department.columns)
-print(df_department.columns.tolist())

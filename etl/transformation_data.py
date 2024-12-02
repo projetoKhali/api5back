@@ -81,7 +81,7 @@ candidate_columns = candidate_complete.rename(columns={
     'cd_score' : 'score',
     'cd_last_update' : 'updated_at',
     'vc_cd_insert_date' : 'apply_date',
-    'vc_id' :  'fact_hiring_process_id'
+    'vc_id' :  'dim_vacancy_db_id'
 })
 
 columns = [
@@ -93,11 +93,11 @@ columns = [
     'apply_date',
     'status',
     'updated_at',
-    'fact_hiring_process_id'
+    'dim_vacancy_db_id'
 ]
 
 
-hiring_process_candidate = candidate_columns[columns]
+dim_candidate = candidate_columns[columns]
 
 def create_fact_table(df_process, df_vacancy, df_vacancy_candidate, df_interview, df_feedback, df_hiring):
     """Cria a tabela fato com todas as métricas e dimensões necessárias."""
@@ -171,23 +171,23 @@ if __name__ == "__main__":
         df_hiring
     )
     
-    # print("Dimensão DateTime:")
-    # print(dim_datetime.head())
+    print("Dimensão DateTime:")
+    print(dim_datetime.head())
 
-    # print("Dimensão User:")
-    # print(dim_user.head())
+    print("Dimensão User:")
+    print(dim_user.head())
 
     print("\nDimensão Department:")
     print(dim_department.head())
 
-    # print("\nDimensão Process:")
-    # print(dim_process.head())
+    print("\nDimensão Process:")
+    print(dim_process.head())
 
-    # print("\nDimensão Vacancy:")
-    # print(dim_vacancy.head())
+    print("\nDimensão Vacancy:")
+    print(dim_vacancy.head())
 
-    # print("\nDimensão Candidate:")
-    # print(hiring_process_candidate.head())
+    print("\nDimensão Candidate:")
+    print(dim_candidate.head())
     
-    # print("\nFact Hiring Process:")
-    # print(fact_hiring_process.head())
+    print("\nFact Hiring Process:")
+    print(fact_hiring_process.head())

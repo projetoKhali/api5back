@@ -58,16 +58,24 @@ class PostgreSQLLoader:
             ORDER BY id DESC
             LIMIT 1;
         """
-        with self.engine.connect() as conn:
-            result = conn.execute(text(query))
-            last_date = result.scalar()
-            
-            if last_date is None:
-                self.logger.warning("Nenhuma data encontrada em dim_datetime (primeira execução do ETL).")
-                return None
+        try:
+            with self.engine.connect() as conn:
+                result = conn.execute(text(query))
+                last_date = result.scalar()
                 
-            self.logger.info(f"Obteve última data de dim_datetime: {last_date}")
-            return last_date
+                # Adicionando logs detalhados
+                self.logger.info(f"Executando query: {query}")
+                self.logger.info(f"Resultado da query: {last_date}")
+                
+                if last_date is None:
+                    self.logger.warning("Nenhuma data encontrada em dim_datetime (primeira execução do ETL).")
+                    return None
+                    
+                self.logger.info(f"Última data obtida em dim_datetime: {last_date}")
+                return last_date
+        except Exception as e:
+            self.logger.error(f"Erro ao obter última data de dim_datetime: {str(e)}")
+            raise
         
     def check_updates(self, df, update_column, table_name):
         """
@@ -78,14 +86,24 @@ class PostgreSQLLoader:
             update_column: Nome da coluna que contém a data de atualização
             table_name: Nome da tabela (para logging)
         """
-        last_etl_date = self.get_last_dim_datetime_date()
-        if last_etl_date is None:
-            self.logger.info(f"Primeira execução - carregando todos os registros de {table_name}")
-            return df
-        
-        updated_records = df[df[update_column] > last_etl_date]
-        self.logger.info(f"Encontrados {len(updated_records)} registros atualizados em {table_name}")
-        return updated_records
+        # Obtém a data e hora atual para comparação
+        current_datetime = datetime.now()
+
+        # Log da data atual
+        self.logger.info(f"Data atual do ETL: {current_datetime}")
+
+        if update_column and update_column in df.columns:
+            # Verificando os registros com data maior que a data atual
+            updated_records = df[df[update_column] > current_datetime]
+            self.logger.info(f"Registros no DataFrame original ({table_name}): {len(df)}")
+            self.logger.info(f"Registros atualizados encontrados ({table_name}): {len(updated_records)}")
+
+            if updated_records.empty:
+                self.logger.info(f"Nenhum novo registro encontrado para a tabela {table_name}")
+            return updated_records
+        else:
+            self.logger.warning(f"Coluna de atualização '{update_column}' não encontrada em {table_name}. Carregando todos os registros.")
+            return df  # Carrega todos os registros caso não haja coluna de atualização ou a coluna não exista.
 
     UPDATE_COLUMNS = {
     'dim_user': 'usr_last_update',
@@ -93,9 +111,38 @@ class PostgreSQLLoader:
     'dim_vacancy': 'vc_closing_date',
     'hiring_process_candidate' : 'cd_last_update',
     }
+
     def load_table(self, df, table_name, update_column):
-        """Carrega dados em uma tabela após checar atualizações."""
+        """Carrega dados em uma tabela após checar atualizações.
+        
+          Args:
+            df: DataFrame com os dados
+            table_name: Nome da tabela
+            update_column: Coluna de atualização (None para carga completa)
+        """
         try:
+            # Verifica se é a tabela `dim_datetime`
+            if table_name == 'dim_datetime':
+                # Se a tabela estiver vazia, insere todos os registros do DataFrame
+                with self.engine.connect() as conn:
+                    result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                    record_count = result.scalar()
+                    print(f"Tabela {table_name} contém {record_count} registros antes da carga.")
+
+                if record_count == 0:
+                    self.logger.info(f"Tabela {table_name} está vazia. Inserindo todos os registros.")
+                    with self.engine.begin() as conn:
+                        df.to_sql(
+                            name=table_name,
+                            con=conn,
+                            if_exists='append',
+                            index=False,
+                            method='multi',
+                            chunksize=1000
+                        )
+                    self.logger.info(f"Carregados {len(df)} registros na tabela {table_name}")
+                    return
+
             updated_df = self.check_updates(df, update_column, table_name)
             if updated_df.empty:
                 self.logger.info(f"Não há novos registros para carregar em {table_name}")
@@ -128,6 +175,10 @@ class PostgreSQLLoader:
             if loader.test_connection():
                 print("Conexão bem-sucedida! Iniciando carga de teste...")
 
+                # Carrega dim_datetime primeiro, independentemente de outras tabelas
+                if dim_datetime is not None:
+                    loader.load_table(dim_datetime, 'dim_datetime', update_column=None)
+
                 # Variável para rastrear se alguma tabela foi atualizada
                 tables_updated = False
 
@@ -143,14 +194,13 @@ class PostgreSQLLoader:
                 if dim_vacancy is not None:
                     if loader.load_table(dim_vacancy, 'dim_vacancy', 'vc_closing_date'):
                         tables_updated = True
-                if hiring_process_candidate is not None:
-                    if loader.load_table(hiring_process_candidate, 'hiring_process_candidate', 'cd_last_update'):
+                if dim_candidate is not None:
+                    if loader.load_table(dim_candidate, 'dim_candidate', 'cd_last_update'):
                         tables_updated = True
 
-                # Carrega dim_datetime apenas se houve atualização em alguma tabela
+                # Carrega tabela fato apenas se houve atualização em outras tabelas
                 if tables_updated:
-                    loader.load_table(dim_datetime, 'dim_datetime', update_column=None)
-                    loader.load_fact_table(fact_hiring_process)  # Carrega fact_hiring_process em seguida
+                    loader.load_fact_table(fact_hiring_process)
                     print("Carga de teste concluída com sucesso!")
                 else:
                     print("Nenhuma atualização detectada, nenhuma carga necessária.")
@@ -160,6 +210,7 @@ class PostgreSQLLoader:
         except Exception as e:
             logging.error(f"Erro no processo de teste: {str(e)}")
             raise
+
 
 
 if __name__ == "__main__":
