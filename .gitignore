@@ -11,4 +11,3 @@ etl_loader_*
 # Generated files except `generate.go`
 ent/*
 !ent/generate.go
-
