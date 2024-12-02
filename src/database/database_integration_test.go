@@ -121,7 +121,7 @@ func TestBaseDatabaseOperations(t *testing.T) {
 
 					dimCandidate, err := intEnv.
 						Client.
-						HiringProcessCandidate.
+						DimCandidate.
 						Create().
 						SetDimVacancyDbId(factHiringProcess.DimVacancyId).
 						SetDbId(1).
@@ -129,7 +129,7 @@ func TestBaseDatabaseOperations(t *testing.T) {
 						SetEmail("John@Doe.com").
 						SetPhone("+1234567890").
 						SetApplyDate(dimVacancy.OpeningDate).
-						SetStatus(property.HiringProcessCandidateStatusInAnalysis).
+						SetStatus(property.DimCandidateStatusInAnalysis).
 						SetScore(0).
 						Save(ctx)
 					if err != nil {
@@ -158,7 +158,7 @@ func TestBaseDatabaseOperations(t *testing.T) {
 
 					candidates, err := dimVacancy.
 						Edges.
-						HiringProcessCandidatesOrErr()
+						DimCandidatesOrErr()
 					require.NoError(t, err)
 					require.NotNil(t, candidates)
 					require.NotEmpty(t, candidates)
@@ -169,13 +169,13 @@ func TestBaseDatabaseOperations(t *testing.T) {
 				Run: func(t *testing.T) {
 					hiringProcessCandidate, err := intEnv.
 						Client.
-						HiringProcessCandidate.
+						DimCandidate.
 						Get(ctx, hiringProcessCandidateId)
 					require.NoError(t, err)
 					require.NotNil(t, hiringProcessCandidate)
 					require.Equal(
 						t,
-						property.HiringProcessCandidateStatusInAnalysis,
+						property.DimCandidateStatusInAnalysis,
 						hiringProcessCandidate.Status,
 					)
 				},

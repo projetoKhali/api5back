@@ -12,11 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type HiringProcessCandidate struct {
+type DimCandidate struct {
 	ent.Schema
 }
 
-func (HiringProcessCandidate) Fields() []ent.Field {
+func (DimCandidate) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("dbId"),
 		field.String("name"),
@@ -29,7 +29,10 @@ func (HiringProcessCandidate) Fields() []ent.Field {
 			dialect.Postgres: "date",
 		}),
 		field.Enum("status").
-			GoType(property.HiringProcessCandidateStatus(0)).
+			GoType(property.DimCandidateStatus(0)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
 			Immutable(),
 		field.Other("updatedAt", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
@@ -37,7 +40,7 @@ func (HiringProcessCandidate) Fields() []ent.Field {
 	}
 }
 
-func (HiringProcessCandidate) Edges() []ent.Edge {
+func (DimCandidate) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("dimVacancy", DimVacancy.Type).
 			Field("dimVacancyDbId").
@@ -47,10 +50,10 @@ func (HiringProcessCandidate) Edges() []ent.Edge {
 	}
 }
 
-func (HiringProcessCandidate) Annotations() []schema.Annotation {
+func (DimCandidate) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "hiring_process_candidate",
+			Table: "dim_candidate",
 		},
 	}
 }

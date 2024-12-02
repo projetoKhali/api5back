@@ -26,7 +26,7 @@ func createFactHiringProcessBaseQuery(
 		Order(ent.Desc(facthiringprocess.FieldID)).
 		WithDimProcess().
 		WithDimVacancy(func(query *ent.DimVacancyQuery) {
-			query.WithHiringProcessCandidates(func(query *ent.HiringProcessCandidateQuery) {
+			query.WithDimCandidates(func(query *ent.DimCandidateQuery) {
 				// query.
 				// 	Order(
 				// 		ent.Desc(hiringprocesscandidate.FieldDbId),

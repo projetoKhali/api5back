@@ -58,7 +58,7 @@ func randomName() [2]string {
 	}
 }
 
-func DwProceduralHiringProcessCandidates(client *ent.Client) error {
+func DwProceduralDimCandidates(client *ent.Client) error {
 	ctx := context.Background()
 
 	// select DimVacancy from the database (max 100)
@@ -71,15 +71,15 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 		return fmt.Errorf("failed to query FactHiringProcess: %v", err)
 	}
 
-	var candidatesToInsert []*ent.HiringProcessCandidateCreate
+	var candidatesToInsert []*ent.DimCandidateCreate
 
 	// loop through the FactHiringProcess and create 5 to 10 candidates for each
-	for _, dimVacancy := range dimVacancies {
+	for i, dimVacancy := range dimVacancies {
 		numberOfCandidates := rand.Intn(6) + 5
 
-		for i := 0; i < numberOfCandidates; i++ {
+		for j := 0; j < numberOfCandidates; j++ {
 			candidateName := randomName()
-			candidateStatus := property.HiringProcessCandidateStatus(rand.Intn(4))
+			candidateStatus := property.DimCandidateStatus(rand.Intn(4))
 
 			applyDate := dimVacancy.
 				OpeningDate.
@@ -90,13 +90,14 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 					Sub(dimVacancy.OpeningDate.Time).
 					Hours()/24)+1,
 				))
+
 			applyDatePgType := &pgtype.Date{}
 			if err := applyDatePgType.Scan(applyDate); err != nil {
-				return fmt.Errorf("failed to generate random applyDate for candidate: %v", err)
+				return fmt.Errorf("failed to generate random applyDate for candidate [%d]: %v", i, err)
 			}
 
 			updatedAtPgType := applyDatePgType
-			if candidateStatus == property.HiringProcessCandidateStatusHired {
+			if candidateStatus == property.DimCandidateStatusHired {
 				maxHiredDate := int(dimVacancy.
 					ClosingDate.
 					Time.
@@ -107,12 +108,12 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 				updatedAt := applyDate.AddDate(0, 0, rand.Intn(maxHiredDate+1)+1)
 				updatedAtPgType = &pgtype.Date{}
 				if err := updatedAtPgType.Scan(updatedAt); err != nil {
-					return fmt.Errorf("failed to generate random updatedAt for candidate: %v", err)
+					return fmt.Errorf("failed to generate random updatedAt for candidate [%d]: %v", i, err)
 				}
 			}
 
 			candidatesToInsert = append(candidatesToInsert, client.
-				HiringProcessCandidate.
+				DimCandidate.
 				Create().
 				SetDimVacancyDbId(dimVacancy.DbId).
 				SetName(fmt.Sprintf(
@@ -139,7 +140,7 @@ func DwProceduralHiringProcessCandidates(client *ent.Client) error {
 	}
 
 	if _, err = client.
-		HiringProcessCandidate.
+		DimCandidate.
 		CreateBulk(candidatesToInsert...).
 		Save(ctx); err != nil {
 		return fmt.Errorf("failed to create candidate: %v", err)

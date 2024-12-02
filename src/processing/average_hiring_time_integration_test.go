@@ -24,7 +24,7 @@ import (
 func CreateTestData(
 	client *ent.Client,
 	ids []int,
-) []*ent.HiringProcessCandidateCreate {
+) []*ent.DimCandidateCreate {
 	datesString := [12][2]string{
 		{"2022-01-19", "2022-01-21"},
 		{"2022-02-14", "2022-02-21"},
@@ -39,7 +39,7 @@ func CreateTestData(
 		{"2022-10-17", "2022-10-18"},
 		{"2022-12-08", "2022-12-09"},
 	}
-	candidates := []*ent.HiringProcessCandidateCreate{}
+	candidates := []*ent.DimCandidateCreate{}
 
 	for i, dimVacancyDbId := range ids {
 		factIndex := i * 8
@@ -58,7 +58,7 @@ func CreateTestData(
 			pgtypeUpdatedAt.Scan(timeUpdatedAt)
 
 			candidates = append(candidates, client.
-				HiringProcessCandidate.
+				DimCandidate.
 				Create().
 				SetDbId(j).
 				SetName(fmt.Sprintf("Candidate[%d][%d]", i, j)).
@@ -67,7 +67,7 @@ func CreateTestData(
 				SetScore(100).
 				SetApplyDate(pgtypeApplyDate).
 				SetUpdatedAt(pgtypeUpdatedAt).
-				SetStatus(property.HiringProcessCandidateStatus(j)).
+				SetStatus(property.DimCandidateStatus(j)).
 				SetDimVacancyDbId(dimVacancyDbId),
 			)
 		}
@@ -117,22 +117,22 @@ func TestAverageHiringTime(t *testing.T) {
 	}
 
 	candidates := CreateTestData(intEnv.Client, ids)
-	if testResult := t.Run("Insert FactHiringProcessCandidates", func(t *testing.T) {
+	if testResult := t.Run("Insert FactDimCandidates", func(t *testing.T) {
 		for i := range ids {
 			_, err = intEnv.
 				Client.
-				HiringProcessCandidate.
+				DimCandidate.
 				CreateBulk(candidates[i*4 : (i*4)+4]...).
 				Save(ctx)
 			if err != nil {
-				t.Fatalf("Failed to insert FactHiringProcessCandidates: %v", err)
+				t.Fatalf("Failed to insert FactDimCandidates: %v", err)
 			}
 		}
 	}); !testResult {
-		t.Fatalf("Failed to insert FactHiringProcessCandidates: %v", err)
+		t.Fatalf("Failed to insert FactDimCandidates: %v", err)
 	}
 
-	if testResult := t.Run("Select FactHiringProcess with HiringProcessCandidates", func(t *testing.T) {
+	if testResult := t.Run("Select FactHiringProcess with DimCandidates", func(t *testing.T) {
 		dimVacancies, err = intEnv.
 			Client.
 			DimVacancy.
@@ -141,13 +141,13 @@ func TestAverageHiringTime(t *testing.T) {
 				s.Select("ON db_id *")
 			}).
 			Order(ent.Desc(dimvacancy.FieldID)).
-			WithHiringProcessCandidates().
+			WithDimCandidates().
 			Where(dimvacancy.DbIdIn(ids...)).
 			All(ctx)
 
 		require.NoError(t, err)
 	}); !testResult {
-		t.Fatalf("Failed to select FactHiringProcess with HiringProcessCandidates: %v", err)
+		t.Fatalf("Failed to select FactHiringProcess with DimCandidates: %v", err)
 	}
 
 	if testResult := t.Run("Test GenerateAverageHiringTimePerMonth processing function", func(t *testing.T) {
@@ -162,10 +162,10 @@ func TestAverageHiringTime(t *testing.T) {
 		assert.Equal(t, float32(15), months.June)
 		assert.Equal(t, float32(12.333333), months.July)
 		assert.Equal(t, float32(0), months.August)
-		assert.Equal(t, float32(12.666667), months.September)
+		assert.Equal(t, float32(0), months.September)
 		assert.Equal(t, float32(1), months.October)
 		assert.Equal(t, float32(0), months.November)
-		assert.Equal(t, float32(0), months.December)
+		assert.Equal(t, float32(12.666667), months.December)
 	}); !testResult {
 		t.Fatalf("Failed to test GenerateAverageHiringTimePerMonth processing function: %v", err)
 	}

@@ -36,17 +36,17 @@ func GenerateAverageHiringTimePerMonth(
 	for _, dimVacancy := range dimVacancies {
 		candidates, err := dimVacancy.
 			Edges.
-			HiringProcessCandidatesOrErr()
+			DimCandidatesOrErr()
 		if err != nil {
 			return AverageHiringTimePerMonth{}, fmt.Errorf(
-				"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+				"`DimCandidates` of `DimVacancy` with ID %d not found: %w",
 				dimVacancy.ID,
 				err,
 			)
 		}
 
 		for _, candidate := range candidates {
-			if candidate.Status == property.HiringProcessCandidateStatusHired {
+			if candidate.Status == property.DimCandidateStatusHired {
 				interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 				intervalDays := interval.Hours() / 24
 				monthIndex := candidate.UpdatedAt.Time.Month() - 1
@@ -96,10 +96,10 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 
 	candidates, err := vacancy.
 		Edges.
-		HiringProcessCandidatesOrErr()
+		DimCandidatesOrErr()
 	if err != nil {
 		return 0, fmt.Errorf(
-			"`HiringProcessCandidates` of `DimVacancy` with ID %d not found: %w",
+			"`DimCandidates` of `DimVacancy` with ID %d not found: %w",
 			vacancy.ID,
 			err,
 		)
@@ -109,7 +109,7 @@ func GenerateAverageHiringTimePerFactHiringProcess(
 	days := 0.0
 
 	for _, candidate := range candidates {
-		if candidate.Status == property.HiringProcessCandidateStatusHired {
+		if candidate.Status == property.DimCandidateStatusHired {
 			interval := candidate.UpdatedAt.Time.Sub(candidate.ApplyDate.Time)
 			intervalDays := interval.Hours() / 24
 			hiredCandidates += 1

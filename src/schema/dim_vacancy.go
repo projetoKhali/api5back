@@ -21,9 +21,13 @@ func (DimVacancy) Fields() []ent.Field {
 		field.Int("dbId"),
 		field.String("title"),
 		field.Int("numPositions"),
-		field.Int("reqId"),
-		field.Enum("status").
-			GoType(property.DimVacancyStatus(1)),
+		field.Int("reqId").Optional(),
+		field.Int("status").
+			GoType(property.DimVacancyStatus(1)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
+			Default(int(property.DimVacancyStatusOpen)),
 		field.String("location"),
 		field.Int("dimUsrId"),
 		field.Other("openingDate", &pgtype.Date{}).SchemaType(map[string]string{
@@ -31,7 +35,7 @@ func (DimVacancy) Fields() []ent.Field {
 		}),
 		field.Other("closingDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
-		}),
+		}).Optional(),
 	}
 }
 
@@ -39,7 +43,7 @@ func (DimVacancy) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("fact_hiring_process", FactHiringProcess.Type).
 			Ref("dimVacancy"),
-		edge.From("hiringProcessCandidates", HiringProcessCandidate.Type).
+		edge.From("dimCandidates", DimCandidate.Type).
 			Ref("dimVacancy"),
 	}
 }

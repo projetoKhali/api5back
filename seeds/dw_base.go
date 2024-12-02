@@ -382,29 +382,29 @@ var DwFactHiringProcess = []ent.FactHiringProcess{
 func DataWarehouse(client *ent.Client) error {
 	ctx := context.Background()
 
-	for _, department := range DwDimDepartment {
+	for i, department := range DwDimDepartment {
 		_, err := client.DimDepartment.Create().
 			SetDbId(department.DbId).
 			SetName(department.Name).
 			SetDescription(department.Description).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create department %s: %v", department.Name, err)
+			return fmt.Errorf("failed to create department [%d] %s: %v", i, department.Name, err)
 		}
 	}
 
-	for _, user := range DwDimUser {
+	for i, user := range DwDimUser {
 		_, err := client.DimUser.Create().
 			SetDbId(user.DbId).
 			SetName(user.Name).
 			SetOccupation(user.Occupation).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create user %s: %v", user.Name, err)
+			return fmt.Errorf("failed to create user [%d] %+v: %+v", i, user, err)
 		}
 	}
 
-	for _, date := range DwDimDatetime {
+	for i, date := range DwDimDatetime {
 		_, err := client.DimDatetime.Create().
 			SetDate(date.Date).
 			SetYear(date.Year).
@@ -416,11 +416,11 @@ func DataWarehouse(client *ent.Client) error {
 			SetSecond(date.Second).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create date: %v", err)
+			return fmt.Errorf("failed to create date [%d]: %+v", i, err)
 		}
 	}
 
-	for _, vacancy := range DwDimVacancy {
+	for i, vacancy := range DwDimVacancy {
 		_, err := client.DimVacancy.Create().
 			SetDbId(vacancy.DbId).
 			SetTitle(vacancy.Title).
@@ -433,11 +433,11 @@ func DataWarehouse(client *ent.Client) error {
 			SetStatus(vacancy.Status).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create vacancy %s: %v", vacancy.Title, err)
+			return fmt.Errorf("failed to create vacancy [%d] %s: %+v", i, vacancy.Title, err)
 		}
 	}
 
-	for _, process := range DwDimProcess {
+	for i, process := range DwDimProcess {
 		_, err := client.DimProcess.Create().
 			SetDbId(process.DbId).
 			SetTitle(process.Title).
@@ -448,7 +448,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetDimDepartmentId(process.DimDepartmentId).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create process %s: %v", process.Title, err)
+			return fmt.Errorf("failed to create process [%d] %s: %+v", i, process.Title, err)
 		}
 	}
 
@@ -484,7 +484,7 @@ func DataWarehouse(client *ent.Client) error {
 			SetDimDatetimeID(fact.DimDateId).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to create fact hiring process: %v", err)
+			return fmt.Errorf("failed to create fact hiring process: [%d] %+v", factId, err)
 		}
 
 		factCurrentCandidateDbId := 1
@@ -513,7 +513,7 @@ func DataWarehouse(client *ent.Client) error {
 					t,
 				)
 
-				candidateBuilder := client.HiringProcessCandidate.Create().
+				candidateBuilder := client.DimCandidate.Create().
 					SetDbId(factCurrentCandidateDbId).
 					SetName(candidateName).
 					SetEmail(fmt.Sprintf("%s_%d@mail.com", candidateName, factCurrentCandidateDbId)).
@@ -521,9 +521,9 @@ func DataWarehouse(client *ent.Client) error {
 					SetScore(pseudoRandomScoreIdempotent(factCurrentCandidateDbId)).
 					SetDimVacancyDbId(fact.DimVacancyId).
 					SetApplyDate(candidateApplyDate).
-					SetStatus(property.HiringProcessCandidateStatus(candidateStatus))
+					SetStatus(property.DimCandidateStatus(candidateStatus))
 
-				if property.HiringProcessCandidateStatus(candidateStatus) > property.HiringProcessCandidateStatusInAnalysis {
+				if property.DimCandidateStatus(candidateStatus) > property.DimCandidateStatusInAnalysis {
 					candidateBuilder.SetUpdatedAt(lerpDate(
 						*candidateApplyDate,
 						*DwDimVacancy[fact.DimVacancyId-1].ClosingDate,
@@ -533,7 +533,7 @@ func DataWarehouse(client *ent.Client) error {
 
 				_, err := candidateBuilder.Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to create fact candidate: %v", err)
+					return fmt.Errorf("failed to create dim_candidate [%d]: %+v", logCurrentCandidate, err)
 				}
 
 				factCurrentCandidateDbId++
