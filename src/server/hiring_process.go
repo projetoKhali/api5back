@@ -36,10 +36,10 @@ func HiringProcessDashboard(
 			authentication.POST("/login", LoginUser(dbClient))
 			authentication.POST("/create", CreateUser(dbClient))
 		}
-		groupAccess := v1.Group("/access-group")
+		accessGroup := v1.Group("/access-group")
 		{
-			groupAccess.GET("", ListAccessGroup(dbClient))
-			groupAccess.POST("", CreateAccessGroup(dbClient))
+			accessGroup.GET("", ListAccessGroup(dbClient))
+			accessGroup.POST("", CreateAccessGroup(dbClient))
 		}
 	}
 }
