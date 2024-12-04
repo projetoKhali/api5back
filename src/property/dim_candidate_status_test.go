@@ -74,7 +74,7 @@ func TestParseDimCandidateStatus(t *testing.T) {
 	} {
 		t.Run(testCase.Name, func(t *testing.T) {
 			testFunction := func() {
-				status := HiringProcessCandidateStatus(0)
+				status := DimCandidateStatus(0)
 				err := status.Scan(testCase.IntValue)
 				if err != nil {
 					require.Equal(t, testCase.ExpectedStatus, "")

@@ -26,20 +26,22 @@ func HiringProcessDashboard(
 		suggestions := v1.Group("/suggestions")
 		{
 			suggestions.POST("/recruiter", UserList(dwClient))
-			suggestions.POST("/process", HiringProcessList((dwClient)))
+			suggestions.POST("/process", HiringProcessList(dwClient))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
 			suggestions.GET("/department", ListDepartments(dbClient))
 		}
+
 		authentication := v1.Group("/authentication")
 		{
 			authentication.GET("/users", ListUsers(dbClient))
 			authentication.POST("/login", LoginUser(dbClient))
 			authentication.POST("/create", CreateUser(dbClient))
 		}
-		groupAccess := v1.Group("/access-group")
+
+		accessGroup := v1.Group("/access-group")
 		{
-			groupAccess.GET("", ListAccessGroup(dbClient))
-			groupAccess.POST("", CreateAccessGroup(dbClient))
+			accessGroup.GET("", ListAccessGroup(dbClient))
+			accessGroup.POST("", CreateAccessGroup(dbClient))
 		}
 	}
 }
@@ -222,7 +224,7 @@ func VacancyTable(
 // @Tags departments
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /suggestions/departments [get]
+// @Router /suggestions/department [get]
 func ListDepartments(
 	client *ent.Client,
 ) func(c *gin.Context) {
