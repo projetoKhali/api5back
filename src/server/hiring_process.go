@@ -26,16 +26,18 @@ func HiringProcessDashboard(
 		suggestions := v1.Group("/suggestions")
 		{
 			suggestions.POST("/recruiter", UserList(dwClient))
-			suggestions.POST("/process", HiringProcessList((dwClient)))
+			suggestions.POST("/process", HiringProcessList(dwClient))
 			suggestions.POST("/vacancy", VacancyList(dwClient))
 			suggestions.GET("/department", ListDepartments(dbClient))
 		}
+
 		authentication := v1.Group("/authentication")
 		{
 			authentication.GET("/users", ListUsers(dbClient))
 			authentication.POST("/login", LoginUser(dbClient))
 			authentication.POST("/create", CreateUser(dbClient))
 		}
+
 		accessGroup := v1.Group("/access-group")
 		{
 			accessGroup.GET("", ListAccessGroup(dbClient))
