@@ -222,7 +222,7 @@ func VacancyTable(
 // @Tags departments
 // @Produce json
 // @Success 200 {array} model.Suggestion
-// @Router /suggestions/departments [get]
+// @Router /suggestions/department [get]
 func ListDepartments(
 	client *ent.Client,
 ) func(c *gin.Context) {
