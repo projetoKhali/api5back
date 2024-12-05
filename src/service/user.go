@@ -11,8 +11,6 @@ import (
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
-
-	"entgo.io/ent/dialect/sql"
 )
 
 func GetUserSuggestions(
@@ -22,15 +20,7 @@ func GetUserSuggestions(
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimUser.
-		Query().
-		Order(
-			ent.Desc(dimuser.FieldDbId),
-			ent.Desc(dimuser.FieldID),
-		).
-		Modify(func(s *sql.Selector) {
-			s.Select("DISTINCT ON (db_id) *")
-		}).
-		Clone()
+		Query()
 
 	if pageRequest != nil && pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
 		query = query.

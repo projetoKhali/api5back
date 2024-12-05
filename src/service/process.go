@@ -9,8 +9,6 @@ import (
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
-
-	"entgo.io/ent/dialect/sql"
 )
 
 func GetProcessSuggestions(
@@ -20,15 +18,7 @@ func GetProcessSuggestions(
 ) (*model.Page[model.Suggestion], error) {
 	query := client.
 		DimProcess.
-		Query().
-		Order(
-			ent.Desc(dimprocess.FieldDbId),
-			ent.Desc(dimprocess.FieldID),
-		).
-		Modify(func(s *sql.Selector) {
-			s.Select("DISTINCT ON (db_id) *")
-		}).
-		Clone()
+		Query()
 
 	if pageRequest != nil {
 		if pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
