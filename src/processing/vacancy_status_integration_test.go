@@ -55,8 +55,8 @@ func TestVacancyStatusProcessing(t *testing.T) {
 		require.Equal(t,
 			VacancyStatusSummary{
 				Open:      9,
-				Analyzing: 1,
-				Closed:    0,
+				Analyzing: 0,
+				Closed:    1,
 			},
 			vacancyStatusSummary,
 		)

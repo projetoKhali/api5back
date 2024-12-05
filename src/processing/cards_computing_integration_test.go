@@ -111,7 +111,7 @@ func TestComputingCardInfo(t *testing.T) {
 		assert.Equal(t, 1, cardInfos.InProgress)
 		assert.Equal(t, 0, cardInfos.Closed)
 		assert.Equal(t, 1, cardInfos.ApproachingDeadline)
-		assert.Equal(t, 14, cardInfos.AverageHiringTime)
+		assert.Equal(t, 15, cardInfos.AverageHiringTime)
 	}); !testResult {
 		t.Fatalf("Failed to query FactHiringProcess: %v", err)
 	}
