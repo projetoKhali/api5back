@@ -2,17 +2,15 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"api5back/ent"
 	"api5back/ent/dimdepartment"
 	"api5back/ent/dimprocess"
-	"api5back/ent/dimvacancy"
 	"api5back/ent/facthiringprocess"
 	"api5back/src/model"
 	"api5back/src/pagination"
 	"api5back/src/processing"
-
-	"entgo.io/ent/dialect/sql"
 )
 
 func GetVacancySuggestions(
@@ -23,17 +21,7 @@ func GetVacancySuggestions(
 	query := client.
 		FactHiringProcess.
 		Query().
-		WithDimVacancy().
-		Order(
-			facthiringprocess.ByDimVacancyField(
-				dimvacancy.FieldDbId,
-			),
-			ent.Desc(facthiringprocess.FieldID),
-		).
-		Modify(func(s *sql.Selector) {
-			s.Select("DISTINCT ON (t1.db_id) *")
-		}).
-		Clone()
+		WithDimVacancy()
 
 	if pageRequest != nil {
 		if pageRequest.DepartmentIds != nil && len(*pageRequest.DepartmentIds) > 0 {
@@ -70,6 +58,7 @@ func GetVacancySuggestions(
 		totalRecords,
 	)
 
+	fmt.Printf("pageSize: %+v | totalRecords: %+v\n", pageSize, totalRecords)
 	factHiringProcesses, err := query.
 		Offset(offset).
 		Limit(pageSize).

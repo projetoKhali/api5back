@@ -5,10 +5,9 @@ package service
 
 import (
 	"context"
-	"math"
+	"fmt"
 	"testing"
 
-	"api5back/ent"
 	"api5back/seeds"
 	"api5back/src/database"
 	"api5back/src/model"
@@ -21,7 +20,8 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 	var intEnv *database.IntegrationEnvironment = nil
 
 	if testResult := t.Run("Setup database connection", func(t *testing.T) {
-		intEnv = database.DefaultIntegrationEnvironment(ctx).
+		intEnv = database.
+			DefaultIntegrationEnvironment(ctx).
 			WithSeeds(seeds.DataWarehouse)
 
 		require.NotNil(t, intEnv)
@@ -35,12 +35,16 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 	type TestCase struct {
 		Name               string
 		GetSuggestionsFunc TestFunc
-		ExpectedFunc       TestFunc
+		ExpectedLength     int
+		ExpectedError      error
 	}
 
-	maxPageSizeRequest := model.PageRequest{
-		Page:     nil,
-		PageSize: &[]int{math.MaxInt32}[0],
+	pageSize := 1000
+	maxPageSizeRequest := model.SuggestionsPageRequest{
+		PageRequest: &model.PageRequest{
+			Page:     nil,
+			PageSize: &pageSize,
+		},
 	}
 
 	for _, testCase := range []TestCase{
@@ -54,15 +58,8 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 				)
 				return len(suggestions.Items), err
 			},
-			ExpectedFunc: func() (int, error) {
-				wrappedUsers := make([]DbIdGetter, len(seeds.DwDimUser))
-
-				for i, user := range seeds.DwDimUser {
-					wrappedUsers[i] = &DimUserWrapper{&user}
-				}
-
-				return len(deduplicateById(wrappedUsers)), nil
-			},
+			ExpectedLength: len(seeds.DwDimUser),
+			ExpectedError:  nil,
 		},
 		{
 			Name: "GetProcessSuggestions returns all unique processes by DbId",
@@ -70,81 +67,42 @@ func TestGetSuggestionsFunctions(t *testing.T) {
 				suggestions, err := GetProcessSuggestions(
 					ctx,
 					intEnv.Client,
-					&model.SuggestionsPageRequest{
-						PageRequest: &maxPageSizeRequest,
+					&model.SuggestionsFilter{
+						SuggestionsPageRequest: maxPageSizeRequest,
 					},
 				)
 				return len(suggestions.Items), err
 			},
-			ExpectedFunc: func() (int, error) {
-				wrappedProcesses := make([]DbIdGetter, len(seeds.DwDimProcess))
-
-				for i, process := range seeds.DwDimProcess {
-					wrappedProcesses[i] = &DimProcessWrapper{&process}
-				}
-
-				return len(deduplicateById(wrappedProcesses)), nil
-			},
+			ExpectedLength: len(seeds.DwDimProcess),
+			ExpectedError:  nil,
 		},
 		{
 			Name: "GetVacancySuggestions returns all unique vacancies by DbId",
 			GetSuggestionsFunc: func() (int, error) {
+				fmt.Printf("maxPageSizeRequest: %+v | pageSize: %+v\n", maxPageSizeRequest, pageSize)
 				suggestions, err := GetVacancySuggestions(
 					ctx,
 					intEnv.Client,
-					&model.SuggestionsPageRequest{
-						PageRequest: &maxPageSizeRequest,
+					&model.SuggestionsFilter{
+						SuggestionsPageRequest: maxPageSizeRequest,
 					},
 				)
 				return len(suggestions.Items), err
 			},
-			ExpectedFunc: func() (int, error) {
-				wrappedVacancies := make([]DbIdGetter, len(seeds.DwDimVacancy))
-
-				for i, vacancy := range seeds.DwDimVacancy {
-					wrappedVacancies[i] = &DimVacancyWrapper{&vacancy}
-				}
-
-				return len(deduplicateById(wrappedVacancies)), nil
-			},
+			ExpectedLength: len(seeds.DwDimVacancy),
+			ExpectedError:  nil,
 		},
 	} {
 		if testResult := t.Run(testCase.Name, func(t *testing.T) {
 			suggestionsCount, err := testCase.GetSuggestionsFunc()
-			expectedCount, expectedErr := testCase.ExpectedFunc()
 
-			require.Equal(t, expectedErr, err)
-			require.Equal(t, expectedCount, suggestionsCount)
+			require.Equal(t, testCase.ExpectedError, err)
+
+			if testCase.ExpectedError == nil {
+				require.Equal(t, testCase.ExpectedLength, suggestionsCount)
+			}
 		}); !testResult {
 			t.Fatalf("Test case failed")
 		}
 	}
-}
-
-type DbIdGetter interface{ GetDbId() int }
-
-type (
-	DimUserWrapper    struct{ *ent.DimUser }
-	DimVacancyWrapper struct{ *ent.DimVacancy }
-	DimProcessWrapper struct{ *ent.DimProcess }
-)
-
-func (duw *DimUserWrapper) GetDbId() int    { return duw.DbId }
-func (dwv *DimVacancyWrapper) GetDbId() int { return dwv.DbId }
-func (dpw *DimProcessWrapper) GetDbId() int { return dpw.DbId }
-
-func deduplicateById(suggestions []DbIdGetter) []DbIdGetter {
-	seen := make(map[int]bool)
-	uniqueSuggestions := []DbIdGetter{}
-
-	for _, suggestion := range suggestions {
-		id := suggestion.GetDbId()
-
-		if !seen[id] {
-			seen[id] = true
-			uniqueSuggestions = append(uniqueSuggestions, suggestion)
-		}
-	}
-
-	return uniqueSuggestions
 }

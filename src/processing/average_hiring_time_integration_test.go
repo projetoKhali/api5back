@@ -15,7 +15,6 @@ import (
 	"api5back/src/database"
 	"api5back/src/property"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -98,10 +97,6 @@ func TestAverageHiringTime(t *testing.T) {
 			Client.
 			DimVacancy.
 			Query().
-			Modify(func(s *sql.Selector) {
-				s.Select("ON db_id *")
-			}).
-			Order(ent.Desc(dimvacancy.FieldID)).
 			Limit(3).
 			All(ctx)
 
@@ -137,10 +132,6 @@ func TestAverageHiringTime(t *testing.T) {
 			Client.
 			DimVacancy.
 			Query().
-			Modify(func(s *sql.Selector) {
-				s.Select("ON db_id *")
-			}).
-			Order(ent.Desc(dimvacancy.FieldID)).
 			WithDimCandidates().
 			Where(dimvacancy.DbIdIn(ids...)).
 			All(ctx)
