@@ -112,9 +112,9 @@ class PostgreSQLLoader:
 
     UPDATE_COLUMNS = {
     'dim_user': 'usr_last_update',
-    'dim_process': 'pc_finish_date',
-    'dim_vacancy': 'vc_closing_date',
-    'hiring_process_candidate' : 'cd_last_update',
+    'dim_process': 'finish_date',
+    'dim_vacancy': 'closing_date',
+    'hiring_process_candidate' : 'updated_at',
     }
 
     def load_table(self, df, table_name, update_column):
