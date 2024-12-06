@@ -64,6 +64,6 @@ func Helloworld(
 	dwClient *ent.Client,
 ) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "Hello New World")
+		c.JSON(http.StatusOK, "Hello World")
 	}
 }

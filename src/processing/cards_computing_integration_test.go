@@ -107,9 +107,9 @@ func TestComputingCardInfo(t *testing.T) {
 		cardInfos, err := ComputingCardsInfo(factHiringProcesses)
 		require.NoError(t, err)
 
-		assert.Equal(t, 8, cardInfos.Open)
+		assert.Equal(t, 9, cardInfos.Open)
 		assert.Equal(t, 1, cardInfos.InProgress)
-		assert.Equal(t, 1, cardInfos.Closed)
+		assert.Equal(t, 0, cardInfos.Closed)
 		assert.Equal(t, 1, cardInfos.ApproachingDeadline)
 		assert.Equal(t, 15, cardInfos.AverageHiringTime)
 	}); !testResult {

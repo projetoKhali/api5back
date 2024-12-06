@@ -49,7 +49,7 @@ func DataRelational(client *ent.Client) error {
 		{Name: "Vendas", GroupIDs: []int{3, 5}},
 	}
 
-	groupAccessIds := []int{}
+	accessGroupIds := []int{}
 	for _, g := range groups {
 		group, err := client.
 			AccessGroup.
@@ -59,7 +59,7 @@ func DataRelational(client *ent.Client) error {
 		if err != nil {
 			return fmt.Errorf("failed to create Group Access %s: %v", g.Name, err)
 		}
-		groupAccessIds = append(groupAccessIds, group.ID)
+		accessGroupIds = append(accessGroupIds, group.ID)
 	}
 
 	relations := []struct {
@@ -77,7 +77,7 @@ func DataRelational(client *ent.Client) error {
 		dept := departmentIDs[rel.DepartmentID-1]
 		groupsIDs := []int{}
 		for _, relationGroupID := range rel.GroupIDs {
-			groupsIDs = append(groupsIDs, groupAccessIds[relationGroupID-1])
+			groupsIDs = append(groupsIDs, accessGroupIds[relationGroupID-1])
 		}
 
 		err := client.
