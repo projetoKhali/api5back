@@ -14,17 +14,19 @@ type VacancyStatusSummary struct {
 }
 
 func GenerateVacancyStatusSummary(
-	data []*ent.FactHiringProcess,
+	factHiringProcesses []*ent.FactHiringProcess,
 ) (VacancyStatusSummary, error) {
 	countByStatus := make(map[property.DimVacancyStatus]int)
 
-	for _, process := range data {
-		vacancy, err := process.
+	for _, factHiringProcess := range factHiringProcesses {
+		vacancy, err := factHiringProcess.
 			Edges.
 			DimVacancyOrErr()
 		if err != nil {
 			return VacancyStatusSummary{}, fmt.Errorf(
-				"`DimVacancy` of `FactHiringProcess` not found: %w",
+				"`DimVacancy` with ID %d of `FactHiringProcess` with ID %d not found: %w",
+				factHiringProcess.DimVacancyId,
+				factHiringProcess.ID,
 				err,
 			)
 		}

@@ -25,16 +25,26 @@ func (DimProcess) Fields() []ent.Field {
 		}),
 		field.Other("finishDate", &pgtype.Date{}).SchemaType(map[string]string{
 			dialect.Postgres: "date",
-		}),
-		field.Enum("status").
-			GoType(property.DimProcessStatus(1)),
+		}).Optional(),
+		field.Int("status").
+			GoType(property.DimProcessStatus(1)).
+			SchemaType(map[string]string{
+				dialect.Postgres: "character varying",
+			}).
+			Default(int(property.DimProcessStatusOpen)),
 		field.Int("dimUsrId"),
 		field.String("description").Optional(),
+		field.Int("dimDepartmentId").Immutable(),
 	}
 }
 
 func (DimProcess) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("dimDepartment", DimDepartment.Type).
+			Unique().
+			Immutable().
+			Required().
+			Field("dimDepartmentId"),
 		edge.From("fact_hiring_process", FactHiringProcess.Type).
 			Ref("dimProcess"),
 	}

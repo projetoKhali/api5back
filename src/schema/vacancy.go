@@ -16,7 +16,6 @@ type Vacancy struct {
 // Fields of the Vacancy.
 func (Vacancy) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
 		field.Int("proccessId"),
 		field.String("title"),
 		field.Int("positions"),

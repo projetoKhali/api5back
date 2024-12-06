@@ -8,27 +8,29 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-type Department struct {
+type DimDepartment struct {
 	ent.Schema
 }
 
-func (Department) Fields() []ent.Field {
+func (DimDepartment) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("dbId"),
 		field.String("name"),
 		field.String("description"),
 	}
 }
 
-func (Department) Edges() []ent.Edge {
+func (DimDepartment) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("access_group", AccessGroup.Type),
+		edge.From("dim_process", DimProcess.Type).
+			Ref("dimDepartment"),
 	}
 }
 
-func (Department) Annotations() []schema.Annotation {
+func (DimDepartment) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "department",
+			Table: "dim_department",
 		},
 	}
 }

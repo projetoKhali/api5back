@@ -18,14 +18,24 @@ s: serve
 serve:
 	air
 
+# Test with optional module parameter
 t: test
 test:
-	go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go') -tags=production
+	@if [ -z "$(module)" ]; then \
+		go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go'); \
+	else \
+		go test -v api5back/src/$(module); \
+	fi
 
+# Test integration with optional module parameter
 ti: test-integration
 test-integration:
 	$(MAKE) gen
-	go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=production
+	@if [ -z "$(module)" ]; then \
+		go test -p 1 -v $$(go list ./... | grep -v 'ent/\|docs/') -tags=integration; \
+	else \
+		go test -p 1 -v api5back/src/$(module) -tags=integration; \
+	fi
 
 swag: swagger
 swagger:

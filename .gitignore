@@ -5,6 +5,8 @@
 # Temporary and generated files
 bin/
 docs/
+etl_loader_*
+**/__pycache__/**
 
 # Generated files except `generate.go`
 ent/*

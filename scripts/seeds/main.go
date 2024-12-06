@@ -12,19 +12,28 @@ import (
 type SeedsPreset struct {
 	Abbreviation string
 	Name         string
+	Database     string
 	SeedsFunc    func(client *ent.Client) error
 }
 
 var SeedsPresets = []SeedsPreset{
 	{
 		Abbreviation: "dw",
-		Name:         "DataWarehouse",
+		Name:         "data-warehouse",
+		Database:     "DW",
 		SeedsFunc:    seeds.DataWarehouse,
 	},
 	{
-		Abbreviation: "phpc",
-		Name:         "ProceduralHiringProcessCandidates",
-		SeedsFunc:    seeds.DwProceduralHiringProcessCandidates,
+		Abbreviation: "db",
+		Name:         "DataRelational",
+		Database:     "DB",
+		SeedsFunc:    seeds.DataRelational,
+	},
+	{
+		Abbreviation: "pdc",
+		Name:         "ProceduralDimCandidates",
+		Database:     "DW",
+		SeedsFunc:    seeds.DwProceduralDimCandidates,
 	},
 }
 
@@ -66,8 +75,8 @@ func main() {
 		buildAvailableSeedsMessage(&sb)
 		sb.WriteString("You can run a seed by providing its name or abbreviation as an argument.\n")
 		sb.WriteString("Example:\n")
-		sb.WriteString("  go run scripts/seeds.go DataWarehouse\n")
-		sb.WriteString("  go run scripts/seeds.go dw\n")
+		sb.WriteString(fmt.Sprintf("  go run scripts/seeds.go %s\n", SeedsPresets[0].Name))
+		sb.WriteString(fmt.Sprintf("  go run scripts/seeds.go %s\n", SeedsPresets[0].Abbreviation))
 		panic(sb.String())
 	}
 
@@ -110,5 +119,5 @@ func main() {
 		}
 	}
 
-	seeds.Execute("DW", targetSeedsPreset.SeedsFunc)
+	seeds.Execute(targetSeedsPreset.Database, targetSeedsPreset.SeedsFunc)
 }

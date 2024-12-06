@@ -14,17 +14,18 @@ type Authentication struct {
 
 func (Authentication) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("groupId").Immutable(),
-		field.Int("id"),
 		field.String("name"),
-		field.String("email"),
+		field.String("email").
+			Unique(),
 		field.String("password"),
+		field.Int("groupId").
+			Immutable(),
 	}
 }
 
 func (Authentication) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("group_acess", GroupAcess.Type).
+		edge.To("access_group", AccessGroup.Type).
 			Unique().
 			Immutable().
 			Required().
@@ -35,7 +36,7 @@ func (Authentication) Edges() []ent.Edge {
 func (Authentication) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "autentication",
+			Table: "authentication",
 		},
 	}
 }
