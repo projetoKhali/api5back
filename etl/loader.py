@@ -5,11 +5,21 @@ from sqlalchemy.orm import sessionmaker
 import logging
 from datetime import datetime
 from transformation_data import *
+from dotenv import load_dotenv
+import os
+
+dotenv_path = "./.env"
+load_dotenv(dotenv_path)
+
+dw_user = os.getenv('DW_USER')
+dw_password = os.getenv('DW_PASS')
+dw_host = os.getenv('DW_HOST')
+dw_name = os.getenv('DW_NAME')
 
 class PostgreSQLLoader:
     def __init__(self):
         """Inicializa o loader com as credenciais do PostgreSQL."""
-        self.connection_string = 'postgresql+pg8000://postgres:pass_warehouse@localhost:5433/postgres'
+        self.connection_string = f'postgresql+pg8000://{dw_user}:{dw_password}@{dw_host}:5433/{dw_name}'
         self.engine = create_engine(self.connection_string)
         self.setup_logging()
 
