@@ -22,9 +22,9 @@ serve:
 t: test
 test:
 	@if [ -z "$(module)" ]; then \
-		go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go'); \
+		go test -v $$(go list ./... | grep -v 'ent/\|docs/\|_integration_test.go') -tags=production; \
 	else \
-		go test -v api5back/src/$(module); \
+		go test -v api5back/src/$(module) -tags=production; \
 	fi
 
 # Test integration with optional module parameter
